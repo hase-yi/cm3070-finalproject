@@ -4,6 +4,72 @@ from rest_framework.response import Response
 from functools import wraps
 from django.http import HttpResponse, HttpResponseForbidden
 
+from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Book, Shelf, ReadingProgress, Comment
+from .serializers import BookSerializer, ShelfSerializer, ReadingProgressSerializer, CommentSerializer
+
+class BookListCreateView(generics.ListCreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+class ShelfListCreateView(generics.ListCreateAPIView):
+    queryset = Shelf.objects.all()
+    serializer_class = ShelfSerializer
+
+class ShelfDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Shelf.objects.all()
+    serializer_class = ShelfSerializer
+
+class ReadingProgressListCreateView(generics.ListCreateAPIView):
+    queryset = ReadingProgress.objects.all()
+    serializer_class = ReadingProgressSerializer
+
+class ReadingProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ReadingProgress.objects.all()
+    serializer_class = ReadingProgressSerializer
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class AddBookToShelfView(APIView):
+    def post(self, request, pk):
+        try:
+            shelf = Shelf.objects.get(pk=pk)
+        except Shelf.DoesNotExist:
+            return Response({"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        book_data = request.data
+        book_data['shelf'] = shelf.id  # Assign the shelf ID to the book data
+        book_serializer = BookSerializer(data=book_data)
+
+        if book_serializer.is_valid():
+            book_serializer.save()
+            return Response(book_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(book_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CurrentlyReadingBooksView(generics.ListAPIView):
+    serializer_class = BookSerializer
+
+    def get_queryset(self):
+        return Book.objects.filter(status='is_reading')
+
+
+# Auth
 
 def require_cookie(cookie_name):
     def decorator(view_func):
