@@ -1,16 +1,26 @@
 // src/App.js
 import React from 'react';
-import { createBrowserRouter , RouterProvider} from 'react-router-dom';
+import {
+	createBrowserRouter,
+	createRoutesFromElements,
+	RouterProvider,
+	Route,
+} from 'react-router-dom';
 
 import HomePage from './Pages/Home';
+import ShelvesPage from './Pages/Shelves';
 
-const router = createBrowserRouter([
-    {path :'/', element:<HomePage/> },
-    {}
-]);
+const routeDefinitions = createRoutesFromElements(
+	<Route>
+		<Route path="/" element={<HomePage />} />
+		<Route path="/shelves" element={<ShelvesPage />} />
+	</Route>
+);
 
-function App(){
-    return <RouterProvider router={router}/>;
+const router = createBrowserRouter(routeDefinitions);
+
+function App() {
+	return <RouterProvider router={router} />;
 }
 
 export default App;
