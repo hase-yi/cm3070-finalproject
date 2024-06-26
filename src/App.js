@@ -10,10 +10,11 @@ import {
 import HomePage from './Pages/Home';
 import ShelvesPage from './Pages/Shelves';
 import RootLayout from './Pages/Root';
+import ErrorPage from './Pages/Error';
 
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
-	<Route path="/" element={<RootLayout />}>
+	<Route path="/" element={<RootLayout />} errorElement={<ErrorPage/>}>
 		<Route path="/" element={<HomePage />} />
 		<Route path="/shelves" element={<ShelvesPage />} />
 	</Route>

@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
+import { NavLink } from 'react-router-dom';
 
-
-import classes from './MainNavigation.module.css'
+import classes from './MainNavigation.module.css';
 
 function MainNavigation() {
 	return (
@@ -9,10 +8,27 @@ function MainNavigation() {
 			<nav>
 				<ul className={classes.list}>
 					<li>
-						<Link to="/">Home</Link>
+						{/* wether the link is active, so it shows if the link is active */}
+						<NavLink
+							to="/"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}							
+							end={true} // This link will only be considered active if we are on "/"
+						>
+							Home
+						</NavLink>
 					</li>
 					<li>
-						<Link to="/shelves">Shelves</Link>
+						<NavLink
+							to="/shelves"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Shelves
+						</NavLink>
 					</li>
 				</ul>
 			</nav>
