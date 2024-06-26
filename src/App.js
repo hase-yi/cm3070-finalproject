@@ -9,9 +9,11 @@ import {
 
 import HomePage from './Pages/Home';
 import ShelvesPage from './Pages/Shelves';
+import RootLayout from './Pages/Root';
 
 const routeDefinitions = createRoutesFromElements(
-	<Route>
+	// path dependent wrapper Route
+	<Route path="/" element={<RootLayout />}>
 		<Route path="/" element={<HomePage />} />
 		<Route path="/shelves" element={<ShelvesPage />} />
 	</Route>
