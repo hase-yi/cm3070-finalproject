@@ -7,7 +7,7 @@ function HomePage(){
   <>
     <h1>My Home Page</h1>
     <p>
-      Go to <Link to="/shelves"> The Shelves </Link>
+      Go to <Link to="shelves"> The Shelves </Link>
     </p>
   </>
   )
