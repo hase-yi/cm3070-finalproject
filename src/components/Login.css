@@ -1,0 +1,32 @@
+/* src/components/Login.css */
+.button-default {
+  background-color: #f0f0f0; /* default button color */
+  color: #000;
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+  margin-right: 10px; /* Add some space between buttons */
+}
+
+.button-logged-in {
+  background-color: green; /* green color when logged in */
+  color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+  margin-right: 10px; /* Add some space between buttons */
+}
+
+.button-logout {
+  background-color: red; /* red color for logout */
+  color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.button-container {
+  display: flex; /* Align buttons horizontally */
+  align-items: center;
+  margin-top: 10px;
+}
