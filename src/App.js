@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 
 import HomePage from './Pages/Home';
-import ShelvesPage from './Pages/Shelves/Shelves';
+import ShelvesPage,{loader as shelvesLoader} from './Pages/Shelves/Shelves';
 import RootLayout from './Pages/Root';
 import ErrorPage from './Pages/Error';
 import ShelfDetailPage from './Pages/Shelves/ShelfDetail';
@@ -24,15 +24,7 @@ const routeDefinitions = createRoutesFromElements(
 			<Route
 				index
 				element={<ShelvesPage />}
-				loader={async () => {
-					const response = await fetch('http://127.0.0.1:8000/api/shelves/');
-					if (!response.ok) {
-						// ...
-					} else {
-						const resData = await response.json();
-						return resData;
-					}
-				}}
+				loader={shelvesLoader}
 			/>
 			<Route path=":shelfId" element={<ShelfDetailPage />} />
 			<Route path="new" element={<NewShelfPage />} />
