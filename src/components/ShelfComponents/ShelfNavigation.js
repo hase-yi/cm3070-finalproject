@@ -1,33 +1,32 @@
 import { NavLink } from 'react-router-dom';
 
-import classes from './MainNavigation.module.css';
+import classes from './ShelfNavigation.module.css';
 
-function MainNavigation() {
+function ShelfNavigation() {
 	return (
 		<header className={classes.header}>
 			<nav>
 				<ul className={classes.list}>
 					<li>
-						{/* wether the link is active, so it shows if the link is active */}
 						<NavLink
-							to="/"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}							
-							end={true} // This link will only be considered active if we are on "/"
-						>
-							Home
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="shelves"
+							to=""
 							className={({ isActive }) =>
 								isActive ? classes.active : undefined
 							}
 							end
 						>
-							Shelves
+							All Shelves
+						</NavLink>
+					</li>
+					<li>
+						<NavLink
+							to="new"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							New Shelf
 						</NavLink>
 					</li>
 				</ul>
@@ -36,4 +35,4 @@ function MainNavigation() {
 	);
 }
 
-export default MainNavigation;
+export default ShelfNavigation;

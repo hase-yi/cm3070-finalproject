@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 
-function ProductDetailPage() {
+function ShelfDetailPage() {
 	const params = useParams();
 
 	return (
 		<>
 			<h1>Shelf Detail</h1>
-			<p>{params.shelfId}</p>
+			<p>Shelf ID: {params.shelfId}</p>
 			{/* ".." go back */}
 			<p>
 				<Link to=".." relative="path">
@@ -16,4 +16,4 @@ function ProductDetailPage() {
 		</>
 	);
 }
-export default ProductDetailPage;
+export default ShelfDetailPage;
