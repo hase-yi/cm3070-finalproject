@@ -1,6 +1,6 @@
 import classes from './ShelfList.module.css';
 
-function ShelfList({shelves}) {
+function ShelfList({ shelves }) {
 	return (
 		<div className={classes.shelves}>
 			<h1>All Shelves</h1>

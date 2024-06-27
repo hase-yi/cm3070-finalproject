@@ -21,7 +21,19 @@ const routeDefinitions = createRoutesFromElements(
 	<Route path="/" element={<RootLayout />} errorElement={<ErrorPage />}>
 		<Route index element={<HomePage />} />
 		<Route path="shelves" element={<ShelfRootLayout />}>
-			<Route index element={<ShelvesPage />} />
+			<Route
+				index
+				element={<ShelvesPage />}
+				loader={async () => {
+					const response = await fetch('http://127.0.0.1:8000/api/shelves/');
+					if (!response.ok) {
+						// ...
+					} else {
+						const resData = await response.json();
+						return resData;
+					}
+				}}
+			/>
 			<Route path=":shelfId" element={<ShelfDetailPage />} />
 			<Route path="new" element={<NewShelfPage />} />
 			<Route path=":shelfId/edit" element={<EditShelfPage />} />
