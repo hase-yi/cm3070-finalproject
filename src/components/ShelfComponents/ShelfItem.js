@@ -1,10 +1,15 @@
 import classes from './ShelfItem.module.css'
 
-import { Link } from 'react-router-dom';
+import { Link, useSubmit } from 'react-router-dom';
 
 function ShelfItem({shelf}){
+  const submit = useSubmit();//submit function
+
   function startDeleteHandler(){
-    //...
+    const proceed = window.confirm('Are you sure?')//boolean
+    if (proceed){
+submit(null, {method: 'DELETE'});
+    }
   }
 
   return(

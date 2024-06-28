@@ -1,10 +1,11 @@
-import { Form} from 'react-router-dom';
+import { Form, useNavigate, useNavigation} from 'react-router-dom';
 
 import classes from './ShelfForm.module.css';
 
 function ShelfForm({ method, shelf }) {
+  const navigate = useNavigate();
 	function cancelHandler() {
-		//...
+		navigate('..')
 	}
 	return (
     // This request is send to action

@@ -13,8 +13,11 @@ import RootLayout from './Pages/Root';
 import ErrorPage from './Pages/Error';
 import ShelfDetailPage, {
 	loader as shelfDetailLoader,
+	action as deleteShelfAction,
 } from './Pages/Shelves/ShelfDetail';
-import NewShelfPage, {action as newEventAction } from './Pages/Shelves/NewShelf';
+import NewShelfPage, {
+	action as newEventAction,
+} from './Pages/Shelves/NewShelf';
 import EditShelfPage from './Pages/Shelves/EditShelf';
 import ShelfRootLayout from './Pages/Shelves/ShelfRoot';
 
@@ -25,10 +28,10 @@ const routeDefinitions = createRoutesFromElements(
 		<Route path="shelves" element={<ShelfRootLayout />}>
 			<Route index element={<ShelvesPage />} loader={shelvesLoader} />
 			<Route path=":shelfId" id="shelf-detail" loader={shelfDetailLoader}>
-				<Route index element={<ShelfDetailPage />}/>
+				<Route index element={<ShelfDetailPage />} action={deleteShelfAction} />
 				<Route path="edit" element={<EditShelfPage />} />
 			</Route>
-			<Route path="new" element={<NewShelfPage />} action={newEventAction}/>
+			<Route path="new" element={<NewShelfPage />} action={newEventAction} />
 		</Route>
 	</Route>
 );
