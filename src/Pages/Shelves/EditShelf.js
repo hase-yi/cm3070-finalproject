@@ -1,9 +1,10 @@
+import {useRouteLoaderData } from 'react-router-dom'
+import ShelfForm from '../../components/ShelfComponents/ShelfForm'
+
 function EditShelfPage(){
-
-  return (
-    <h1>Edit Page</h1>
-  )
-
+  const data = useRouteLoaderData("shelf-detail");
+  const shelf = data
+  return <ShelfForm shelf={shelf}/> 
 }
 
 export default EditShelfPage

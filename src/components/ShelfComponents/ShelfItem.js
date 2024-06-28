@@ -1,6 +1,8 @@
 import classes from './ShelfItem.module.css'
 
-function ShelfItem({event}){
+import { Link } from 'react-router-dom';
+
+function ShelfItem({shelf}){
   function startDeleteHandler(){
     //...
   }
@@ -11,7 +13,7 @@ function ShelfItem({event}){
       <h1>{shelf.title}</h1>
       <p>{shelf.description}</p>
       <menu className={classes.actions}>
-        <a href="edit">Edit</a>
+        <Link to="edit">Edit</Link>
         <button onClick={startDeleteHandler}>Delete</button>
       </menu>
     </article>
