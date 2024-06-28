@@ -15,11 +15,10 @@ import ShelfDetailPage, {
 	loader as shelfDetailLoader,
 	action as deleteShelfAction,
 } from './Pages/Shelves/ShelfDetail';
-import NewShelfPage, {
-	action as newEventAction,
-} from './Pages/Shelves/NewShelf';
+import NewShelfPage from './Pages/Shelves/NewShelf';
 import EditShelfPage from './Pages/Shelves/EditShelf';
 import ShelfRootLayout from './Pages/Shelves/ShelfRoot';
+import { action as manipulateShelfAction } from './util/action';
 
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
@@ -29,9 +28,17 @@ const routeDefinitions = createRoutesFromElements(
 			<Route index element={<ShelvesPage />} loader={shelvesLoader} />
 			<Route path=":shelfId" id="shelf-detail" loader={shelfDetailLoader}>
 				<Route index element={<ShelfDetailPage />} action={deleteShelfAction} />
-				<Route path="edit" element={<EditShelfPage />} />
+				<Route
+					path="edit"
+					element={<EditShelfPage />}
+					action={manipulateShelfAction}
+				/>
 			</Route>
-			<Route path="new" element={<NewShelfPage />} action={newEventAction} />
+			<Route
+				path="new"
+				element={<NewShelfPage />}
+				action={manipulateShelfAction}
+			/>
 		</Route>
 	</Route>
 );

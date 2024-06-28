@@ -1,15 +1,24 @@
-import { Form, useNavigate, useNavigation} from 'react-router-dom';
+import { Form, useNavigate, useNavigation, useActionData} from 'react-router-dom';
 
 import classes from './ShelfForm.module.css';
 
 function ShelfForm({ method, shelf }) {
+  const data = useActionData();
   const navigate = useNavigate();
+
+  // Adding feedback for buttons 
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === 'submitting';
 	function cancelHandler() {
 		navigate('..')
 	}
 	return (
     // This request is send to action
-		<Form method='POST' className={classes.form}>
+		<Form method={method} className={classes.form}>
+      {/* Outputing validations errors from backend  */}
+      {data && data.error && <ul>
+        {Object.values(data.error).map(err=><li key={err}>{err}</li>)}
+        </ul>}
 			<p>
 				<label htmlFor="title">Shelf Name</label>
 				<input
@@ -41,10 +50,10 @@ function ShelfForm({ method, shelf }) {
 				/>
 			</p>
 			<div className={classes.actions}>
-				<button type="button" onClick={cancelHandler}>
+				<button type="button" onClick={cancelHandler} disabled = {isSubmitting}>
 					Cancel
 				</button>
-				<button>Save</button>
+				<button disabled = {isSubmitting}>{isSubmitting ? 'Submitting': 'Save'}</button>
 			</div>
 		</Form>
 	);

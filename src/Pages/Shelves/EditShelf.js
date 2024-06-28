@@ -4,7 +4,7 @@ import ShelfForm from '../../components/ShelfComponents/ShelfForm'
 function EditShelfPage(){
   const data = useRouteLoaderData("shelf-detail");
   const shelf = data
-  return <ShelfForm shelf={shelf}/> 
+  return <ShelfForm method = 'PATCH' shelf={shelf}/> 
 }
 
 export default EditShelfPage
