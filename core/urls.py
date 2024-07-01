@@ -17,7 +17,7 @@ from .views import (
 
 urlpatterns = [
     path("secured/", secured, name="requires_jwt"),
-    path("token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("login/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("signup/",register_user, name="register_user"),
     path("books/", BookListCreateView.as_view(), name="book-list-create"),
