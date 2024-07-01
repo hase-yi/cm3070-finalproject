@@ -12,12 +12,14 @@ from .views import (
     CommentDetailView,
     AddBookToShelfView,
     CurrentlyReadingBooksView,
+    register_user,
 )
 
 urlpatterns = [
     path("secured/", secured, name="requires_jwt"),
     path("token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
+    path("signup/",register_user, name="register_user"),
     path("books/", BookListCreateView.as_view(), name="book-list-create"),
     path("books/<int:pk>/", BookDetailView.as_view(), name="book-detail"),
     path("shelves/", ShelfListCreateView.as_view(), name="shelf-list-create"),

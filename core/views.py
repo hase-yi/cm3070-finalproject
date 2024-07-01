@@ -6,13 +6,14 @@ from rest_framework.response import Response
 from functools import wraps
 from django.http import Http404, HttpResponse, HttpResponseForbidden
 
+from rest_framework.decorators import api_view
 from rest_framework import mixins,generics
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Book, Shelf, ReadingProgress, Comment
-from .serializers import BookSerializer, ShelfSerializer, ReadingProgressSerializer, CommentSerializer
+from .serializers import BookSerializer, ShelfSerializer, ReadingProgressSerializer, CommentSerializer, UserSerializer
 
 class BookListCreateView(generics.ListCreateAPIView):
     queryset = Book.objects.all()
@@ -198,3 +199,12 @@ class CookieTokenRefreshView(TokenRefreshView):
             )
             del response.data["access"]
         return super().finalize_response(request, response, *args, **kwargs)
+
+# User Registration View
+@api_view(['POST'])
+def register_user(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
