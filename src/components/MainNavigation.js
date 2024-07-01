@@ -30,6 +30,17 @@ function MainNavigation() {
 							Shelves
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="auth"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Authentication
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>

@@ -19,6 +19,8 @@ import NewShelfPage from './Pages/Shelves/NewShelf';
 import EditShelfPage from './Pages/Shelves/EditShelf';
 import ShelfRootLayout from './Pages/Shelves/ShelfRoot';
 import { action as manipulateShelfAction } from './util/action';
+import AuthenticationPage, {action as authAction} from './Pages/Authentication'
+
 
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
@@ -40,6 +42,7 @@ const routeDefinitions = createRoutesFromElements(
 				action={manipulateShelfAction}
 			/>
 		</Route>
+		<Route path="auth" element={<AuthenticationPage/>} action={authAction}></Route>
 	</Route>
 );
 
