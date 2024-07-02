@@ -30,7 +30,6 @@ export async function action({request}){
       'Content-Type':'application/json'
     },
     body:JSON.stringify(authData),
-    credentials: 'include', 
   });
 
   if(response.status === 422 || response.status === 401){
@@ -42,6 +41,11 @@ export async function action({request}){
   if(!response.ok){
     throw json({message:'Could not authenticate user'},{status:500});
   }
+
+  const resData = await response.json();
+  const token = resData.token;
+
+  localStorage.setItem('token', token);
 
   // Token management 
 return redirect('/');
