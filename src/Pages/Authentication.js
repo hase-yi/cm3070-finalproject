@@ -29,11 +29,13 @@ export async function action({request}){
     headers:{
       'Content-Type':'application/json'
     },
-    body:JSON.stringify(authData)
+    body:JSON.stringify(authData),
+    credentials: 'include', 
   });
 
   if(response.status === 422 || response.status === 401){
     const responseData = await response.json();
+    console.log('Response Data:', responseData); // Log response data
     return json(responseData, { status: response.status });
   }
 
