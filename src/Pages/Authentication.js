@@ -22,7 +22,9 @@ export async function action({request}){
     password:data.get('password'),
   };
 
-  const response = await fetch('http://127.0.0.1:8000/api/'+ mode +'/',{
+  console.log('Auth Data:', authData); // Log the payload
+
+  const response = await fetch(`http://127.0.0.1:8000/api/${mode}/`,{
     method:'POST',
     headers:{
       'Content-Type':'application/json'
@@ -31,7 +33,8 @@ export async function action({request}){
   });
 
   if(response.status === 422 || response.status === 401){
-    return response;
+    const responseData = await response.json();
+    return json(responseData, { status: response.status });
   }
 
   if(!response.ok){
