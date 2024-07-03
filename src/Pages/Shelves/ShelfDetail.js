@@ -1,7 +1,6 @@
 import { useRouteLoaderData, json, redirect } from 'react-router-dom';
 
 import ShelfItem from '../../components/ShelfComponents/ShelfItem';
-import { getAuthToken } from '../../util/auth';
 
 function ShelfDetailPage() {
 	const data = useRouteLoaderData('shelf-detail');
@@ -30,7 +29,6 @@ export async function action({ request, params }) {
 	const id = params.shelfId;
 
 	// get token
-	const token = getAuthToken();
 	const response = await fetch('http://127.0.0.1:8000/api/shelves/' + id, {
 		method:request.method,//method used by submit function by useSubmit hook
 		credentials: 'include',
