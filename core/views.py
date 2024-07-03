@@ -203,6 +203,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 # User Registration View
 @api_view(['POST'])
 def register_user(request):
+    print('Request data:', request.data)  # Log the incoming data
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
