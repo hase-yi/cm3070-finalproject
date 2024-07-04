@@ -1,14 +1,17 @@
-import classes from './ShelfItem.module.css'
-
-import { Link, useSubmit } from 'react-router-dom';
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { deleteShelf } from '../../features/shelfSlice';
+import classes from './ShelfItem.module.css';
 
 function ShelfItem({shelf}){
-  const submit = useSubmit();//submit function
+const dispatch = useDispatch();
+const navigate = useNavigate();
 
   function startDeleteHandler(){
     const proceed = window.confirm('Are you sure?')//boolean
     if (proceed){
-submit(null, {method: 'DELETE'});
+dispatch(deleteShelf(shelf.id)).then(()=>{navigate('/shelves')})
     }
   }
 
