@@ -4,6 +4,7 @@ from core.views import CookieTokenObtainPairView, CookieTokenRefreshView, secure
 from .views import (
     BookListCreateView,
     BookDetailView,
+    LogoutView,
     ShelfListCreateView,
     ShelfDetailView,
     ReadingProgressListCreateView,
@@ -17,6 +18,7 @@ from .views import (
 
 urlpatterns = [
     path("secured/", secured, name="requires_jwt"),
+    path("logout/", LogoutView.as_view(), name='logout'),
     path("login/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("signup/",register_user, name="register_user"),

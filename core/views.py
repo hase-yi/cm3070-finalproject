@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from functools import wraps
-from django.http import Http404, HttpResponse, HttpResponseForbidden
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 
 from rest_framework.decorators import api_view
 from rest_framework import mixins,generics
@@ -23,11 +23,18 @@ class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
-class ShelfListCreateView(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericAPIView
-):
+import logging
+from django.http import Http404
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import mixins, generics
+from .models import Shelf
+from .serializers import ShelfSerializer
+
+logger = logging.getLogger(__name__)
+
+class ShelfListCreateView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Shelf.objects.all()
     serializer_class = ShelfSerializer
 
@@ -41,17 +48,14 @@ class ShelfListCreateView(
     def post(self, request, *args, **kwargs):
         try:
             return self.create(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            logger.error(f"Validation error creating shelf: {e}")
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error creating shelf: {e}")
             return Response({"error": "An error occurred while creating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class ShelfDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    GenericAPIView
-):
+class ShelfDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
     queryset = Shelf.objects.all()
     serializer_class = ShelfSerializer
 
@@ -75,6 +79,9 @@ class ShelfDetailView(
     def put(self, request, *args, **kwargs):
         try:
             return self.update(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            logger.error(f"Validation error updating shelf: {e}")
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error updating shelf: {e}")
             return Response({"error": "An error occurred while updating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
@@ -82,6 +89,9 @@ class ShelfDetailView(
     def patch(self, request, *args, **kwargs):
         try:
             return self.partial_update(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            logger.error(f"Validation error partially updating shelf: {e}")
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error partially updating shelf: {e}")
             return Response({"error": "An error occurred while partially updating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
@@ -210,3 +220,10 @@ def register_user(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#logout
+class LogoutView(APIView):
+    def post(self, request):
+        response = JsonResponse({'detail': 'Successfully logged out.'})
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        return response
