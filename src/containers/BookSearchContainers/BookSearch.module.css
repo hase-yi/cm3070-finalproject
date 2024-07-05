@@ -1,86 +1,41 @@
-.BookSearch {
+.bookSearch {
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-form {
-  margin-bottom: 20px;
-}
-
-input[type="text"] {
-  padding: 8px;
+.input {
+  padding: 10px;
   width: 300px;
   margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
-button {
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+.button {
+  padding: 10px 20px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #0056b3;
-}
-
-.feedback-message {
-  margin: 10px 0;
+.feedbackMessage {
   color: red;
+  margin-top: 10px;
 }
 
-.loading-indicator {
-  margin: 10px 0;
+.loadingIndicator {
   color: blue;
-}
-
-.error-message {
-  margin: 10px 0;
-  color: red;
+  margin-top: 10px;
 }
 
 .results {
-  margin-top: 20px;
-}
-
-.results ul {
   list-style-type: none;
   padding: 0;
 }
 
-.results li {
+.bookItem {
+  margin: 10px 0;
   padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-.results img {
+.bookItem img {
   max-width: 50px;
   margin-right: 10px;
-}
-
-.results button {
-  padding: 6px 10px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.results button:hover {
-  background-color: #218838;
 }

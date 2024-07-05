@@ -8,10 +8,10 @@ export const searchBooks = createAsyncThunk('search/searchBooks', async (query) 
   return response.data.docs; // assuming docs contains the list of books
 });
 
-// Thunk to add book
-export const addBook = createAsyncThunk('search/addBook', async (newBook, { rejectWithValue }) => {
+// Thunk to add book to a shelf
+export const addBook = createAsyncThunk('search/addBook', async ({ newBook, shelfId }, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.post('/books/', newBook);
+    const response = await axiosInstance.post(`/shelves/${shelfId}/add_book/`, newBook);
     return response.data;
   } catch (error) {
     if (error.response) {

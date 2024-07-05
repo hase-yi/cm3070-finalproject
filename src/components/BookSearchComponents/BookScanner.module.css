@@ -1,0 +1,8 @@
+.scannerContainer {
+  margin: 20px 0;
+}
+
+.errorMessage {
+  color: red;
+  margin-top: 10px;
+}

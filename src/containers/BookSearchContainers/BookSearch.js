@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setQuery, setSelectedBook, clearSelectedBook, searchBooks, addBook } from '../../features/searchSlice';
-import BookModal from '../../components/BookModal/BookModal';
-import Scanner from '../../components/Scanner/Scanner';
-import BookItem from '../../components/BookItem/BookItem';
+import { setQuery, clearSelectedBook, searchBooks, addBook } from '../../features/searchSlice';
+import BookModal from '../../components/BookSearchComponents/BookModal';
+import BookItem from '../../components/BookComponents/BookItem';
+import AddBook from '../../components/BookSearchComponents/AddBook';
 import debounce from 'lodash.debounce';
-import './BookSearch.css';
+import classes from './BookSearch.module.css';
 
-const BookSearch = () => {
+const BookSearch = ({ shelfId }) => {
   const dispatch = useDispatch();
   const query = useSelector((state) => state.search.query);
   const results = useSelector((state) => state.search.results);
@@ -15,13 +15,6 @@ const BookSearch = () => {
   const showModal = useSelector((state) => state.search.showModal);
   const feedbackMessage = useSelector((state) => state.search.feedbackMessage);
   const loading = useSelector((state) => state.search.loading);
-
-  const handleDetected = (data) => {
-    const query = data.codeResult.code;
-    if (query.length < 13) return;
-    dispatch(setQuery(query));
-    dispatch(searchBooks(query));
-  };
 
   const handleChange = (e) => {
     const query = e.target.value;
@@ -38,12 +31,8 @@ const BookSearch = () => {
     }
   };
 
-  const handleAddBook = (book) => {
-    dispatch(addBook(book));
-  };
-
   return (
-    <div className="BookSearch">
+    <div className={classes.bookSearch}>
       <h1>Search Books</h1>
       <input
         type="text"
@@ -51,24 +40,27 @@ const BookSearch = () => {
         onChange={handleChange}
         onKeyDown={handleKeyPress}
         placeholder="Search for books"
+        className={classes.input}
       />
-      <button onClick={debouncedSearch}>Search</button>
+      <button onClick={debouncedSearch} className={classes.button}>Search</button>
       {feedbackMessage && (
-        <div className="feedback-message">{feedbackMessage}</div>
+        <div className={classes.feedbackMessage}>{feedbackMessage}</div>
       )}
       {loading && (
-        <div className="loading-indicator">Loading...</div>
+        <div className={classes.loadingIndicator}>Loading...</div>
       )}
-      <Scanner onDetected={handleDetected} />
-      <ul className="results">
+      <ul className={classes.results}>
         {results.map((book) => (
-          <BookItem key={book.key} book={book} />
+          <li key={book.key} className={classes.bookItem}>
+            <BookItem book={book} />
+            <AddBook book={book} shelfId={shelfId} />
+          </li>
         ))}
       </ul>
       <BookModal
         show={showModal}
         book={selectedBook}
-        onAddBook={handleAddBook}
+        onAddBook={() => dispatch(addBook({ newBook: selectedBook, shelfId }))}
         onClose={() => dispatch(clearSelectedBook())}
       />
     </div>
