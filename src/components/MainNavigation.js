@@ -41,6 +41,17 @@ function MainNavigation() {
 							Authentication
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="search"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Search
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>

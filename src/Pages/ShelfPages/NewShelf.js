@@ -1,5 +1,5 @@
 
-import ShelfForm from "../../components/ShelfComponents/ShelfForm"
+import ShelfForm from "../../containers/ShelfContainers/ShelfForm"
 
 function NewShelfPage(){
   return <ShelfForm method = 'POST'/>

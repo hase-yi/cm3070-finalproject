@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import BookForm from '../../components/BookComponents/BookForm';
+import BookForm from '../../containers/BookContainers/BookForm';
 
 const EditBookPage = () => {
   const { bookId } = useParams();

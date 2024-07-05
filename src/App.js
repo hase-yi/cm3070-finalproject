@@ -8,21 +8,22 @@ import {
 } from 'react-router-dom';
 
 import HomePage from './Pages/Home';
-import ShelvesPage from './Pages/Shelves/Shelves';
+import ShelvesPage from './Pages/ShelfPages/Shelves';
 import RootLayout from './Pages/Root';
 import ErrorPage from './Pages/Error';
-import ShelfDetailPage from './Pages/Shelves/ShelfDetail';
-import NewShelfPage from './Pages/Shelves/NewShelf';
-import EditShelfPage from './Pages/Shelves/EditShelf';
-import ShelfRootLayout from './Pages/Shelves/ShelfRoot';
+import ShelfDetailPage from './Pages/ShelfPages/ShelfDetail';
+import NewShelfPage from './Pages/ShelfPages/NewShelf';
+import EditShelfPage from './Pages/ShelfPages/EditShelf';
+import ShelfRootLayout from './Pages/ShelfPages/ShelfRoot';
 
-import BookRoot from './Pages/Books/BookRoot';
-import NewBookPage from './Pages/Books/NewBook';
-import EditBookPage from './Pages/Books/EditBook';
-import BooksPage from './Pages/Books/Books';
-import BookDetailPage from './Pages/Books/BookDetail';
+import BookRoot from './Pages/BookPages/BookRoot';
+import NewBookPage from './Pages/BookPages/NewBook';
+import EditBookPage from './Pages/BookPages/EditBook';
+import BooksPage from './Pages/BookPages/Books';
+import BookDetailPage from './Pages/BookPages/BookDetail';
 
 import AuthenticationPage from './Pages/Authentication'
+import SearchPage from './Pages/BookSearchPage';
 
 
 const routeDefinitions = createRoutesFromElements(
@@ -50,6 +51,7 @@ const routeDefinitions = createRoutesFromElements(
       <Route path=":bookId" element={<BookDetailPage />} />
       <Route path=":bookId/edit" element={<EditBookPage />} />
     </Route>
+		<Route path="search" element={<SearchPage />} />
 	</Route>
 );
 

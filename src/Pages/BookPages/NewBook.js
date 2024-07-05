@@ -1,5 +1,5 @@
 import React from 'react';
-import BookForm from '../../components/BookComponents/BookForm';
+import BookForm from '../../containers/BookContainers/BookForm';
 
 const NewBookPage = () => {
   return (
