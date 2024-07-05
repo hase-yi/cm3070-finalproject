@@ -15,6 +15,13 @@ import ShelfDetailPage from './Pages/Shelves/ShelfDetail';
 import NewShelfPage from './Pages/Shelves/NewShelf';
 import EditShelfPage from './Pages/Shelves/EditShelf';
 import ShelfRootLayout from './Pages/Shelves/ShelfRoot';
+
+import BookRoot from './Pages/Books/BookRoot';
+import NewBookPage from './Pages/Books/NewBook';
+import EditBookPage from './Pages/Books/EditBook';
+import BooksPage from './Pages/Books/Books';
+import BookDetailPage from './Pages/Books/BookDetail';
+
 import AuthenticationPage from './Pages/Authentication'
 
 
@@ -37,6 +44,12 @@ const routeDefinitions = createRoutesFromElements(
 			/>
 		</Route>
 		<Route path="auth" element={<AuthenticationPage/>}></Route>
+		<Route path="books" element={<BookRoot />}>
+      <Route index element={<BooksPage />} />
+      <Route path="new" element={<NewBookPage />} />
+      <Route path=":bookId" element={<BookDetailPage />} />
+      <Route path=":bookId/edit" element={<EditBookPage />} />
+    </Route>
 	</Route>
 );
 

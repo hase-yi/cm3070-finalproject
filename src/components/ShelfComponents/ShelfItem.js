@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { deleteShelf } from '../../features/shelfSlice';
 import classes from './ShelfItem.module.css';
+import BookItem from '../BookComponents/BookItem';
 
 function ShelfItem({shelf}){
 const dispatch = useDispatch();
@@ -16,6 +17,7 @@ dispatch(deleteShelf(shelf.id)).then(()=>{navigate('/shelves')})
   }
 
   return(
+    <>
     <article className={classes.shelf}>
       <img src={shelf.image} alt={shelf.title}/>
       <h1>{shelf.title}</h1>
@@ -25,6 +27,8 @@ dispatch(deleteShelf(shelf.id)).then(()=>{navigate('/shelves')})
         <button onClick={startDeleteHandler}>Delete</button>
       </menu>
     </article>
+    <BookItem/>
+    </>
   );
 
 }
