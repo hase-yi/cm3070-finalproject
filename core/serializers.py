@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Book, Shelf, ReadingProgress, Comment
 
+
 # Auth
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -40,6 +41,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Function
 class BookSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False
+    )
+
     reading_percentage = serializers.ReadOnlyField()
 
     class Meta:
@@ -47,21 +52,43 @@ class BookSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        if "title" not in data or not data["title"]:
-            raise serializers.ValidationError("Title is required")
-        if "author" not in data or not data["author"]:
-            raise serializers.ValidationError("Author is required")
-        if "shelf" not in data or not data["shelf"]:
-            raise serializers.ValidationError("Shelf is required")
+        # Ensure the request is available in the serializer context
+        request_user = self.context["request"].user
+        specified_user = data.get("user")
+
+        if specified_user is None:
+            data["user"] = request_user
+        elif request_user != specified_user:
+            raise serializers.ValidationError(
+                "You can only create objects for yourself."
+            )
+
         return data
 
 
 class ShelfSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False
+    )
     books = BookSerializer(many=True, read_only=True)
 
     class Meta:
         model = Shelf
         fields = "__all__"
+
+    def validate(self, data):
+        # Ensure the request is available in the serializer context
+        request_user = self.context["request"].user
+        specified_user = data.get("user")
+
+        if specified_user is None:
+            data["user"] = request_user
+        elif request_user != specified_user:
+            raise serializers.ValidationError(
+                "You can only create objects for yourself."
+            )
+
+        return data
 
 
 class ReadingProgressSerializer(serializers.ModelSerializer):

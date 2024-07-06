@@ -5,10 +5,17 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from functools import wraps
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.decorators import api_view
 from rest_framework import mixins, generics
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -44,181 +51,68 @@ from .serializers import ShelfSerializer
 logger = logging.getLogger(__name__)
 
 
-class ShelfListCreateView(
-    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
-):
-    queryset = Shelf.objects.all()
+class ShelfListView(ListAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = ShelfSerializer
 
-    def get(self, request, *args, **kwargs):
-        try:
-            return self.list(request, *args, **kwargs)
-        except Exception as e:
-            logger.error(f"Error retrieving shelf list: {e}")
-            return Response(
-                {"error": "An error occurred while retrieving the shelf list."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+    def get_queryset(self):
+        return Shelf.objects.for_user(user=self.request.user)
 
-    def post(self, request, *args, **kwargs):
-        try:
-            return self.create(request, *args, **kwargs)
-        except serializers.ValidationError as e:
-            logger.error(f"Validation error creating shelf: {e}")
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error creating shelf: {e}")
-            return Response(
-                {"error": "An error occurred while creating the shelf."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
 class ShelfDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
 ):
-    queryset = Shelf.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = ShelfSerializer
 
-    def get_object(self):
-        try:
-            return super().get_object()
-        except Http404:
-            logger.error("Shelf not found")
-            return Response(
-                {"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            logger.error(f"Error retrieving shelf: {e}")
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+    def get_queryset(self):
+        return Shelf.objects.for_user(user=self.request.user)
 
-    def get(self, request, *args, **kwargs):
-        try:
-            return self.retrieve(request, *args, **kwargs)
-        except Exception as e:
-            logger.error(f"Error retrieving shelf: {e}")
-            return Response(
-                {"error": "An error occurred while retrieving the shelf."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-    def put(self, request, *args, **kwargs):
-        try:
-            return self.update(request, *args, **kwargs)
-        except serializers.ValidationError as e:
-            logger.error(f"Validation error updating shelf: {e}")
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error updating shelf: {e}")
-            return Response(
-                {"error": "An error occurred while updating the shelf."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def patch(self, request, *args, **kwargs):
-        try:
-            return self.partial_update(request, *args, **kwargs)
-        except serializers.ValidationError as e:
-            logger.error(f"Validation error partially updating shelf: {e}")
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error partially updating shelf: {e}")
-            return Response(
-                {"error": "An error occurred while partially updating the shelf."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def delete(self, request, *args, **kwargs):
-        try:
-            return self.destroy(request, *args, **kwargs)
-        except Exception as e:
-            logger.error(f"Error deleting shelf: {e}")
-            return Response(
-                {"error": "An error occurred while deleting the shelf."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
-class BooksByShelfView(generics.ListAPIView):
+class BookListView(ListAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        shelf_id = self.kwargs["pk"]
-        return Book.objects.filter(shelf_id=shelf_id)
-
-
-class ReadingProgressListCreateView(generics.ListCreateAPIView):
-    queryset = ReadingProgress.objects.all()
-    serializer_class = ReadingProgressSerializer
-
-
-class ReadingProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ReadingProgress.objects.all()
-    serializer_class = ReadingProgressSerializer
-
-
-class CommentListCreateView(generics.ListCreateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-
-class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-
-class AddBookToShelfView(APIView):
-    def post(self, request, pk):
-        try:
-            shelf = Shelf.objects.get(pk=pk)
-        except Shelf.DoesNotExist:
-            return Response(
-                {"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        book_data = request.data
-        book_data["shelf"] = shelf.id  # Assign the shelf ID to the book data
-        book_serializer = BookSerializer(data=book_data)
-
-        if book_serializer.is_valid():
-            book_serializer.save()
-            return Response(book_serializer.data, status=status.HTTP_201_CREATED)
+        shelf = self.request.query_params.get("shelf", None)
+        if shelf:
+            return Book.objects.get_books_by_shelf(shelf, self.request.user)
         else:
-            return Response(book_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Book.objects.for_user(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
-class CurrentlyReadingBooksView(generics.ListAPIView):
+class BookDetailView(
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+):
+    permission_classes = [IsAuthenticated]
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        return Book.objects.filter(status="is_reading")
+        return Book.objects.for_user(user=self.request.user)
 
-
-# Auth
-def require_cookie(cookie_name):
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            if cookie_name in request.COOKIES:
-                # Cookie is present, proceed with the view function
-                return view_func(request, *args, **kwargs)
-            else:
-                # Cookie is missing, return a forbidden response or redirect
-                return HttpResponseForbidden("This action requires authentication.")
-
-        return _wrapped_view
-
-    return decorator
-
-
-@require_cookie("access_token")
-def secured(request):
-    return HttpResponse("You have access to this view.")
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):

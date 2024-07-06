@@ -9,6 +9,11 @@ class UserSettings(models.Model):
     share_all_reading_progress = models.BooleanField(default=False)
 
 
+class BaseUserAccessManager(models.Manager):
+    def for_user(self, user):
+        return self.filter(user=user)
+
+
 class Shelf(models.Model):
     user = models.ForeignKey(User, related_name="shelves", on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
@@ -17,6 +22,13 @@ class Shelf(models.Model):
 
     def __str__(self):
         return self.title
+
+    objects = BaseUserAccessManager()
+
+
+class BookManager(BaseUserAccessManager):
+    def get_books_by_shelf(self, shelf, user):
+        return self.for_user(user).filter(shelf=shelf)
 
 
 class Book(models.Model):
@@ -33,6 +45,8 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+
+    objects = BookManager()
 
 
 class ReadingProgress(models.Model):
