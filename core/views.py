@@ -1,5 +1,5 @@
 import logging
-from venv import logger 
+from venv import logger
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
@@ -7,21 +7,30 @@ from functools import wraps
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 
 from rest_framework.decorators import api_view
-from rest_framework import mixins,generics
+from rest_framework import mixins, generics
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Book, Shelf, ReadingProgress, Comment
-from .serializers import BookSerializer, ShelfSerializer, ReadingProgressSerializer, CommentSerializer, UserSerializer
+from .serializers import (
+    BookSerializer,
+    ShelfSerializer,
+    ReadingProgressSerializer,
+    CommentSerializer,
+    UserSerializer,
+)
+
 
 class BookListCreateView(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
+
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+
 
 import logging
 from django.http import Http404
@@ -34,7 +43,10 @@ from .serializers import ShelfSerializer
 
 logger = logging.getLogger(__name__)
 
-class ShelfListCreateView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+
+class ShelfListCreateView(
+    mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView
+):
     queryset = Shelf.objects.all()
     serializer_class = ShelfSerializer
 
@@ -43,7 +55,10 @@ class ShelfListCreateView(mixins.ListModelMixin, mixins.CreateModelMixin, generi
             return self.list(request, *args, **kwargs)
         except Exception as e:
             logger.error(f"Error retrieving shelf list: {e}")
-            return Response({"error": "An error occurred while retrieving the shelf list."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "An error occurred while retrieving the shelf list."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def post(self, request, *args, **kwargs):
         try:
@@ -53,9 +68,18 @@ class ShelfListCreateView(mixins.ListModelMixin, mixins.CreateModelMixin, generi
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error creating shelf: {e}")
-            return Response({"error": "An error occurred while creating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An error occurred while creating the shelf."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-class ShelfDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+
+class ShelfDetailView(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
     queryset = Shelf.objects.all()
     serializer_class = ShelfSerializer
 
@@ -64,17 +88,24 @@ class ShelfDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins
             return super().get_object()
         except Http404:
             logger.error("Shelf not found")
-            return Response({"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             logger.error(f"Error retrieving shelf: {e}")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def get(self, request, *args, **kwargs):
         try:
             return self.retrieve(request, *args, **kwargs)
         except Exception as e:
             logger.error(f"Error retrieving shelf: {e}")
-            return Response({"error": "An error occurred while retrieving the shelf."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "An error occurred while retrieving the shelf."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def put(self, request, *args, **kwargs):
         try:
@@ -84,7 +115,10 @@ class ShelfDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error updating shelf: {e}")
-            return Response({"error": "An error occurred while updating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An error occurred while updating the shelf."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def patch(self, request, *args, **kwargs):
         try:
@@ -94,26 +128,44 @@ class ShelfDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error partially updating shelf: {e}")
-            return Response({"error": "An error occurred while partially updating the shelf."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An error occurred while partially updating the shelf."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, *args, **kwargs):
         try:
             return self.destroy(request, *args, **kwargs)
         except Exception as e:
             logger.error(f"Error deleting shelf: {e}")
-            return Response({"error": "An error occurred while deleting the shelf."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An error occurred while deleting the shelf."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class BooksByShelfView(generics.ListAPIView):
+    serializer_class = BookSerializer
+
+    def get_queryset(self):
+        shelf_id = self.kwargs["pk"]
+        return Book.objects.filter(shelf_id=shelf_id)
+
 
 class ReadingProgressListCreateView(generics.ListCreateAPIView):
     queryset = ReadingProgress.objects.all()
     serializer_class = ReadingProgressSerializer
 
+
 class ReadingProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ReadingProgress.objects.all()
     serializer_class = ReadingProgressSerializer
 
+
 class CommentListCreateView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
 
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
@@ -125,10 +177,12 @@ class AddBookToShelfView(APIView):
         try:
             shelf = Shelf.objects.get(pk=pk)
         except Shelf.DoesNotExist:
-            return Response({"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Shelf not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         book_data = request.data
-        book_data['shelf'] = shelf.id  # Assign the shelf ID to the book data
+        book_data["shelf"] = shelf.id  # Assign the shelf ID to the book data
         book_serializer = BookSerializer(data=book_data)
 
         if book_serializer.is_valid():
@@ -142,11 +196,10 @@ class CurrentlyReadingBooksView(generics.ListAPIView):
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        return Book.objects.filter(status='is_reading')
+        return Book.objects.filter(status="is_reading")
 
 
 # Auth
-
 def require_cookie(cookie_name):
     def decorator(view_func):
         @wraps(view_func)
@@ -210,20 +263,22 @@ class CookieTokenRefreshView(TokenRefreshView):
             del response.data["access"]
         return super().finalize_response(request, response, *args, **kwargs)
 
+
 # User Registration View
-@api_view(['POST'])
+@api_view(["POST"])
 def register_user(request):
-    print('Request data:', request.data)  # Log the incoming data
+    print("Request data:", request.data)  # Log the incoming data
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#logout
+
+# logout
 class LogoutView(APIView):
     def post(self, request):
-        response = JsonResponse({'detail': 'Successfully logged out.'})
-        response.delete_cookie('access_token')
-        response.delete_cookie('refresh_token')
+        response = JsonResponse({"detail": "Successfully logged out."})
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
         return response

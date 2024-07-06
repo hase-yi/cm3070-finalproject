@@ -14,6 +14,7 @@ from .views import (
     AddBookToShelfView,
     CurrentlyReadingBooksView,
     register_user,
+    BooksByShelfView,  # Import the new view
 )
 
 urlpatterns = [
@@ -30,6 +31,11 @@ urlpatterns = [
         "shelves/<int:pk>/add_book/",
         AddBookToShelfView.as_view(),
         name="add-book-to-shelf",
+    ),
+    path(
+        "shelves/<int:pk>/books/",  # Add this URL pattern
+        BooksByShelfView.as_view(),
+        name="books-by-shelf",
     ),
     path(
         "reading-progress/",
