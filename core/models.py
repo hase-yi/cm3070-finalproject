@@ -1,66 +1,94 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
-class AppUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user.username
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, related_name="settings", on_delete=models.CASCADE)
+    share_all_reviews = models.BooleanField(default=False)
+    share_all_reading_progress = models.BooleanField(default=False)
 
 
 class Shelf(models.Model):
+    user = models.ForeignKey(User, related_name="shelves", on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    image = models.URLField(max_length=200, blank=True, null=True)
+    image = models.URLField(max_length=400, blank=True, null=True)
 
     def __str__(self):
         return self.title
-
-from django.db import models
 
 
 class Book(models.Model):
-    STATUS_CHOICES = [
-        ("want_to_read", "Want to Read"),
-        ("is_reading", "Is Reading"),
-        ("finished_reading", "Finished Reading"),
-        ("not_to_finish", "Not to Finish"),
-    ]
-
+    user = models.ForeignKey(User, related_name="books", on_delete=models.CASCADE)
+    isbn = models.CharField(max_length=13)
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
-    total_pages = models.PositiveIntegerField(
-        null=True, blank=True
-    )  # Allow null and blank for total_pages
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    shelf = models.ForeignKey("Shelf", related_name="books", on_delete=models.CASCADE)
-    current_page = models.PositiveIntegerField(default=0)
-    cover_id = models.CharField(
-        max_length=20, null=True, blank=True
-    )  # New field for storing cover ID
-    open_library_id = models.CharField(
-        max_length=20, null=True, blank=True
-    )  # New field for storing OpenLibrary ID
+    total_pages = models.PositiveIntegerField(null=True, blank=True)
+    release_year = models.PositiveBigIntegerField(blank=True, null=True)
+    shelf = models.ForeignKey(
+        Shelf, related_name="books", on_delete=models.SET_NULL, null=True
+    )
+    image = models.URLField(max_length=400, blank=True, null=True)
 
     def __str__(self):
         return self.title
 
+
+class ReadingProgress(models.Model):
+    book = models.OneToOneField(
+        Book, related_name="reading_progress", on_delete=models.CASCADE, null=True
+    )
+
+    STATUS_CHOICES = [
+        ("W", "Want to Read"),
+        ("R", "Is Reading"),
+        ("F", "Finished Reading"),
+        ("N", "Not to Finish"),
+    ]
+
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    current_page = models.PositiveIntegerField(default=0)
+    shared = models.BooleanField(default=False)
+
     @property
     def reading_percentage(self):
-        if self.total_pages > 0:
-            return (self.current_page / self.total_pages) * 100
+        total_pages = self.book.total_pages
+        if total_pages > 0:
+            return (self.current_page / total_pages) * 100
         return 0
 
 
-class ReadingProgress(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    current_page = models.PositiveIntegerField()
+class Review(models.Model):
+    book = models.OneToOneField(
+        Book, related_name="review", on_delete=models.CASCADE, null=True
+    )
+    text = models.TextField()
+    shared = models.BooleanField(default=False)
+    date = models.DateField(default=timezone.now)
 
 
 class Comment(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    text = models.TextField()
-    parent_comment = models.ForeignKey(
-        "self", null=True, blank=True, related_name="replies", on_delete=models.CASCADE
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    review = models.ForeignKey(
+        Review, related_name="comments", on_delete=models.CASCADE
     )
+    text = models.TextField()
+    date = models.DateField(default=timezone.now)
+
+
+class Activity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, null=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True)
+    reading_progress = models.ForeignKey(
+        ReadingProgress, on_delete=models.CASCADE, null=True
+    )
+    text = models.CharField(max_length=200)
+    backlink = models.URLField()
+
+
+class Following(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    followed_users = models.ManyToManyField(User, related_name="followers")
