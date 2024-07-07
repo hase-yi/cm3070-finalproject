@@ -123,8 +123,9 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 "access_token",
                 response.data["access"],
                 httponly=True,  # HTTP-only flag
-                samesite="Lax",  # SameSite attribute can be 'Lax' or 'Strict'
+                samesite="None",  # SameSite attribute can be 'Lax' or 'Strict'
                 secure=True,  # Only send cookie over HTTPS
+                path="/",
             )
             # Remove the access token from the response body
             del response.data["access"]
@@ -135,8 +136,9 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 "refresh_token",
                 response.data["refresh"],
                 httponly=True,
-                samesite="Lax",
+                samesite="None",
                 secure=True,
+                path="/",
             )
             # Remove the refresh token from the response body
             del response.data["refresh"]
