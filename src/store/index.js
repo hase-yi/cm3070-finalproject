@@ -1,16 +1,7 @@
+// store.js
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../features/authSlice';
-import shelfReducer from '../features/shelfSlice';
-import bookReducer from '../features/bookSlice';
-import searchReducer from '../features/searchSlice';
+import rootReducer from './rootReducer'; // import the rootReducer you defined
 
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    books: bookReducer,
-    search: searchReducer,
-    shelves: shelfReducer,
-
-  },
+  reducer: rootReducer,  // Use the rootReducer here
 });
-

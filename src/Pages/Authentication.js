@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginUser, logoutUser } from '../features/authSlice'; // Ensure logoutUser is imported
 import navigateEmitter from '../navigateEmitter';
+import {store } from '../store/index'
 
 function AuthenticationPage() {
   const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ function AuthenticationPage() {
   // Logout user when component mounts
   useEffect(() => {
     dispatch(logoutUser());
+    store.dispatch({ type: 'LOGOUT' });
   }, [dispatch]);
 
   const handleSubmit = (e) => {
