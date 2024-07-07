@@ -22,36 +22,33 @@ import EditBookPage from './Pages/BookPages/EditBook';
 import BooksPage from './Pages/BookPages/Books';
 import BookDetailPage from './Pages/BookPages/BookDetail';
 
-import AuthenticationPage from './Pages/Authentication'
+import AuthenticationPage from './Pages/Authentication';
 import SearchPage from './Pages/BookSearchPage';
+import NavigationLayout from './NavigationLayout';
 
 
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
 	<Route path="/" element={<RootLayout />} errorElement={<ErrorPage />}>
-		<Route index element={<HomePage />} />
-		<Route path="shelves" element={<ShelfRootLayout />}>
-			<Route index element={<ShelvesPage />}  />
-			<Route path=":shelfId" id="shelf-detail" >
-				<Route index element={<ShelfDetailPage />}  />
-				<Route
-					path="edit"
-					element={<EditShelfPage />}
-				/>
+		<Route element={<NavigationLayout />}>
+			<Route index element={<HomePage />} />
+			<Route path="shelves" element={<ShelfRootLayout />}>
+				<Route index element={<ShelvesPage />} />
+				<Route path=":shelfId" id="shelf-detail">
+					<Route index element={<ShelfDetailPage />} />
+					<Route path="edit" element={<EditShelfPage />} />
+				</Route>
+				<Route path="new" element={<NewShelfPage />} />
 			</Route>
-			<Route
-				path="new"
-				element={<NewShelfPage />}
-			/>
+			<Route path="auth" element={<AuthenticationPage />}></Route>
+			<Route path="books" element={<BookRoot />}>
+				<Route index element={<BooksPage />} />
+				<Route path="new" element={<NewBookPage />} />
+				<Route path=":bookId" element={<BookDetailPage />} />
+				<Route path=":bookId/edit" element={<EditBookPage />} />
+			</Route>
+			<Route path="search" element={<SearchPage />} />
 		</Route>
-		<Route path="auth" element={<AuthenticationPage/>}></Route>
-		<Route path="books" element={<BookRoot />}>
-      <Route index element={<BooksPage />} />
-      <Route path="new" element={<NewBookPage />} />
-      <Route path=":bookId" element={<BookDetailPage />} />
-      <Route path=":bookId/edit" element={<EditBookPage />} />
-    </Route>
-		<Route path="search" element={<SearchPage />} />
 	</Route>
 );
 

@@ -1,16 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
-import shelfReducer from '../features/shelfSlice'; // Ensure the correct path
-import bookReducer from '../features/bookSlice'; // Ensure the correct path
+import authReducer from '../features/authSlice';
+import shelfReducer from '../features/shelfSlice';
+import bookReducer from '../features/bookSlice';
 import searchReducer from '../features/searchSlice';
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
-    shelves: shelfReducer, // Ensure the key matches the one used in the selector
+    auth: authReducer,
     books: bookReducer,
     search: searchReducer,
+    shelves: shelfReducer,
 
   },
 });
-
-export default store;
 
