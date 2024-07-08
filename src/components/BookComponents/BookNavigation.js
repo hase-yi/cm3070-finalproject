@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const BookNavigation = () => {
   return (
@@ -7,13 +7,13 @@ const BookNavigation = () => {
       <nav>
         <ul>
           <li>
-            <Link to="/books/new">Add New Book</Link>
+            <Link to="/books/new">Add New Book(to be changed)</Link>
           </li>
         </ul>
       </nav>
-      <Outlet />
     </div>
   );
 };
 
 export default BookNavigation;
+

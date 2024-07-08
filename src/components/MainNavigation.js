@@ -52,6 +52,17 @@ function MainNavigation() {
 							Search
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="books/new"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Add Book
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>
