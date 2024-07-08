@@ -23,14 +23,28 @@ export const loginUser = createAsyncThunk(
 	}
 );
 
+// Async thunk for user registration
+export const registerUser = createAsyncThunk(
+	'auth/registerUser',
+	async (userData, { rejectWithValue }) => {
+		try {
+			const response = await axiosInstance.post('/signup/', userData);
+			return response.data;
+		} catch (err) {
+			return rejectWithValue(err.response.data);
+		}
+	}
+);
+
 const authSlice = createSlice({
 	name: 'auth',
 	initialState,
 	reducers: {
 		logoutUser(state) {
-      state.user = null;
-      state.status = 'idle';
-      state.error = null;
+			state.user = null;
+			state.status = 'idle';
+			state.error = null;
+			axiosInstance.post('/logout/', {}, { withCredentials: true });
 		},
 	},
 	extraReducers: (builder) => {
@@ -43,6 +57,17 @@ const authSlice = createSlice({
 				state.user = action.payload;
 			})
 			.addCase(loginUser.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.payload;
+			})
+			.addCase(registerUser.pending, (state) => {
+				state.status = 'loading';
+			})
+			.addCase(registerUser.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				state.user = action.payload;
+			})
+			.addCase(registerUser.rejected, (state, action) => {
 				state.status = 'failed';
 				state.error = action.payload;
 			});
