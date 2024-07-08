@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setQuery, clearSelectedBook, searchBooks, addBook } from '../../features/searchSlice';
-import BookModal from '../../components/BookSearchComponents/BookModal';
-import BookItem from '../../components/BookComponents/BookItem';
-import AddBook from '../../components/BookSearchComponents/AddBook';
+import BookModal from './BookModal';
+import BookItem from '../BookComponents/BookItem';
+import AddBook from './AddBook';
 import debounce from 'lodash.debounce';
 import classes from './BookSearch.module.css';
 

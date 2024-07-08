@@ -8,12 +8,20 @@ function ShelfItem({shelf}){
 const dispatch = useDispatch();
 const navigate = useNavigate();
 
-  function startDeleteHandler(){
-    const proceed = window.confirm('Are you sure?')//boolean
-    if (proceed){
-dispatch(deleteShelf(shelf.id)).then(()=>{navigate('/shelves')})
-    }
+const startDeleteHandler = () => {
+  const proceed = window.confirm('Are you sure?');
+  if (proceed) {
+    dispatch(deleteShelf(shelf.id)).then((result) => {
+      if (result.meta.requestStatus === 'fulfilled') {
+        navigate('/shelves');
+      } else {
+        // Handle the error case
+        console.error('Failed to delete the shelf:', result.error.message);
+      }
+    });
   }
+};
+
 
   return(
 

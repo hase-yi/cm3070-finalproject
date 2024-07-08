@@ -40,9 +40,16 @@ export const updateShelf = createAsyncThunk('shelves/updateShelf', async ({ id, 
 });
 
 // Thunk to delete a shelf
-export const deleteShelf = createAsyncThunk('shelves/deleteShelf', async (id) => {
-  await axiosInstance.delete(`shelves/${id}/`);
-  return id;
+export const deleteShelf = createAsyncThunk('shelves/deleteShelf', async (id, { rejectWithValue }) => {
+  try {
+    await axiosInstance.delete(`shelves/${id}/`);
+    return id;
+  } catch (error) {
+    if (!error.response) {
+      throw error;
+    }
+    return rejectWithValue(error.response.data);
+  }
 });
 
 const shelfSlice = createSlice({

@@ -1,5 +1,5 @@
 import React from 'react';
-import BookSearch from '../containers/BookSearchContainers/BookSearch';
+import BookSearch from '../components/BookSearchComponents/BookSearch';
 
 const SearchPage = () => {
   return (

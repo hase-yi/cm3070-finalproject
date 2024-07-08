@@ -15,7 +15,11 @@ export const fetchBooks = createAsyncThunk('books/fetchBooks', async () => {
 
 // Thunk to fetch books for a specific shelf
 export const fetchBooksForShelf = createAsyncThunk('books/fetchBooksForShelf', async (shelfId) => {
-  const response = await axiosInstance.get(`shelves/${shelfId}/books/`);
+  const response = await axiosInstance.get('books/', {
+    params: {
+      shelf: shelfId,
+    },
+  });
   return response.data;
 });
 

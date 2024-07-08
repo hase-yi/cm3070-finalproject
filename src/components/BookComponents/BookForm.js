@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createBook, fetchBook, updateBook } from '../../features/bookSlice';
+import {fetchShelves} from '../../features/shelfSlice'
 
 const BookForm = () => {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ const BookForm = () => {
         });
       }
     }
+    dispatch(fetchShelves()); // Fetch shelves when the component mounts
   }, [isEditing, book, dispatch, id]);
 
   // Get shelves from state
