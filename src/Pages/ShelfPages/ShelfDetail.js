@@ -37,7 +37,7 @@ function ShelfDetailPage() {
     <div>
       {shelf && <ShelfItem shelf={shelf} />}
       <h2>Books</h2>
-      <BookList books={books.filter((book) => book.shelf === parseInt(shelfId))} />
+      <BookList books={books} />
     </div>
   );
 }

@@ -43,7 +43,8 @@ export const updateShelf = createAsyncThunk('shelves/updateShelf', async ({ id, 
 export const deleteShelf = createAsyncThunk('shelves/deleteShelf', async (id, { rejectWithValue }) => {
   try {
     await axiosInstance.delete(`shelves/${id}/`);
-    return id;
+    console.log('Deleted shelf ID:', id); // Log the deleted shelf ID
+    return id; // Ensure the returned id is correct
   } catch (error) {
     if (!error.response) {
       throw error;
@@ -51,6 +52,7 @@ export const deleteShelf = createAsyncThunk('shelves/deleteShelf', async (id, { 
     return rejectWithValue(error.response.data);
   }
 });
+
 
 const shelfSlice = createSlice({
   name: 'shelves',
@@ -118,8 +120,11 @@ const shelfSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(deleteShelf.fulfilled, (state, action) => {
+        console.log('Deleting shelf in reducer:', action.payload); // Debug log
+        const deletedShelfId = parseInt(action.payload, 10); // Ensure the ID is a number
         state.status = 'succeeded';
-        state.shelves = state.shelves.filter((shelf) => shelf.id !== action.payload);
+        state.shelves = state.shelves.filter((shelf) => shelf.id !== deletedShelfId);
+        console.log('Updated shelves:', state.shelves); // Debug log
       })
       .addCase(deleteShelf.rejected, (state, action) => {
         state.status = 'failed';

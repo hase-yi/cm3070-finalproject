@@ -1,32 +1,65 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { deleteShelf } from '../../features/shelfSlice';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { fetchShelf, deleteShelf } from '../../features/shelfSlice';
 import classes from './ShelfItem.module.css';
 
-function ShelfItem({shelf}){
-const dispatch = useDispatch();
-const navigate = useNavigate();
+function ShelfItem() {
+  const { shelfId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-const startDeleteHandler = () => {
-  const proceed = window.confirm('Are you sure?');
-  if (proceed) {
-    dispatch(deleteShelf(shelf.id)).then((result) => {
-      if (result.meta.requestStatus === 'fulfilled') {
-        navigate('/shelves');
-      } else {
-        // Handle the error case
-        console.error('Failed to delete the shelf:', result.error.message);
-      }
-    });
+  const numericShelfId = parseInt(shelfId, 10); // Ensure shelfId is a number
+
+  const shelf = useSelector((state) =>
+    state.shelves.shelves.find((shelf) => shelf.id === numericShelfId)
+  );
+  const status = useSelector((state) => state.shelves.status);
+  const error = useSelector((state) => state.shelves.error);
+  const deletedShelfIds = useSelector((state) => state.shelves.deletedShelfIds); // Get deleted shelf IDs
+
+  // TODO: is deletedShelfIds necessary?
+  // TODO: fetchShelf is used here and in ShelfDetail.js - where should it be?
+  useEffect(() => {
+    if (status === 'idle' || (!shelf && !deletedShelfIds.includes(numericShelfId))) {
+      dispatch(fetchShelf(numericShelfId));
+    }
+  }, [status, dispatch, numericShelfId, shelf, deletedShelfIds]);
+
+  const startDeleteHandler = () => {
+    const proceed = window.confirm('Are you sure?');
+    if (proceed) {
+      // NOTE: Navigate away from details first...
+      navigate('/shelves'); // Navigate immediately after deletion
+
+      // ... then delete
+      dispatch(deleteShelf(numericShelfId)).then((result) => {
+        if (result.meta.requestStatus === 'fulfilled') {
+          console.log('Shelf deleted successfully, navigating to /shelves'); // Debug log
+        } else {
+          console.error('Failed to delete the shelf:', result.error.message);
+        }
+      });
+    }
+  };
+
+  console.log('ShelfItem render:', shelf); // Debug log
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
   }
-};
 
+  if (status === 'failed') {
+    return <div>Error: {error}</div>;
+  }
 
-  return(
+  if (!shelf) {
+    return <div>Shelf not found</div>;
+  }
 
+  return (
     <article className={classes.shelf}>
-      <img src={shelf.image} alt={shelf.title}/>
+      <img src={shelf.image} alt={shelf.title} />
       <h1>{shelf.title}</h1>
       <p>{shelf.description}</p>
       <menu className={classes.actions}>
@@ -35,7 +68,6 @@ const startDeleteHandler = () => {
       </menu>
     </article>
   );
-
 }
 
 export default ShelfItem;
