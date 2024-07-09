@@ -1,161 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import {useEffect} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { createBook, fetchBook, updateBook } from '../../features/bookSlice';
-import {fetchShelves} from '../../features/shelfSlice'
+import { useNavigate } from 'react-router-dom';
+import { createBook, updateBook } from '../../features/bookSlice';
+import { fetchShelves } from '../../features/shelfSlice';
+import classes from './BookForm.module.css';
 
-const BookForm = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const isEditing = Boolean(id);
-  
-  // Initialize formData state to hold form field values
-  const [formData, setFormData] = useState({
-    isbn: '',
-    title: '',
-    author: '',
-    total_pages: '',
-    release_year: '',
-    shelf: '',
-    image: ''
-  });
+const BookForm = ({ method, book }) => {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
-  // Get the book to edit if isEditing is true
-  const book = useSelector((state) =>
-    state.books.books.find((book) => book.id === parseInt(id))
-  );
-  
-  // Fetch book data if editing
+	const status = useSelector((state) => state.books.status);
+	const error = useSelector((state) => state.books.status);
+	const validationErrors = useSelector((state) => state.books.validationErrors);
+
+	const isSubmitting = status === 'loading';
+	const shelves = useSelector((state) => state.shelves.shelves);
+
   useEffect(() => {
-    if (isEditing) {
-      if (!book) {
-        dispatch(fetchBook(id));
-      } else {
-        setFormData({
-          isbn: book.isbn,
-          title: book.title,
-          author: book.author,
-          total_pages: book.total_pages || '',
-          release_year: book.release_year || '',
-          shelf: book.shelf ? book.shelf.id : '',
-          image: book.image || ''
-        });
-      }
-    }
-    dispatch(fetchShelves()); // Fetch shelves when the component mounts
-  }, [isEditing, book, dispatch, id]);
+		dispatch(fetchShelves());
+	}, [dispatch]);
 
-  // Get shelves from state
-  const shelves = useSelector((state) => state.shelves.shelves);
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+		const formData = new FormData(event.target);
+		const bookData = {
+			isbn: formData.get('isbn'),
+			title: formData.get('title'),
+			author: formData.get('author'),
+			total_pages: formData.get('total_pages'),
+			release_year: formData.get('release_year'),
+			shelf: formData.get('shelf'),
+			image: formData.get('image'),
+		};
 
-  // Handle form field changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
+		try {
+			if (method === 'POST') {
+				await dispatch(createBook(bookData)).unwrap();
+			} else if (method === 'PATCH' && book) {
+				await dispatch(
+					updateBook({ id: book.id, updatedBook: bookData })
+				).unwrap();
+			}
+			navigate('/books');
+		} catch (err) {
+			console.error('Failed to save book:', err);
+		}
+	};
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isEditing) {
-      await dispatch(updateBook({ id, updatedBook: formData }));
-    } else {
-      await dispatch(createBook(formData));
-    }
-    navigate('/books');
-  };
-
-  return (
-    <div>
-      <h2>{isEditing ? 'Edit Book' : 'Add New Book'}</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="isbn">ISBN:</label>
-          <input
-            type="text"
-            id="isbn"
-            name="isbn"
-            value={formData.isbn}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="title">Title:</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="author">Author:</label>
-          <input
-            type="text"
-            id="author"
-            name="author"
-            value={formData.author}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="total_pages">Total Pages:</label>
-          <input
-            type="number"
-            id="total_pages"
-            name="total_pages"
-            value={formData.total_pages}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="release_year">Release Year:</label>
-          <input
-            type="number"
-            id="release_year"
-            name="release_year"
-            value={formData.release_year}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="shelf">Shelf:</label>
-          <select
-            id="shelf"
-            name="shelf"
-            value={formData.shelf}
-            onChange={handleChange}
-          >
-            <option value="">Select Shelf</option>
-            {shelves.map((shelf) => (
-              <option key={shelf.id} value={shelf.id}>
-                {shelf.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="image">Image URL:</label>
-          <input
-            type="text"
-            id="image"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">{isEditing ? 'Update' : 'Add'}</button>
-      </form>
-    </div>
-  );
+	return (
+		<form className={classes.form} onSubmit={handleSubmit}>
+			{error && <p className="error">{error}</p>}
+			{validationErrors && (
+				<ul>
+					{Object.entries(validationErrors).map(([field, errors]) =>
+						errors.map((error, index) => (
+							<li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
+						))
+					)}
+				</ul>
+			)}
+			<p>
+				<label htmlFor="isbn">ISBN:</label>
+				<input type="text" id="isbn" name="isbn" required />
+			</p>
+			<p>
+				<label htmlFor="title">Title:</label>
+				<input type="text" id="title" name="title" required />
+			</p>
+			<p>
+				<label htmlFor="author">Author:</label>
+				<input type="text" id="author" name="author" required />
+			</p>
+			<p>
+				<label htmlFor="total_pages">Total Pages:</label>
+				<input type="number" id="total_pages" name="total_pages" />
+			</p>
+			<p>
+				<label htmlFor="release_year">Release Year:</label>
+				<input type="number" id="release_year" name="release_year" />
+			</p>
+			<p>
+				<label htmlFor="shelf">Shelf:</label>
+				<select id="shelf" name="shelf">
+					<option value="">Select Shelf</option>
+					{shelves.map((shelf) => (
+						<option key={shelf.id} value={shelf.id}>
+							{shelf.title}
+						</option>
+					))}
+				</select>
+			</p>
+			<p>
+				<label htmlFor="image">Image URL:</label>
+				<input type="text" id="image" name="image" />
+			</p>
+			<div className={classes.actions}>
+				<button
+					type="button"
+					onClick={() => navigate('..')}
+					disabled={isSubmitting}
+				>
+					Cancel
+				</button>
+				<button type="submit" disabled={isSubmitting}>
+					{isSubmitting ? 'Submitting' : 'Save'}
+				</button>
+			</div>
+		</form>
+	);
 };
 
 export default BookForm;

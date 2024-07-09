@@ -61,7 +61,6 @@ function ShelfForm({ method, shelf }) {
           id="image"
           type="url"
           name="image"
-          required
           defaultValue={shelf ? shelf.image : ''}
         />
       </p>

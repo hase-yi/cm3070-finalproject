@@ -19,7 +19,6 @@ function ShelfItem() {
   const deletedShelfIds = useSelector((state) => state.shelves.deletedShelfIds); // Get deleted shelf IDs
 
   // TODO: is deletedShelfIds necessary?
-  // TODO: fetchShelf is used here and in ShelfDetail.js - where should it be?
   useEffect(() => {
     if (status === 'idle' || (!shelf && !deletedShelfIds.includes(numericShelfId))) {
       dispatch(fetchShelf(numericShelfId));
@@ -30,14 +29,14 @@ function ShelfItem() {
     const proceed = window.confirm('Are you sure?');
     if (proceed) {
       // NOTE: Navigate away from details first...
-      navigate('/shelves'); // Navigate immediately after deletion
+      navigate('/shelves'); 
 
       // ... then delete
       dispatch(deleteShelf(numericShelfId)).then((result) => {
         if (result.meta.requestStatus === 'fulfilled') {
-          console.log('Shelf deleted successfully, navigating to /shelves'); // Debug log
+          // console.log('Shelf deleted successfully, navigating to /shelves'); // Debug log
         } else {
-          console.error('Failed to delete the shelf:', result.error.message);
+          // console.error('Failed to delete the shelf:', result.error.message);
         }
       });
     }
