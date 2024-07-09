@@ -35,7 +35,7 @@ if(!books){
 			<ul className={classes.list}>
 				{books.map((book) => (
 					<li key={book.id} className={classes.item}>
-						<Link to={`${book.id}`}>
+						<Link to={`/books/${book.id}`}>
 							<img src={book.image} alt={book.title} />
 							<div className={classes.content}>
 								<h2>{book.title}</h2>
