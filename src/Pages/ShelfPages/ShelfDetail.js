@@ -8,14 +8,12 @@ function ShelfDetailPage() {
   const shelf = useSelector((state) =>
     state.shelves.shelves.find((shelf) => shelf.id === parseInt(shelfId))
   );
-  const books = useSelector((state) => state.books.books);
-
 
   return (
     <div>
       {shelf && <ShelfItem shelf={shelf} />}
       <h2>Books</h2>
-      <BookList books={books} />
+      <BookList shelfId={shelfId} />
     </div>
   );
 }

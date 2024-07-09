@@ -16,14 +16,14 @@ function ShelfItem() {
   );
   const status = useSelector((state) => state.shelves.status);
   const error = useSelector((state) => state.shelves.error);
-  const deletedShelfIds = useSelector((state) => state.shelves.deletedShelfIds); // Get deleted shelf IDs
 
-  // TODO: is deletedShelfIds necessary?
+
+
   useEffect(() => {
-    if (status === 'idle' || (!shelf && !deletedShelfIds.includes(numericShelfId))) {
+    if (status === 'idle' || (!shelf)) {
       dispatch(fetchShelf(numericShelfId));
     }
-  }, [status, dispatch, numericShelfId, shelf, deletedShelfIds]);
+  }, [status, dispatch, numericShelfId, shelf]);
 
   const startDeleteHandler = () => {
     const proceed = window.confirm('Are you sure?');

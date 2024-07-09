@@ -2,26 +2,66 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../axiosInstance';
 
 // Thunk to fetch a single book
-export const fetchBook = createAsyncThunk('books/fetchBook', async (id) => {
-  const response = await axiosInstance.get(`books/${id}/`);
-  return response.data;
-});
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import axiosInstance from './path/to/axiosInstance'; // Update the path to your axios instance
+
+export const fetchBook = createAsyncThunk(
+  'books/fetchBook',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`books/${id}/`);
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 // Thunk to fetch all books
-export const fetchBooks = createAsyncThunk('books/fetchBooks', async () => {
-  const response = await axiosInstance.get('books/');
-  return response.data;
-});
+export const fetchBooks = createAsyncThunk(
+  'books/fetchBooks',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('books/');
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // Thunk to fetch books for a specific shelf
-export const fetchBooksForShelf = createAsyncThunk('books/fetchBooksForShelf', async (shelfId) => {
-  const response = await axiosInstance.get('books/', {
-    params: {
-      shelf: shelfId,
-    },
-  });
-  return response.data;
-});
+export const fetchBooksForShelf = createAsyncThunk(
+  'books/fetchBooksForShelf',
+  async (shelfId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('books/', {
+        params: {
+          shelf: shelfId,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // Thunk to create a new book
 export const createBook = createAsyncThunk('books/createBook', async (newBook, { rejectWithValue }) => {
@@ -35,6 +75,28 @@ export const createBook = createAsyncThunk('books/createBook', async (newBook, {
     return rejectWithValue(error.response.data);
   }
 });
+
+
+// Thunk to create a new book to a related shelf
+export const createBooksForShelf = createAsyncThunk(
+  'books/createBooksForShelf',
+  async ({ shelfId, newBook }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('books/', {
+        shelf: shelfId,
+        ...newBook
+      });
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // Thunk to update an existing book
 export const updateBook = createAsyncThunk('books/updateBook', async ({ id, updatedBook }, { rejectWithValue }) => {
@@ -50,10 +112,22 @@ export const updateBook = createAsyncThunk('books/updateBook', async ({ id, upda
 });
 
 // Thunk to delete a book
-export const deleteBook = createAsyncThunk('books/deleteBook', async (id) => {
-  await axiosInstance.delete(`books/${id}/`);
-  return id;
-});
+export const deleteBook = createAsyncThunk(
+  'books/deleteBook',
+  async (id, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`books/${id}/`);
+      return id;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 const bookSlice = createSlice({
   name: 'books',

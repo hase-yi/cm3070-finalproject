@@ -12,12 +12,15 @@ const BookForm = ({ method, book }) => {
 	const status = useSelector((state) => state.books.status);
 	const error = useSelector((state) => state.books.status);
 	const validationErrors = useSelector((state) => state.books.validationErrors);
-
-	const isSubmitting = status === 'loading';
 	const shelves = useSelector((state) => state.shelves.shelves);
 
-  useEffect(() => {
-		dispatch(fetchShelves());
+	const isSubmitting = status === 'loading';
+
+	useEffect(() => {
+		console.log('Fetching shelves...');
+		dispatch(fetchShelves()).then((response) => {
+			console.log('Shelves fetched:', response);
+		});
 	}, [dispatch]);
 
 	const handleSubmit = async (event) => {
@@ -33,18 +36,23 @@ const BookForm = ({ method, book }) => {
 			image: formData.get('image'),
 		};
 
+		console.log('Submitting book data:', bookData);
+
 		try {
 			if (method === 'POST') {
 				await dispatch(createBook(bookData)).unwrap();
+				console.log('Book created successfully');
 			} else if (method === 'PATCH' && book) {
 				await dispatch(
 					updateBook({ id: book.id, updatedBook: bookData })
 				).unwrap();
+				console.log('Book updated successfully');
 			}
 			navigate('/books');
 		} catch (err) {
 			console.error('Failed to save book:', err);
 		}
+
 	};
 
 	return (
