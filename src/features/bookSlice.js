@@ -1,10 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../axiosInstance';
 
-// Thunk to fetch a single book
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from './path/to/axiosInstance'; // Update the path to your axios instance
-
+// Fetch one book by id
 export const fetchBook = createAsyncThunk(
   'books/fetchBook',
   async (id, { rejectWithValue }) => {
@@ -75,28 +72,6 @@ export const createBook = createAsyncThunk('books/createBook', async (newBook, {
     return rejectWithValue(error.response.data);
   }
 });
-
-
-// Thunk to create a new book to a related shelf
-export const createBooksForShelf = createAsyncThunk(
-  'books/createBooksForShelf',
-  async ({ shelfId, newBook }, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('books/', {
-        shelf: shelfId,
-        ...newBook
-      });
-      return response.data;
-    } catch (error) {
-      // Check if the error is from Axios and has a response
-      if (error.response) {
-        return rejectWithValue(error.response.data);
-      }
-      // For other errors (like network issues)
-      return rejectWithValue(error.message);
-    }
-  }
-);
 
 // Thunk to update an existing book
 export const updateBook = createAsyncThunk('books/updateBook', async ({ id, updatedBook }, { rejectWithValue }) => {

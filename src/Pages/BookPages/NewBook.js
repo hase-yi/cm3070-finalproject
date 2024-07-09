@@ -5,7 +5,7 @@ const NewBookPage = () => {
   return (
     <div>
       <h1>Add New Book(the navigation)</h1>
-      <BookForm  />
+      <BookForm method="POST" />
     </div>
   );
 };

@@ -16,6 +16,8 @@ const BookForm = ({ method, book }) => {
 
 	const isSubmitting = status === 'loading';
 
+	// TODO: Called twice with strict mode during development!!!
+	// TODO: https://stackoverflow.com/questions/72238175/why-useeffect-running-twice-and-how-to-handle-it-well-in-react/72238236#72238236
 	useEffect(() => {
 		console.log('Fetching shelves...');
 		dispatch(fetchShelves()).then((response) => {
@@ -30,11 +32,20 @@ const BookForm = ({ method, book }) => {
 			isbn: formData.get('isbn'),
 			title: formData.get('title'),
 			author: formData.get('author'),
-			total_pages: formData.get('total_pages'),
-			release_year: formData.get('release_year'),
 			shelf: formData.get('shelf'),
 			image: formData.get('image'),
 		};
+
+		// Optional integers
+		const totalPages = formData.get('total_pages');
+    if (totalPages) {
+        bookData.total_pages = totalPages;
+    }
+
+    const releaseYear = formData.get('release_year');
+    if (releaseYear) {
+        bookData.release_year = releaseYear;
+    }
 
 		console.log('Submitting book data:', bookData);
 
@@ -89,7 +100,7 @@ const BookForm = ({ method, book }) => {
 			</p>
 			<p>
 				<label htmlFor="shelf">Shelf:</label>
-				<select id="shelf" name="shelf">
+				<select id="shelf" name="shelf" required>
 					<option value="">Select Shelf</option>
 					{shelves.map((shelf) => (
 						<option key={shelf.id} value={shelf.id}>
