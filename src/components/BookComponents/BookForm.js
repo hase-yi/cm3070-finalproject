@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { createBook, updateBook } from '../../features/bookSlice';
@@ -38,32 +38,36 @@ const BookForm = ({ method, book }) => {
 
 		// Optional integers
 		const totalPages = formData.get('total_pages');
-    if (totalPages) {
-        bookData.total_pages = totalPages;
-    }
+		if (totalPages) {
+			bookData.total_pages = totalPages;
+		}
 
-    const releaseYear = formData.get('release_year');
-    if (releaseYear) {
-        bookData.release_year = releaseYear;
-    }
+		const releaseYear = formData.get('release_year');
+		if (releaseYear) {
+			bookData.release_year = releaseYear;
+		}
 
 		console.log('Submitting book data:', bookData);
 
 		try {
+			let bookId;
+			let response;
 			if (method === 'POST') {
-				await dispatch(createBook(bookData)).unwrap();
-				console.log('Book created successfully');
+				response = await dispatch(createBook(bookData)).unwrap();
+				bookId = response.id; // Extract the book ID from the response
+				console.log('Book created successfully', response);
 			} else if (method === 'PATCH' && book) {
-				await dispatch(
+				response = await dispatch(
 					updateBook({ id: book.id, updatedBook: bookData })
 				).unwrap();
-				console.log('Book updated successfully');
+				bookId = response.id; // Extract the book ID from the response
+				console.log('Book updated successfully', response);
 			}
-			navigate('/books');
+			// Navigate to the specific book route
+			navigate(`/books/${bookId}`);
 		} catch (err) {
 			console.error('Failed to save book:', err);
 		}
-
 	};
 
 	return (
@@ -80,27 +84,60 @@ const BookForm = ({ method, book }) => {
 			)}
 			<p>
 				<label htmlFor="isbn">ISBN:</label>
-				<input type="text" id="isbn" name="isbn" required />
+				<input
+					type="text"
+					id="isbn"
+					name="isbn"
+					required
+					defaultValue={book ? book.isbn : ''}
+				/>
 			</p>
 			<p>
 				<label htmlFor="title">Title:</label>
-				<input type="text" id="title" name="title" required />
+				<input
+					type="text"
+					id="title"
+					name="title"
+					required
+					defaultValue={book ? book.title : ''}
+				/>
 			</p>
 			<p>
 				<label htmlFor="author">Author:</label>
-				<input type="text" id="author" name="author" required />
+				<input
+					type="text"
+					id="author"
+					name="author"
+					required
+					defaultValue={book ? book.author : ''}
+				/>
 			</p>
 			<p>
 				<label htmlFor="total_pages">Total Pages:</label>
-				<input type="number" id="total_pages" name="total_pages" />
+				<input
+					type="number"
+					id="total_pages"
+					name="total_pages"
+					defaultValue={book ? book.total_pages : ''}
+				/>
 			</p>
 			<p>
 				<label htmlFor="release_year">Release Year:</label>
-				<input type="number" id="release_year" name="release_year" />
+				<input
+					type="number"
+					id="release_year"
+					name="release_year"
+					defaultValue={book ? book.release_year : ''}
+				/>
 			</p>
 			<p>
 				<label htmlFor="shelf">Shelf:</label>
-				<select id="shelf" name="shelf" required>
+				<select
+					id="shelf"
+					name="shelf"
+					required
+					defaultValue={book ? book.shelf : ''}
+				>
 					<option value="">Select Shelf</option>
 					{shelves.map((shelf) => (
 						<option key={shelf.id} value={shelf.id}>
@@ -111,8 +148,14 @@ const BookForm = ({ method, book }) => {
 			</p>
 			<p>
 				<label htmlFor="image">Image URL:</label>
-				<input type="text" id="image" name="image" />
+				<input
+					type="text"
+					id="image"
+					name="image"
+					defaultValue={book ? book.image : ''}
+				/>
 			</p>
+
 			<div className={classes.actions}>
 				<button
 					type="button"
