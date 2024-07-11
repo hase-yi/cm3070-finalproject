@@ -34,19 +34,21 @@ const routeDefinitions = createRoutesFromElements(
 			<Route index element={<HomePage />} />
 			<Route path="shelves" element={<ShelfRootLayout />}>
 				<Route index element={<ShelvesPage />} />
-				<Route path=":shelfId" id="shelf-detail">
+				<Route path=":shelfId" >
 					<Route index element={<ShelfDetailPage />} />
 					<Route path="edit" element={<EditShelfPage />} />
 				</Route>
 				<Route path="new" element={<NewShelfPage />} />
 			</Route>
-			<Route path="auth" element={<AuthenticationPage />}></Route>
 			<Route path="books" element={<BookRoot />}>
 				<Route index element={<BooksPage />} />
+				<Route path=":bookId" >
+					<Route index element={<BookDetailPage />} />
+					<Route path="edit" element={<EditBookPage />} />
+				</Route>
 				<Route path="new" element={<NewBookPage />} />
-				<Route path=":bookId" element={<BookDetailPage />} />
-				<Route path=":bookId/edit" element={<EditBookPage />} />
 			</Route>
+			<Route path="auth" element={<AuthenticationPage />}></Route>
 			<Route path="search" element={<SearchPage />} />
 		</Route>
 	</Route>

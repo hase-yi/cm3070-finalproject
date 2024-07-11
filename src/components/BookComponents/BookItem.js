@@ -66,7 +66,7 @@ function BookItem() {
   <h1>{book.image}</h1>
   <h1>{book.isbn}</h1>
   <menu className={classes.actions}>
-        <Link to="book/edit">Edit</Link>
+        <Link to="edit">Edit</Link>
         <button onClick={startDeleteHandler}>Delete</button>
       </menu>
 </article>
