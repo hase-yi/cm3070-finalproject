@@ -30,7 +30,7 @@ function BookItem() {
 		const proceed = window.confirm('Are you sure?');
 		if (proceed) {
 			// TODO: Navigate to the shelf page which the books are relative
-			navigate(`../books?shelf=${book.shelf}`, { replace: true });
+			navigate(`/shelves/${book.shelf}`, { replace: true });
 
 			dispatch(deleteBook(numericBookId)).then((result) => {
 				if (result.meta.requestStatus === 'fulfilled') {
