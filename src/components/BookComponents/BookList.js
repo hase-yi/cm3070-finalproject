@@ -31,7 +31,6 @@ if(!books){
 
 	return (
 		<div className={classes.books}>
-			<h1>All books</h1>
 			<ul className={classes.list}>
 				{books.map((book) => (
 					<li key={book.id} className={classes.item}>

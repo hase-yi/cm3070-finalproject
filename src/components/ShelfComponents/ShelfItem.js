@@ -34,7 +34,7 @@ function ShelfItem() {
       // ... then delete
       dispatch(deleteShelf(numericShelfId)).then((result) => {
         if (result.meta.requestStatus === 'fulfilled') {
-          // console.log('Shelf deleted successfully, navigating to /shelves'); // Debug log
+          // console.log('Shelf deleted successfully, navigating to /shelves'); 
         } else {
           // console.error('Failed to delete the shelf:', result.error.message);
         }
@@ -42,7 +42,7 @@ function ShelfItem() {
     }
   };
 
-  console.log('ShelfItem render:', shelf); // Debug log
+  // console.log('ShelfItem render:', shelf); 
 
   if (status === 'loading') {
     return <div>Loading...</div>;
