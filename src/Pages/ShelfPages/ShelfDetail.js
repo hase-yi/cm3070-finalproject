@@ -1,5 +1,5 @@
 import {  useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams,Link } from 'react-router-dom';
 import ShelfItem from '../../components/ShelfComponents/ShelfItem';
 import BookList from '../../components/BookComponents/BookList';
 
@@ -27,6 +27,7 @@ function ShelfDetailPage() {
     <div>
       {shelf && <ShelfItem shelf={shelf} />}
       <h2>Books in {shelf.title}</h2>
+      <Link to="/books/new"><button>Add New Book</button></Link>
       <BookList shelfId={shelfId} />
     </div>
   );

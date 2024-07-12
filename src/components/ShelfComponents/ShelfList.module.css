@@ -9,18 +9,27 @@
   gap: 1rem;
 }
 
-.item a {
-  text-decoration: none;
-  color: inherit;
+.item {
   display: flex;
   background-color: var(--color-gray-800);
   border-radius: 4px;
   overflow: hidden;
+  align-items: center;
+  position: relative;
+  padding: 1rem; /* Add padding for spacing */
+}
+
+.item a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  width: 100%;
+  align-items: center;
 }
 
 .item a:hover {
   transform: scale(1.02);
-  background-color: var(--color-gray-700);
+  /* background-color: var(--color-gray-700); */
 }
 
 .item img {
@@ -30,7 +39,42 @@
 
 .content {
   padding: 1rem;
+  flex-grow: 1;
 }
+
 .item h2 {
   margin: 0 0 1rem 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  top: 60%;
+}
+
+.actions button {
+  display: flex;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: var(--color-gray-300);
+  color: var(--color-gray-800);
+  border: none;
+}
+
+.actions button:hover {
+  background-color: var(--color-primary-300);
+}
+
+.actions a button {
+  background-color: var(--color-gray-300);
+  color: var(--color-gray-800);
+}
+
+.actions a button:hover {
+  background-color: var(--color-primary-300);
 }
