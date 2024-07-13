@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models import Q, QuerySet
 
 
 class UserSettings(models.Model):
@@ -26,10 +27,31 @@ class Shelf(models.Model):
     objects = BaseUserAccessManager()
 
 
-class BookManager(BaseUserAccessManager):
-    def get_books_by_shelf(self, shelf, user):
-        return self.for_user(user).filter(shelf=shelf)
+class BookQuerySet(QuerySet):
+    def get_books_by_shelf(self, shelf):
+        return self.filter(shelf=shelf)
 
+    def search_local(self, search_str):
+        search_str = search_str.strip()
+
+        return self.filter(
+            Q(isbn__icontains=search_str)
+            | Q(title__contains=search_str)
+            | Q(author__contains=search_str)
+            | Q(release_year__contains=search_str)
+        )
+
+
+class BookManager(BaseUserAccessManager):
+    def get_queryset(self):
+        return BookQuerySet(self.model, using=self._db)
+
+    def get_books_by_shelf(self, shelf):
+        return self.get_queryset().get_books_by_shelf(shelf)
+
+    def search_local(self, search_str):
+        return self.get_queryset().search_local(search_str)
+    
 
 class Book(models.Model):
     user = models.ForeignKey(User, related_name="books", on_delete=models.CASCADE)

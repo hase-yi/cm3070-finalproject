@@ -65,6 +65,15 @@ class BookSerializer(serializers.ModelSerializer):
 
         return data
 
+class SearchResultSerializer(BookSerializer):
+    book = BookSerializer()
+    type = serializers.CharField()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['type'] = instance.get('type', 'local')
+        return representation
+
 
 class ShelfSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(

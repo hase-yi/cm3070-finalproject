@@ -7,6 +7,7 @@ from .views import (
     LogoutView,
     ShelfListView,
     ShelfDetailView,
+    book_search,
     register_user,
 )
 
@@ -17,6 +18,7 @@ urlpatterns = [
     path("signup/", register_user, name="register_user"),
     path("books/", BookListView.as_view(), name="book-list-create"),
     path("books/<int:pk>/", BookDetailView.as_view(), name="book-detail"),
+    path("books/search/", book_search, name="book-search"),
     path("shelves/", ShelfListView.as_view(), name="shelf-list-create"),
     path("shelves/<int:pk>/", ShelfDetailView.as_view(), name="shelf-detail"),
 ]

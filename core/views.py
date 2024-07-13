@@ -1,5 +1,6 @@
 import logging
 from venv import logger
+import requests
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
@@ -7,7 +8,7 @@ from functools import wraps
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from rest_framework.permissions import IsAuthenticated
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import mixins, generics
 from rest_framework.generics import (
     CreateAPIView,
@@ -27,6 +28,8 @@ from .serializers import (
     CommentSerializer,
     UserSerializer,
 )
+
+OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
 
 
 class BookListCreateView(generics.ListCreateAPIView):
@@ -86,11 +89,17 @@ class BookListView(ListAPIView, CreateAPIView):
     serializer_class = BookSerializer
 
     def get_queryset(self):
+        books = Book.objects.for_user(user=self.request.user)
+
+        search_str = self.request.query_params.get("search", None)
+        if search_str:
+            books = books.search_local(search_str)
+
         shelf = self.request.query_params.get("shelf", None)
         if shelf:
-            return Book.objects.get_books_by_shelf(shelf, self.request.user)
-        else:
-            return Book.objects.for_user(user=self.request.user)
+            books = books.get_books_by_shelf(shelf)
+
+        return books
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -113,6 +122,51 @@ class BookDetailView(
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
+
+
+@permission_classes([IsAuthenticated])
+@api_view(["GET"])
+def book_search(request):
+    title_str = request.query_params.get("title", None)
+    isbn_str = request.query_params.get("isbn", None)
+
+    search_results = []
+
+    if not title_str and not isbn_str:
+        return Response(search_results, status=status.HTTP_200_OK)
+
+    # Local search
+    local_books = Book.objects.for_user(user=request.user)
+    local_str = isbn_str if isbn_str else title_str
+    if local_str:
+        local_books = list(local_books.search_local(local_str).values())
+        for book in local_books:
+            search_results.append({"book": book, "type": "local"})
+
+    # Remote search
+    remote_params = {"isbn": isbn_str} if isbn_str else {"title": title_str}
+
+    response = requests.get(OPEN_LIBRARY_SEARCH_URL, params=remote_params)
+    if response.status_code == 200:
+        data = response.json()
+        for doc in data.get("docs", []):
+            cover = doc.get("cover_i", None)
+            book_data = {
+                "isbn": isbn_str if isbn_str else doc.get("isbn", [None])[0],
+                "title": doc.get("title"),
+                "author": ", ".join(doc.get("author_name", [])),
+                "total_pages": doc.get("number_of_pages_median", None),
+                "release_year": doc.get("first_publish_year"),
+                "image": (
+                    f"https://covers.openlibrary.org/b/id/{cover}-L.jpg"
+                    if cover
+                    else None
+                ),
+            }
+
+            search_results.append({"book": book_data, "type": "external"})
+
+    return Response(search_results, status=status.HTTP_200_OK)
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
