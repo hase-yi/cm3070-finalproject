@@ -5,9 +5,12 @@ from .views import (
     BookListView,
     BookDetailView,
     LogoutView,
+    ReadingProgressListView,
     ShelfListView,
     ShelfDetailView,
+    UserListView,
     book_search,
+    follow_user,
     register_user,
 )
 
@@ -21,4 +24,7 @@ urlpatterns = [
     path("books/search/", book_search, name="book-search"),
     path("shelves/", ShelfListView.as_view(), name="shelf-list-create"),
     path("shelves/<int:pk>/", ShelfDetailView.as_view(), name="shelf-detail"),
+    path("users/", UserListView.as_view(), name="user-list"),
+    path("users/follow/<str:username>", follow_user, name="user-follow"),
+    path("reading/", ReadingProgressListView.as_view(), name="reading-list-create")
 ]

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from functools import wraps
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from rest_framework.permissions import IsAuthenticated
-
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import mixins, generics
 from rest_framework.generics import (
@@ -20,12 +20,13 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Book, Shelf, ReadingProgress, Comment
+from .models import Book, Following, Shelf, ReadingProgress, Comment
 from .serializers import (
     BookSerializer,
     ShelfSerializer,
     ReadingProgressSerializer,
     CommentSerializer,
+    UserListSerializer,
     UserSerializer,
 )
 
@@ -167,6 +168,85 @@ def book_search(request):
             search_results.append({"book": book_data, "type": "external"})
 
     return Response(search_results, status=status.HTTP_200_OK)
+
+
+class UserListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserListSerializer
+    queryset = User.objects.all()
+
+
+@permission_classes([IsAuthenticated])
+@api_view(["POST", "DELETE"])
+def follow_user(request, username):
+    try:
+        target_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.user == target_user:
+        return Response({"error": "Both users are identical"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "POST":
+        # Get or create a Following instance for the authenticated user
+        following, _ = Following.objects.get_or_create(user=request.user)
+
+        following.followed_users.add(target_user)
+        following.save()
+
+        return Response(
+            {"message": "User followed successfully"}, status=status.HTTP_200_OK
+        )
+    
+    else:
+         # Get the Following instance for the authenticated user
+        try:
+            following = Following.objects.get(user=request.user)
+        except Following.DoesNotExist:
+            return Response(
+                {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
+            )
+
+        following.followed_users.remove(target_user)
+        following.save()
+
+        return Response(
+            {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
+        )
+
+
+class ReadingProgressListView(ListAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReadingProgressSerializer
+
+    def get_queryset(self):
+        status = self.request.query_params.get("status", None)
+        if status:
+            return ReadingProgress.objects.for_user(self.request.user).filter(status=status)
+        else:
+            return ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+
+class ReadingProgressDetailView(
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReadingProgressSerializer
+
+    def get_queryset(self):
+        return ReadingProgress.objects.for_user(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):

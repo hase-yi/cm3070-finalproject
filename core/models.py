@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Case, When, Value, BooleanField
 
 
 class UserSettings(models.Model):
@@ -51,7 +51,7 @@ class BookManager(BaseUserAccessManager):
 
     def search_local(self, search_str):
         return self.get_queryset().search_local(search_str)
-    
+
 
 class Book(models.Model):
     user = models.ForeignKey(User, related_name="books", on_delete=models.CASCADE)
@@ -69,6 +69,26 @@ class Book(models.Model):
         return self.title
 
     objects = BookManager()
+
+class BooksUserAccessManager(models.Manager):
+    def for_user(self, user):
+        return self.filter(book__user=user)
+
+class ReadingProgressManager(BooksUserAccessManager):
+    def for_user_and_followed(self, user):
+    # Get the users that the given user is following
+        following = Following.objects.filter(user=user).values_list('followed_users', flat=True)
+
+        # Get the reading progress for the user's own books
+        user_books = self.for_user(user)
+
+        # Get the reading progress for the books of the followed users, only if shared
+        followed_users_books = self.filter(book__user__in=following, shared=True)
+
+        # Combine the two querysets
+        combined_query = user_books | followed_users_books
+
+        return combined_query.distinct().select_related('book__user')
 
 
 class ReadingProgress(models.Model):
@@ -93,6 +113,8 @@ class ReadingProgress(models.Model):
         if total_pages > 0:
             return (self.current_page / total_pages) * 100
         return 0
+    
+    objects = ReadingProgressManager()
 
 
 class Review(models.Model):

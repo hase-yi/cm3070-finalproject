@@ -75,6 +75,12 @@ class SearchResultSerializer(BookSerializer):
         return representation
 
 
+class UserListSerializer(BookSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
+
+
 class ShelfSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=False
@@ -101,6 +107,8 @@ class ShelfSerializer(serializers.ModelSerializer):
 
 
 class ReadingProgressSerializer(serializers.ModelSerializer):
+    book = BookSerializer()
+
     class Meta:
         model = ReadingProgress
         fields = "__all__"
