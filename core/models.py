@@ -70,14 +70,16 @@ class Book(models.Model):
 
     objects = BookManager()
 
+
 class BooksUserAccessManager(models.Manager):
     def for_user(self, user):
         return self.filter(book__user=user)
 
-class ReadingProgressManager(BooksUserAccessManager):
     def for_user_and_followed(self, user):
-    # Get the users that the given user is following
-        following = Following.objects.filter(user=user).values_list('followed_users', flat=True)
+        # Get the users that the given user is following
+        following = Following.objects.filter(user=user).values_list(
+            "followed_users", flat=True
+        )
 
         # Get the reading progress for the user's own books
         user_books = self.for_user(user)
@@ -88,7 +90,7 @@ class ReadingProgressManager(BooksUserAccessManager):
         # Combine the two querysets
         combined_query = user_books | followed_users_books
 
-        return combined_query.distinct().select_related('book__user')
+        return combined_query.distinct().select_related("book__user")
 
 
 class ReadingProgress(models.Model):
@@ -113,8 +115,8 @@ class ReadingProgress(models.Model):
         if total_pages > 0:
             return (self.current_page / total_pages) * 100
         return 0
-    
-    objects = ReadingProgressManager()
+
+    objects = BooksUserAccessManager()
 
 
 class Review(models.Model):
@@ -125,6 +127,8 @@ class Review(models.Model):
     shared = models.BooleanField(default=False)
     date = models.DateField(default=timezone.now)
 
+    objects = BooksUserAccessManager()
+
 
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -133,6 +137,8 @@ class Comment(models.Model):
     )
     text = models.TextField()
     date = models.DateField(default=timezone.now)
+
+    objects = BooksUserAccessManager()
 
 
 class Activity(models.Model):
@@ -145,6 +151,8 @@ class Activity(models.Model):
     )
     text = models.CharField(max_length=200)
     backlink = models.URLField()
+
+    objects = BooksUserAccessManager()
 
 
 class Following(models.Model):

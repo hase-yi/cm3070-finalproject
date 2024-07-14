@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, Shelf, ReadingProgress, Comment
+from .models import Book, Review, Shelf, ReadingProgress, Comment
 
 
 # Auth
@@ -65,13 +65,14 @@ class BookSerializer(serializers.ModelSerializer):
 
         return data
 
+
 class SearchResultSerializer(BookSerializer):
     book = BookSerializer()
     type = serializers.CharField()
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['type'] = instance.get('type', 'local')
+        representation["type"] = instance.get("type", "local")
         return representation
 
 
@@ -107,14 +108,34 @@ class ShelfSerializer(serializers.ModelSerializer):
 
 
 class ReadingProgressSerializer(serializers.ModelSerializer):
-    book = BookSerializer()
-
     class Meta:
         model = ReadingProgress
         fields = "__all__"
+
+    def to_representation(self, instance):
+        reading_progress = super().to_representation(instance)
+        reading_progress["book"] = BookSerializer(instance.book).data
+        return reading_progress
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        review = super().to_representation(instance)
+        review["book"] = BookSerializer(instance.book).data
+        return review
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
+
+    def to_representation(self, instance):
+        comment = super().to_representation(instance)
+        comment["book"] = BookSerializer(instance.book).data
+        return comment

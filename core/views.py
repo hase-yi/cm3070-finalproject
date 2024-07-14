@@ -20,9 +20,10 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Book, Following, Shelf, ReadingProgress, Comment
+from .models import Activity, Book, Following, Review, Shelf, ReadingProgress, Comment
 from .serializers import (
     BookSerializer,
+    ReviewSerializer,
     ShelfSerializer,
     ReadingProgressSerializer,
     CommentSerializer,
@@ -176,6 +177,12 @@ class UserListView(ListAPIView):
     queryset = User.objects.all()
 
 
+class ActivityListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserListSerializer
+    queryset = Activity.objects.all()
+
+
 @permission_classes([IsAuthenticated])
 @api_view(["POST", "DELETE"])
 def follow_user(request, username):
@@ -183,9 +190,11 @@ def follow_user(request, username):
         target_user = User.objects.get(username=username)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
     if request.user == target_user:
-        return Response({"error": "Both users are identical"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Both users are identical"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     if request.method == "POST":
         # Get or create a Following instance for the authenticated user
@@ -197,9 +206,9 @@ def follow_user(request, username):
         return Response(
             {"message": "User followed successfully"}, status=status.HTTP_200_OK
         )
-    
+
     else:
-         # Get the Following instance for the authenticated user
+        # Get the Following instance for the authenticated user
         try:
             following = Following.objects.get(user=request.user)
         except Following.DoesNotExist:
@@ -222,7 +231,9 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
     def get_queryset(self):
         status = self.request.query_params.get("status", None)
         if status:
-            return ReadingProgress.objects.for_user(self.request.user).filter(status=status)
+            return ReadingProgress.objects.for_user(self.request.user).filter(
+                status=status
+            )
         else:
             return ReadingProgress.objects.for_user_and_followed(user=self.request.user)
 
@@ -230,6 +241,17 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
+
+    def perform_create(self, serializer):
+        progress = serializer.save()
+
+        Activity.objects.create(
+            user=self.request.user,
+            book=progress.book,
+            reading_progress=progress,
+            text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
+            backlink="",  # TODO: Add backlink
+        )
 
 
 class ReadingProgressDetailView(
@@ -241,7 +263,118 @@ class ReadingProgressDetailView(
     serializer_class = ReadingProgressSerializer
 
     def get_queryset(self):
-        return ReadingProgress.objects.for_user(user=self.request.user)
+        return ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    def perform_update(self, serializer):
+        progress = serializer.save()
+
+        Activity.objects.create(
+            user=self.request.user,
+            book=progress.book,
+            reading_progress=progress,
+            text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
+            backlink="",  # TODO: Add backlink
+        )
+
+
+class ReviewListView(ListAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        status = self.request.query_params.get("status", None)
+        if status:
+            return Review.objects.for_user(self.request.user).filter(status=status)
+        else:
+            return Review.objects.for_user_and_followed(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    def perform_create(self, serializer):
+        review = serializer.save()
+
+        Activity.objects.create(
+            user=self.request.user,
+            book=review.book,
+            review=review,
+            text=f"{self.request.user} wrote a review for {review.book.title}",
+            backlink="",  # TODO: Add backlink
+        )
+
+
+class ReviewDetailView(
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.for_user_and_followed(user=self.request.user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+
+class CommentListView(ListAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        review_id = self.kwargs["review_pk"]
+        comments = Comment.objects.filter(review_id=review_id)
+
+        status = self.request.query_params.get("status", None)
+        if status:
+            return comments.for_user(self.request.user).filter(status=status)
+        else:
+            return comments.for_user_and_followed(user=self.request.user)
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs["review_pk"]
+        comment = serializer.save(review_id=review_id)
+
+        Activity.objects.create(
+            user=self.request.user,
+            book=comment.book,
+            review=comment.review,
+            comment=comment,
+            text=f"{self.request.user} replied to the review of {comment.book.user.username}'s review of {comment.book.title}",
+            backlink="",  # TODO: Add backlink
+        )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+
+class CommentDetailView(
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        return Comment.objects.for_user_and_followed(user=self.request.user)
+
+    def get_object(self):
+        review_id = self.kwargs["review_pk"]
+        comment_id = self.kwargs["comment_pk"]
+        return generics.get_object_or_404(Comment, review_id=review_id, id=comment_id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

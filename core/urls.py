@@ -4,11 +4,16 @@ from core.views import CookieTokenObtainPairView, CookieTokenRefreshView
 from .views import (
     BookListView,
     BookDetailView,
+    CommentDetailView,
+    CommentListView,
     LogoutView,
+    ReadingProgressDetailView,
     ReadingProgressListView,
+    ReviewDetailView,
     ShelfListView,
     ShelfDetailView,
     UserListView,
+    ReviewListView,
     book_search,
     follow_user,
     register_user,
@@ -26,5 +31,18 @@ urlpatterns = [
     path("shelves/<int:pk>/", ShelfDetailView.as_view(), name="shelf-detail"),
     path("users/", UserListView.as_view(), name="user-list"),
     path("users/follow/<str:username>", follow_user, name="user-follow"),
-    path("reading/", ReadingProgressListView.as_view(), name="reading-list-create")
+    path("reading/", ReadingProgressListView.as_view(), name="reading-list-create"),
+    path("reading/", ReadingProgressDetailView.as_view(), name="reading-detail"),
+    path("reviews/", ReviewListView.as_view(), name="review-list-create"),
+    path("reviews/<int:pk>/", ReviewDetailView.as_view(), name="review-detail"),
+    path(
+        "reviews/<int:review_pk>/comments/",
+        CommentListView.as_view(),
+        name="comment-list-create",
+    ),
+    path(
+        "reviews/<int:review_pk>/comments/<int:comment_pk>",
+        CommentDetailView.as_view(),
+        name="comment-detail",
+    ),
 ]
