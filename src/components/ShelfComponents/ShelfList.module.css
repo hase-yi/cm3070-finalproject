@@ -4,13 +4,15 @@
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:1rem;
+  padding: 1rem;
 }
 
 .item {
   display: flex;
+  flex-direction: column;
   background-color: var(--color-gray-800);
   border-radius: 4px;
   overflow: hidden;
@@ -39,27 +41,33 @@
 
 .content {
   padding: 1rem;
+  width: 100%;
   flex-grow: 1;
 }
 
 .item h2 {
-  margin: 0 0 1rem 0;
+  font-size: 16px; /* Set the desired font size */
+  margin: 0; /* Remove margin for cleaner spacing, if necessary */
+  padding: 0 1rem; /* Add horizontal padding if needed */
+  color: var(--color-white); /* Optional: change color */
+  font-weight: bold; /* Optional: make it bold */
+  /* margin: 0 0 1rem 0; */
 }
 
 .actions {
   display: flex;
   gap: 0.5rem;
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  top: 60%;
+  right:1rem;
+  bottom:1rem;
 }
 
 .actions button {
   display: flex;
   font: inherit;
   cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 5px 10px;
+  font-size:14px;
   border-radius: 4px;
   background-color: var(--color-gray-300);
   color: var(--color-gray-800);
