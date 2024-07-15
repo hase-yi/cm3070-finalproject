@@ -104,6 +104,28 @@ export const deleteBook = createAsyncThunk(
   }
 );
 
+// Thunk to search a book
+export const searchBook = createAsyncThunk(
+  'books/searchBooks',
+  async ({title, isbn}, {rejectWithValue})=>{
+    try{
+      const params = {};
+      if(title) params.title = title;
+      if(isbn) params.isbn = isbn;
+
+      const response = await axiosInstance.get('books/search', {params});
+    }catch(error){
+      if(error.response){
+        return rejectWithValue(error.response.data);
+      } else if (error.request){
+        return rejectWithValue('No response received from server');
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+)
+
 
 
 const bookSlice = createSlice({
@@ -189,7 +211,19 @@ const bookSlice = createSlice({
       .addCase(deleteBook.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
-      });
+      })
+      .addCase(searchBook.pending,(state)=>{
+        state.loading = true;
+        state.error = null 
+      })
+      .addCase(searchBook.fulfilled,(state, action)=>{
+        state.loading = false;
+        state.books = action.payload; 
+      })
+      .addCase(searchBook.rejected,(state,action)=>{
+        state.loading = false;
+        state.error = action.payload || 'Failded to search books';
+      })
   },
 });
 
