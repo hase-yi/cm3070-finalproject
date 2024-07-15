@@ -114,6 +114,8 @@ export const searchBook = createAsyncThunk(
       if(isbn) params.isbn = isbn;
 
       const response = await axiosInstance.get('books/search', {params});
+      return response.data
+      
     }catch(error){
       if(error.response){
         return rejectWithValue(error.response.data);

@@ -21,6 +21,7 @@ function ShelfForm({ method, shelf }) {
 	const isSubmitting = status === 'loading';
 
 	const handleSubmit = async (event) => {
+    // prevent the form automaticlly send a http request to server
 		event.preventDefault();
 		const formData = new FormData(event.target);
 		const shelfData = {
@@ -52,6 +53,7 @@ function ShelfForm({ method, shelf }) {
       console.error('Failed to delete shelf:', err);
     }
 	};
+
 
 	return (
 		<form className={classes.form} onSubmit={handleSubmit}>
