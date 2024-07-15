@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, Review, Shelf, ReadingProgress, Comment
+from .models import Book, ImageAsset, Review, Shelf, ReadingProgress, Comment
 
 
 # Auth
@@ -139,3 +139,20 @@ class CommentSerializer(serializers.ModelSerializer):
         comment = super().to_representation(instance)
         comment["book"] = BookSerializer(instance.book).data
         return comment
+
+
+class ImageAssetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageAsset
+        fields = "__all__"
+
+    def validate(self, data):
+        if data.get("book") and data.get("shelf"):
+            raise serializers.ValidationError(
+                "An image can be associated with either a book or a shelf, not both."
+            )
+        if not data.get("book") and not data.get("shelf"):
+            raise serializers.ValidationError(
+                "An image must be associated with either a book or a shelf."
+            )
+        return data

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 from django.utils import timezone
 from django.db.models import Q, QuerySet, Case, When, Value, BooleanField
 
@@ -158,3 +159,26 @@ class Activity(models.Model):
 class Following(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     followed_users = models.ManyToManyField(User, related_name="followers")
+
+
+class ImageAsset(models.Model):
+    file = models.FileField(upload_to="uploads/")
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True)
+    shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.book and self.shelf:
+            raise ValidationError(
+                "An image can be associated with either a book or a shelf, not both."
+            )
+        if not self.book and not self.shelf:
+            raise ValidationError(
+                "An image must be associated with either a book or a shelf."
+            )
+        super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["book"], name="unique_book_image"),
+            models.UniqueConstraint(fields=["shelf"], name="unique_shelf_image"),
+        ]

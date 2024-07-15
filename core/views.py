@@ -20,9 +20,19 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Activity, Book, Following, Review, Shelf, ReadingProgress, Comment
+from .models import (
+    Activity,
+    Book,
+    Following,
+    ImageAsset,
+    Review,
+    Shelf,
+    ReadingProgress,
+    Comment,
+)
 from .serializers import (
     BookSerializer,
+    ImageAssetSerializer,
     ReviewSerializer,
     ShelfSerializer,
     ReadingProgressSerializer,
@@ -380,6 +390,24 @@ class CommentDetailView(
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
+
+
+class ImageAssetView(APIView):
+    def get(self, request, *args, **kwargs):
+        assets = ImageAsset.objects.all()
+        serializer = ImageAssetSerializer(
+            assets, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ImageAssetSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
