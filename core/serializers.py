@@ -39,7 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-# Function
 class BookSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=False

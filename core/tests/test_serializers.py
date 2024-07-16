@@ -1,8 +1,9 @@
+from django.forms import ValidationError
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIRequestFactory
 from core.models import Shelf
-from core.serializers import ShelfSerializer
+from core.serializers import BookSerializer, ShelfSerializer
 from core.models import Book
 
 
@@ -110,3 +111,67 @@ class ShelfSerializerTest(TestCase):
         self.assertEqual(shelf.user, self.user1)
         self.assertEqual(shelf.title, "User1 Shelf1")
         self.assertEqual(shelf.description, "Description1")
+
+
+class BookSerializerTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = User.objects.create_user(username="user1", password="password1")
+        cls.user2 = User.objects.create_user(username="user2", password="password2")
+        cls.shelf = Shelf.objects.create(user=cls.user1, title="Mystery Shelf")
+
+        cls.book = Book.objects.create(
+            user=cls.user1,
+            title="Mystery Book",
+            author="Author A",
+            isbn="9781234567897",
+            shelf=cls.shelf,
+            release_year=2018,
+        )
+
+    def setUp(self):
+        # Simulate a request context for the serializer
+        self.context = {"request": type("Request", (object,), {"user": self.user1})}
+
+    def test_serialize_book(self):
+        serializer = BookSerializer(instance=self.book)
+        data = serializer.data
+
+        self.assertEqual(data["id"], self.book.id)
+        self.assertEqual(data["title"], "Mystery Book")
+        self.assertEqual(data["author"], "Author A")
+        self.assertEqual(data["isbn"], "9781234567897")
+        self.assertEqual(data["user"], self.user1.id)
+
+    def test_deserialize_and_validate_book_data(self):
+        book_data = {
+            "title": "New Mystery",
+            "author": "Author B",
+            "isbn": "9781234567800",
+            "shelf": self.shelf.id,
+            "release_year": 2020,
+            "user": self.user2.id,  # wrong user scenario
+        }
+        serializer = BookSerializer(data=book_data, context=self.context)
+        if not serializer.is_valid():
+            error_msg = serializer.errors.get("non_field_errors")[
+                0
+            ]  # Accessing the first non-field error
+            self.assertEqual(
+                str(error_msg), "You can only create objects for yourself."
+            )
+        else:
+            self.fail("ValidationError expected but not raised.")
+
+    def test_deserialize_with_no_user(self):
+        book_data = {
+            "title": "Self Assign Test",
+            "author": "Self Author",
+            "isbn": "9780000000000",
+            "shelf": self.shelf.id,
+            "release_year": 2021,
+        }
+        serializer = BookSerializer(data=book_data, context=self.context)
+        self.assertTrue(serializer.is_valid())
+        book = serializer.save()
+        self.assertEqual(book.user, self.user1)  # Should default to context's user
