@@ -2,9 +2,21 @@ from django.forms import ValidationError
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIRequestFactory
-from core.models import ReadingProgress, Shelf
-from core.serializers import BookSerializer, ReadingProgressSerializer, ShelfSerializer
+from core.models import Comment, ReadingProgress, Review, Shelf
+from core.serializers import (
+    BookSerializer,
+    CommentSerializer,
+    ImageAssetSerializer,
+    ReadingProgressSerializer,
+    ReviewSerializer,
+    SearchResultSerializer,
+    ShelfSerializer,
+    UserListSerializer,
+    UserSerializer,
+)
 from core.models import Book
+from django.utils import timezone
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class ShelfSerializerTest(TestCase):
@@ -226,3 +238,282 @@ class ReadingProgressSerializerTest(TestCase):
 
         # Compare the book part of the serialized data
         self.assertEqual(serializer.data["book"], book_serializer.data)
+
+
+class UserSerializerTestCase(TestCase):
+    def setUp(self):
+        # Create a user to test duplicate entries
+        User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword123"
+        )
+
+    def test_valid_data(self):
+        """Test serializer with valid data"""
+        serializer_data = {
+            "username": "newuser",
+            "password": "newpassword123",
+            "email": "new@example.com",
+        }
+        serializer = UserSerializer(data=serializer_data)
+        self.assertTrue(serializer.is_valid())
+        user = serializer.save()
+        self.assertEqual(user.username, "newuser")
+        self.assertEqual(user.email, "new@example.com")
+        self.assertTrue(user.check_password("newpassword123"))
+
+    def test_invalid_data_duplicate_username(self):
+        """Test serializer with a duplicate username"""
+        serializer_data = {
+            "username": "testuser",
+            "password": "newpassword123",
+            "email": "new@example.com",
+        }
+        serializer = UserSerializer(data=serializer_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("username", serializer.errors)
+        self.assertEqual(
+            str(serializer.errors["username"][0]),
+            "A user with that username already exists.",
+        )
+
+    def test_invalid_data_duplicate_email(self):
+        """Test serializer with a duplicate email"""
+        serializer_data = {
+            "username": "newuser",
+            "password": "newpassword123",
+            "email": "test@example.com",
+        }
+        serializer = UserSerializer(data=serializer_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("email", serializer.errors)
+        self.assertEqual(
+            str(serializer.errors["email"][0]), "A user with that email already exists."
+        )
+
+    def test_invalid_password(self):
+        """Test serializer with a short password"""
+        serializer_data = {
+            "username": "newuser",
+            "password": "short",
+            "email": "new@example.com",
+        }
+        serializer = UserSerializer(data=serializer_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("password", serializer.errors)
+        self.assertEqual(
+            str(serializer.errors["password"][0]),
+            "Password must be at least 8 characters long.",
+        )
+
+
+class UserListSerializerTestCase(TestCase):
+    def setUp(self):
+        # Create a user to test serialization
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123", email="test@example.com"
+        )
+
+    def test_serialize_username(self):
+        """Test that the username field is correctly serialized"""
+        user = User.objects.get(username="testuser")
+        serializer = UserListSerializer(user)
+        # Check that all fields specified are correctly serialized
+        self.assertEqual(serializer.data, {"username": "testuser"})
+
+    def test_does_not_serialize_other_fields(self):
+        """Test that no other fields are serialized"""
+        user = User.objects.get(username="testuser")
+        serializer = UserListSerializer(user)
+        # Check that the serializer data only contains the username field
+        self.assertEqual(set(serializer.data.keys()), {"username"})
+
+
+class SearchResultSerializerTestCase(TestCase):
+    def setUp(self):
+        # Set up user and shelf
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123", email="test@example.com"
+        )
+        self.shelf = Shelf.objects.create(
+            user=self.user, title="User1 Shelf1", description="Description1"
+        )
+
+        # Create a book instance
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="9783161484100",
+            title="Example Book",
+            author="Author Name",
+            total_pages=300,
+            release_year=2021,
+            shelf=self.shelf,
+            image="http://example.com/image.jpg",
+        )
+
+    def test_serialization(self):
+        """Test that the SearchResultSerializer correctly serializes data including the 'type' field"""
+        book_instance = {"book": self.book, "type": "local"}
+        serializer = SearchResultSerializer(instance=book_instance)
+        data = serializer.data
+
+        self.assertEqual(data["book"]["isbn"], "9783161484100")
+        self.assertEqual(data["book"]["title"], "Example Book")
+        self.assertEqual(data["type"], "local")
+
+    def test_custom_type(self):
+        book_instance = {"book": self.book, "type": "external"}
+        serializer = SearchResultSerializer(instance=book_instance)
+        data = serializer.data
+
+        self.assertEqual(data["type"], "external")
+
+
+class ReviewSerializerTestCase(TestCase):
+    def setUp(self):
+        # Create necessary models
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123", email="test@example.com"
+        )
+        self.shelf = Shelf.objects.create(
+            user=self.user, title="User1 Shelf1", description="Description1"
+        )
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="9783161484100",
+            title="Example Book",
+            author="Author Name",
+            total_pages=300,
+            release_year=2021,
+            shelf=self.shelf,
+            image="http://example.com/image.jpg",
+        )
+        self.review = Review.objects.create(
+            book=self.book, text="Great read!", shared=True, date=timezone.now().date()
+        )
+
+    def test_review_serialization(self):
+        """Test the serialization of the Review model, including nested Book serialization"""
+        serializer = ReviewSerializer(self.review)
+        data = serializer.data
+
+        self.assertEqual(data["text"], "Great read!")
+        self.assertTrue(data["shared"])
+        self.assertIsNotNone(data["date"])
+        self.assertIsNotNone(data["book"])
+        self.assertEqual(data["book"]["title"], "Example Book")
+        self.assertEqual(data["book"]["isbn"], "9783161484100")
+
+    def test_review_fields(self):
+        """Test that all expected fields are present in the serialized output"""
+        serializer = ReviewSerializer(self.review)
+        data = serializer.data
+        expected_fields = {"id", "book", "text", "shared", "date"}
+        self.assertTrue(set(data.keys()).issuperset(expected_fields))
+
+
+class CommentSerializerTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123", email="test@example.com"
+        )
+        self.shelf = Shelf.objects.create(
+            user=self.user, title="User1 Shelf1", description="Description1"
+        )
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="9783161484100",
+            title="Example Book",
+            author="Author Name",
+            total_pages=300,
+            release_year=2021,
+            shelf=self.shelf,
+            image="http://example.com/image.jpg",
+        )
+        self.review = Review.objects.create(
+            book=self.book, text="Great read!", shared=True, date=timezone.now().date()
+        )
+        self.comment = Comment.objects.create(
+            user=self.user,
+            review=self.review,
+            text="Insightful commentary.",
+            date=timezone.now().date(),
+        )
+
+    def test_comment_serialization(self):
+        """Test the serialization of the Comment model"""
+        serializer = CommentSerializer(self.comment)
+        data = serializer.data
+
+        self.assertEqual(data["text"], "Insightful commentary.")
+        self.assertIsNotNone(data["date"])
+        self.assertEqual(data["user"], self.user.id)
+        self.assertEqual(data["review"], self.review.id)
+
+    def test_comment_fields(self):
+        """Test that all expected fields are present in the serialized output"""
+        serializer = CommentSerializer(self.comment)
+        data = serializer.data
+        expected_fields = {"id", "user", "review", "text", "date"}
+        self.assertTrue(set(data.keys()).issuperset(expected_fields))
+
+
+class ImageAssetSerializerTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123"
+        )
+        self.shelf = Shelf.objects.create(
+            user=self.user, title="User1 Shelf1", description="Description1"
+        )
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="1234567890123",
+            title="Example Book",
+            author="Author Name",
+            total_pages=100,
+            release_year=2021,
+            shelf=self.shelf,
+            image="http://example.com/image.jpg",
+        )
+
+    def test_serializer_with_both_book_and_shelf(self):
+        """Image cannot be associated with both a book and a shelf"""
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        image_data = {"file": image_file, "book": self.book.id, "shelf": self.shelf.id}
+        serializer = ImageAssetSerializer(data=image_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("non_field_errors", serializer.errors)
+        self.assertEqual(
+            serializer.errors["non_field_errors"][0],
+            "An image can be associated with either a book or a shelf, not both.",
+        )
+
+    def test_serializer_without_book_and_shelf(self):
+        """Image must be associated with either a book or a shelf"""
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        image_data = {
+            "file": image_file,
+        }
+        serializer = ImageAssetSerializer(data=image_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("non_field_errors", serializer.errors)
+        self.assertEqual(
+            serializer.errors["non_field_errors"][0],
+            "An image must be associated with either a book or a shelf.",
+        )
+
+    def test_serializer_with_valid_data(self):
+        """Test serializer with valid data: associated with only a book"""
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        image_data = {"file": image_file, "book": self.book.id}
+        serializer = ImageAssetSerializer(data=image_data)
+        self.assertTrue(serializer.is_valid())
+        image = serializer.save()
+        self.assertEqual(image.book, self.book)
+        self.assertIsNone(image.shelf)
