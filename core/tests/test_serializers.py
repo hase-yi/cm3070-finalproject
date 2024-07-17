@@ -2,8 +2,8 @@ from django.forms import ValidationError
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIRequestFactory
-from core.models import Shelf
-from core.serializers import BookSerializer, ShelfSerializer
+from core.models import ReadingProgress, Shelf
+from core.serializers import BookSerializer, ReadingProgressSerializer, ShelfSerializer
 from core.models import Book
 
 
@@ -175,3 +175,54 @@ class BookSerializerTest(TestCase):
         self.assertTrue(serializer.is_valid())
         book = serializer.save()
         self.assertEqual(book.user, self.user1)  # Should default to context's user
+
+
+class ReadingProgressSerializerTest(TestCase):
+    def setUp(self):
+        # Setup test data
+        self.user = User.objects.create_user("user", "user@example.com", "password123")
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="1234567890123",
+            title="Test Book",
+            author="Author",
+            total_pages=300,
+            release_year=2021,
+        )
+        self.reading_progress = ReadingProgress.objects.create(
+            book=self.book, status="R", current_page=120, shared=True
+        )
+
+    def test_reading_progress_serialization(self):
+        # Serialize the reading progress
+        serializer = ReadingProgressSerializer(self.reading_progress)
+
+        # Expected serialized data
+        expected_data = {
+            "id": self.reading_progress.id,
+            "book": {
+                "id": self.book.id,
+                "isbn": "1234567890123",
+                "title": "Test Book",
+                "author": "Author",
+                "total_pages": 300,
+                "release_year": 2021,
+                "user": self.user.id,
+                "shelf": None,
+                "image": None,
+            },
+            "status": "R",
+            "current_page": 120,
+            "shared": True,
+        }
+
+        # Check if the serialized data matches the expected data
+        self.assertEqual(serializer.data, expected_data)
+
+    def test_book_serialization_within_reading_progress(self):
+        # Serialize the reading progress
+        serializer = ReadingProgressSerializer(self.reading_progress)
+        book_serializer = BookSerializer(self.book)
+
+        # Compare the book part of the serialized data
+        self.assertEqual(serializer.data["book"], book_serializer.data)
