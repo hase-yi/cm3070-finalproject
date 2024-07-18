@@ -136,8 +136,8 @@ class BookDetailView(
         return context
 
 
-@permission_classes([IsAuthenticated])
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def book_search(request):
     title_str = request.query_params.get("title", None)
     isbn_str = request.query_params.get("isbn", None)
@@ -193,8 +193,8 @@ class ActivityListView(ListAPIView):
     queryset = Activity.objects.all()
 
 
-@permission_classes([IsAuthenticated])
 @api_view(["POST", "DELETE"])
+@permission_classes([IsAuthenticated])
 def follow_user(request, username):
     try:
         target_user = User.objects.get(username=username)
@@ -297,11 +297,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        status = self.request.query_params.get("status", None)
-        if status:
-            return Review.objects.for_user(self.request.user).filter(status=status)
-        else:
-            return Review.objects.for_user_and_followed(user=self.request.user)
+        return Review.objects.for_user_and_followed(user=self.request.user)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -343,13 +339,9 @@ class CommentListView(ListAPIView, CreateAPIView):
 
     def get_queryset(self):
         review_id = self.kwargs["review_pk"]
-        comments = Comment.objects.filter(review_id=review_id)
-
-        status = self.request.query_params.get("status", None)
-        if status:
-            return comments.for_user(self.request.user).filter(status=status)
-        else:
-            return comments.for_user_and_followed(user=self.request.user)
+        return Comment.objects.for_user_and_followed(user=self.request.user).filter(
+            review_id=review_id
+        )
 
     def perform_create(self, serializer):
         review_id = self.kwargs["review_pk"]

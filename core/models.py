@@ -131,15 +131,40 @@ class Review(models.Model):
     objects = BooksUserAccessManager()
 
 
+class CommentUserAccessManager(models.Manager):
+    def for_user(self, user):
+        return self.filter(book__user=user)
+
+    def for_user_and_followed(self, user):
+        # Get the users that the given user is following
+        following = Following.objects.filter(user=user).values_list(
+            "followed_users", flat=True
+        )
+
+        # Get the reading progress for the user's own books
+        user_books = self.for_user(user)
+
+        # Get the reading progress for the books of the followed users, only if shared
+        followed_users_books = self.filter(
+            book__user__in=following, review__shared=True
+        )
+
+        # Combine the two querysets
+        combined_query = user_books | followed_users_books
+
+        return combined_query.distinct().select_related("book__user")
+
+
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True)
     review = models.ForeignKey(
         Review, related_name="comments", on_delete=models.CASCADE
     )
     text = models.TextField()
     date = models.DateField(default=timezone.now)
 
-    objects = BooksUserAccessManager()
+    objects = CommentUserAccessManager()
 
 
 class Activity(models.Model):

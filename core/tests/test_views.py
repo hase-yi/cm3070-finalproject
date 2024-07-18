@@ -1,9 +1,11 @@
+import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from django.contrib.auth.models import User
-from core.models import Book, Shelf
+from core.models import Book, Comment, Following, ReadingProgress, Review, Shelf
 from django.test import TestCase
+import requests_mock
 
 
 class ShelfListViewTest(TestCase):
@@ -57,6 +59,49 @@ class ShelfListViewTest(TestCase):
         # Unauthenticated user should not be able to create a shelf
         data = {"title": "New Shelf", "description": "Should Fail"}
         response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ShelfDetailViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.shelf = Shelf.objects.create(
+            user=self.user, title="Test Shelf", description="A shelf for testing"
+        )
+        self.url = reverse("shelf-detail", args=[self.shelf.id])
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_shelf(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Test Shelf")
+
+    def test_update_shelf(self):
+        data = {"title": "Updated Shelf", "description": "Updated description"}
+        response = self.client.put(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.shelf.refresh_from_db()
+        self.assertEqual(self.shelf.title, "Updated Shelf")
+        self.assertEqual(self.shelf.description, "Updated description")
+
+    def test_destroy_shelf(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        with self.assertRaises(Shelf.DoesNotExist):
+            self.shelf.refresh_from_db()
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        data = {"title": "New Title"}
+        response = self.client.put(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -181,3 +226,439 @@ class BookDetailViewTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Book.objects.filter(pk=self.book1.id).exists())
+
+
+class BookSearchViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse("book-search")
+
+        self.shelf = Shelf.objects.create(user=self.user, title="Test Shelf")
+        self.book = Book.objects.create(
+            user=self.user,
+            title="Test Book",
+            author="Test Author",
+            isbn="1234567890123",
+            shelf=self.shelf,
+        )
+
+    def test_search_without_params(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+
+    def test_search_with_title(self):
+        with requests_mock.Mocker() as m:
+            m.get(
+                "http://openlibrary.org/search.json",
+                json={
+                    "docs": [
+                        {
+                            "title": "External Book",
+                            "author_name": ["External Author"],
+                            "isbn": ["9876543210987"],
+                            "number_of_pages_median": 300,
+                            "first_publish_year": 2020,
+                            "cover_i": 12345,
+                        }
+                    ]
+                },
+            )
+
+            response = self.client.get(self.url, {"title": "Test"})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data), 2)  # One local and one external result
+            self.assertEqual(response.data[0]["type"], "local")
+            self.assertEqual(response.data[1]["type"], "external")
+
+    def test_search_with_isbn(self):
+        with requests_mock.Mocker() as m:
+            m.get(
+                "http://openlibrary.org/search.json",
+                json={"docs": []},
+            )
+
+            response = self.client.get(self.url, {"isbn": "1234567890123"})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data), 1)  # Only the local result
+            self.assertEqual(response.data[0]["type"], "local")
+
+    def test_search_with_title_and_isbn(self):
+        with requests_mock.Mocker() as m:
+            m.get(
+                "http://openlibrary.org/search.json",
+                json={
+                    "docs": [
+                        {
+                            "title": "External Book",
+                            "author_name": ["External Author"],
+                            "isbn": ["9876543210987"],
+                            "number_of_pages_median": 300,
+                            "first_publish_year": 2020,
+                            "cover_i": 12345,
+                        }
+                    ]
+                },
+            )
+
+            response = self.client.get(
+                self.url, {"title": "Test", "isbn": "1234567890123"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data), 2)  # One local and one external result
+            self.assertEqual(response.data[0]["type"], "local")
+            self.assertEqual(response.data[1]["type"], "external")
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class FollowUserViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.user3 = User.objects.create_user(username="user3", password="testpass3")
+        self.client.force_authenticate(user=self.user1)
+        self.url_follow_user2 = reverse("user-follow", args=[self.user2.username])
+        self.url_follow_user3 = reverse("user-follow", args=[self.user3.username])
+
+    def test_unfollow_user_if_not_following(self):
+        response = self.client.delete(self.url_follow_user2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"message": "User unfollowed successfully"})
+
+    def test_follow_user(self):
+        response = self.client.post(self.url_follow_user2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"message": "User followed successfully"})
+        following = Following.objects.get(user=self.user1)
+        self.assertIn(self.user2, following.followed_users.all())
+
+    def test_unfollow_user(self):
+        Following.objects.create(user=self.user1).followed_users.add(self.user2)
+        response = self.client.delete(self.url_follow_user2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"message": "User unfollowed successfully"})
+        following = Following.objects.get(user=self.user1)
+        self.assertNotIn(self.user2, following.followed_users.all())
+
+    def test_follow_non_existent_user(self):
+        response = self.client.post(reverse("user-follow", args=["nonexistent"]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {"error": "User not found"})
+
+    def test_unfollow_non_existent_user(self):
+        response = self.client.delete(reverse("user-follow", args=["nonexistent"]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {"error": "User not found"})
+
+    def test_follow_self(self):
+        response = self.client.post(reverse("user-follow", args=[self.user1.username]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {"error": "Both users are identical"})
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.post(self.url_follow_user2)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url_follow_user2)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ReadingProgressListViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.book2 = Book.objects.create(
+            user=self.user2,
+            title="Test Book 2",
+            author="Test Author",
+            isbn="9876543210987",
+            total_pages=200,
+        )
+        self.reading_progress1 = ReadingProgress.objects.create(
+            book=self.book1, status="R", current_page=50
+        )
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse("reading-list-create")
+
+    def test_list_reading_progress(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)  # user1 can see their own progress
+        self.assertEqual(response.data[0]["book"]["id"], self.book1.id)
+
+    def test_create_reading_progress(self):
+        data = {
+            "book": self.book2.id,
+            "status": "F",
+            "current_page": 100,
+            "shared": True,
+        }
+        response = self.client.post(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        if response.status_code != status.HTTP_201_CREATED:
+            print(f"Response Data: {response.data}")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ReadingProgress.objects.count(), 2)
+        new_progress = ReadingProgress.objects.get(book=self.book2, status="F")
+        self.assertEqual(new_progress.current_page, 100)
+
+    def test_filter_reading_progress_by_status(self):
+        response = self.client.get(self.url, {"status": "W"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)  # user1 has no 'Want to Read' progress
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ReadingProgressDetailViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.reading_progress1 = ReadingProgress.objects.create(
+            book=self.book1, status="R", current_page=50
+        )
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse("reading-detail", args=[self.reading_progress1.id])
+
+    def test_retrieve_reading_progress(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["book"]["id"], self.book1.id)
+        self.assertEqual(response.data["status"], "R")
+        self.assertEqual(response.data["current_page"], 50)
+
+    def test_update_reading_progress(self):
+        data = {"status": "F", "current_page": 100, "shared": True}
+        response = self.client.put(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        if response.status_code != status.HTTP_200_OK:
+            print(f"Response Data: {response.data}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.reading_progress1.refresh_from_db()
+        self.assertEqual(self.reading_progress1.status, "F")
+        self.assertEqual(self.reading_progress1.current_page, 100)
+
+    def test_delete_reading_progress(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        with self.assertRaises(ReadingProgress.DoesNotExist):
+            self.reading_progress1.refresh_from_db()
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.put(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ReviewListViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.book2 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 2",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.review1 = Review.objects.create(
+            book=self.book1,
+            text="This is a test review.",
+            shared=True,
+            date="2024-01-01",
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse("review-list-create")
+
+    def test_list_reviews(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["book"]["id"], self.book1.id)
+        self.assertEqual(response.data[0]["text"], "This is a test review.")
+
+    def test_create_review(self):
+        data = {
+            "book": self.book2.id,
+            "text": "A new review for the test book.",
+            "shared": True,
+            "date": "2024-01-02",
+        }
+        response = self.client.post(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Review.objects.count(), 2)
+        new_review = Review.objects.get(
+            book=self.book2, text="A new review for the test book."
+        )
+        self.assertEqual(new_review.shared, True)
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ReviewDetailViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.review1 = Review.objects.create(
+            book=self.book1,
+            text="This is a test review.",
+            shared=True,
+            date="2024-01-01",
+        )
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse("review-detail", args=[self.review1.id])
+
+    def test_retrieve_review(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["book"]["id"], self.book1.id)
+        self.assertEqual(response.data["text"], "This is a test review.")
+
+    def test_update_review(self):
+        data = {
+            "text": "An updated review text.",
+            "shared": False,
+            "date": "2024-01-02",
+        }
+        response = self.client.put(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        if response.status_code != status.HTTP_200_OK:
+            print(f"Response Data: {response.data}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.review1.refresh_from_db()
+        self.assertEqual(self.review1.text, "An updated review text.")
+        self.assertEqual(self.review1.shared, False)
+
+    def test_delete_review(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        with self.assertRaises(Review.DoesNotExist):
+            self.review1.refresh_from_db()
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.put(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class CommentListViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.review1 = Review.objects.create(
+            book=self.book1,
+            text="This is a test review.",
+            shared=True,
+            date="2024-01-01",
+        )
+        self.comment1 = Comment.objects.create(
+            review=self.review1,
+            text="This is a test comment.",
+            book=self.book1,
+            user=self.user1,
+            date="2024-01-01",
+        )
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse("comment-list-create", kwargs={"review_pk": self.review1.id})
+
+    def test_list_comments(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)  # user1 can see their own comment
+        self.assertEqual(response.data[0]["review"], self.review1.id)
+        self.assertEqual(response.data[0]["text"], "This is a test comment.")
+
+    def test_create_comment(self):
+        data = {
+            "text": "A new comment for the test review.",
+            "review": self.review1.id,
+            "book": self.book1.id,
+            "date": "2024-01-01",
+        }
+        response = self.client.post(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        if response.status_code != status.HTTP_201_CREATED:
+            print(f"Response Data: {response.data}")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Comment.objects.count(), 2)
+        new_comment = Comment.objects.get(text="A new comment for the test review.")
+        self.assertEqual(new_comment.review, self.review1)
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

@@ -435,6 +435,7 @@ class CommentSerializerTestCase(TestCase):
         self.comment = Comment.objects.create(
             user=self.user,
             review=self.review,
+            book=self.book,
             text="Insightful commentary.",
             date=timezone.now().date(),
         )
