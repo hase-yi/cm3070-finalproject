@@ -7,6 +7,8 @@ import {
 	deleteShelf,
 } from '../../features/shelfSlice';
 import classes from './ShelfForm.module.css';
+import Input from '../Input';
+import FormButtons from '../FormButtons.js';
 
 function ShelfForm({ method, shelf }) {
 	const dispatch = useDispatch();
@@ -67,26 +69,23 @@ function ShelfForm({ method, shelf }) {
 					)}
 				</ul>
 			)}
-			<p>
-				<label htmlFor="title">Shelf Name</label>
-				<input
+			<div className={classes.form}>
+				<Input
+				label="Shelf Name"
 					id="title"
 					type="text"
 					name="title"
 					required
 					defaultValue={shelf ? shelf.title : ''}
 				/>
-			</p>
-			<p>
-				<label htmlFor="image">Image</label>
-				<input
+
+				<Input
+				label="Image"
 					id="image"
 					type="url"
 					name="image"
 					defaultValue={shelf ? shelf.image : ''}
 				/>
-			</p>
-			<p>
 				<label htmlFor="description">Description</label>
 				<textarea
 					id="description"
@@ -95,19 +94,25 @@ function ShelfForm({ method, shelf }) {
 					required
 					defaultValue={shelf ? shelf.description : ''}
 				/>
-			</p>
+			</div>
 			<div className={classes.actions}>
-				<button onClick={() => handleDelete(shelf.id)}>Delete</button>
-				<button
-					type="button"
-					onClick={() => navigate('..')}
-					disabled={isSubmitting}
-				>
-					Cancel
-				</button>
-				<button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? 'Submitting' : 'Save'}
-				</button>
+			<FormButtons
+				onClick={() => handleDelete(shelf.id)}
+				label="Delete"
+				type="button"
+				disabled={isSubmitting}
+			/>
+			<FormButtons
+				onClick={() => navigate('..')}
+				label="Cancel"
+				type="button"
+				disabled={isSubmitting}
+			/>
+			<FormButtons
+				label={isSubmitting ? 'Submitting' : 'Save'}
+				type="submit"
+				disabled={isSubmitting}
+			/>
 			</div>
 		</form>
 	);

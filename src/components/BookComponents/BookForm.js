@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { createBook, updateBook } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
 import classes from './BookForm.module.css';
+import Input from '../Input';
+import FormButtons from '../FormButtons';
+
 
 const BookForm = ({ method, book }) => {
 	const dispatch = useDispatch();
@@ -82,91 +85,76 @@ const BookForm = ({ method, book }) => {
 					)}
 				</ul>
 			)}
-			<p>
-				<label htmlFor="isbn">ISBN:</label>
-				<input
-					type="text"
-					id="isbn"
-					name="isbn"
-					required
-					defaultValue={book ? book.isbn : ''}
-				/>
-			</p>
-			<p>
-				<label htmlFor="title">Title:</label>
-				<input
-					type="text"
-					id="title"
-					name="title"
-					required
-					defaultValue={book ? book.title : ''}
-				/>
-			</p>
-			<p>
-				<label htmlFor="author">Author:</label>
-				<input
-					type="text"
-					id="author"
-					name="author"
-					required
-					defaultValue={book ? book.author : ''}
-				/>
-			</p>
-			<p>
-				<label htmlFor="total_pages">Total Pages:</label>
-				<input
-					type="number"
-					id="total_pages"
-					name="total_pages"
-					defaultValue={book ? book.total_pages : ''}
-				/>
-			</p>
-			<p>
-				<label htmlFor="release_year">Release Year:</label>
-				<input
-					type="number"
-					id="release_year"
-					name="release_year"
-					defaultValue={book ? book.release_year : ''}
-				/>
-			</p>
-			<p>
-				<label htmlFor="shelf">Shelf:</label>
-				<select
-					id="shelf"
-					name="shelf"
-					required
-					defaultValue={book ? book.shelf : ''}
-				>
-					<option value="">Select Shelf</option>
-					{shelves.map((shelf) => (
-						<option key={shelf.id} value={shelf.id}>
-							{shelf.title}
-						</option>
-					))}
-				</select>
-			</p>
-			<p>
-				<label htmlFor="image">Image URL:</label>
-				<input
-					type="text"
-					id="image"
-					name="image"
-					defaultValue={book ? book.image : ''}
-				/>
-			</p>
+			<Input
+				label="ISBN"
+				id="isbn"
+				name="isbn"
+				required
+				defaultValue={book ? book.isbn : ''}
+			/>
+			<Input
+				label="Title"
+				id="title"
+				name="title"
+				required
+				defaultValue={book ? book.title : ''}
+			/>
+			<Input
+				label="Author"
+				id="author"
+				name="author"
+				required
+				defaultValue={book ? book.author : ''}
+			/>
+			<Input
+				label="Total Pages"
+				id="total_pages"
+				name="total_pages"
+				type="number"
+				defaultValue={book ? book.total_pages : ''}
+			/>
+			<Input
+				label="Release Year"
+				id="release_year"
+				name="release_year"
+				type="date"
+				defaultValue={book ? book.release_year : ''}
+			/>
+			<label htmlFor="shelf">Shelf:</label>
+			<select
+				id="shelf"
+				name="shelf"
+				required
+				defaultValue={book ? book.shelf : ''}
+			>
+				<option value="">Select Shelf</option>
+				{shelves.map((shelf) => (
+					<option key={shelf.id} value={shelf.id}>
+						{shelf.title}
+					</option>
+				))}
+			</select>
+			<Input
+				label="Image URL"
+				id="image"
+				name="image"
+				type="text"
+				defaultValue={book ? book.image : ''}
+			/>
 
 			<div className={classes.actions}>
-				<button
-					type="button"
-					onClick={() => navigate('..')}
-					disabled={isSubmitting}
-				>
-					Cancel
-				</button>
-				<button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? 'Submitting' : 'Save'}
-				</button>
+				<FormButtons
+				label="Cancel"
+									type="button"
+									onClick={() => navigate('..')}
+									disabled={isSubmitting}
+
+				/>
+				<FormButtons
+				type="submit"
+				disabled={isSubmitting}
+				label={isSubmitting ? 'Submitting' : 'Save'}
+				/>
 			</div>
 		</form>
 	);

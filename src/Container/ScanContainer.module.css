@@ -1,0 +1,68 @@
+.ScanContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.ScanContainer h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.scannerContainer {
+  width: 640px;
+  height: 480px;
+  margin-bottom: 20px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.feedback-message {
+  color: #ff0000;
+  margin-bottom: 20px;
+}
+
+.loading-indicator {
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.book-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  width: 200px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.book-item h3 {
+  font-size: 1.2em;
+  margin: 10px 0;
+  color: #333;
+}
+
+.book-item p {
+  font-size: 0.9em;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.book-item img {
+  max-width: 100%;
+  border-radius: 5px;
+}

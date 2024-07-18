@@ -63,6 +63,17 @@ function MainNavigation() {
 							Add Book
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="scan"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Scan
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>

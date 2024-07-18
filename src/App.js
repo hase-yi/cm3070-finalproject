@@ -25,6 +25,7 @@ import BookDetailPage from './Pages/BookPages/BookDetail';
 import AuthenticationPage from './Pages/Authentication';
 import SearchPage from './Pages/BookSearchPage';
 import NavigationLayout from './NavigationLayout';
+import ScanPage from './Pages/BookScanPage';
 
 
 const routeDefinitions = createRoutesFromElements(
@@ -50,6 +51,7 @@ const routeDefinitions = createRoutesFromElements(
 			</Route>
 			<Route path="auth" element={<AuthenticationPage />}></Route>
 			<Route path="search" element={<SearchPage />} />
+			<Route path="scan" element={<ScanPage />} />
 		</Route>
 	</Route>
 );

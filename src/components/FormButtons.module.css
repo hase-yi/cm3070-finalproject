@@ -1,27 +1,7 @@
-.form {
-  max-width: 40rem;
-  margin: 4rem auto;
-
-}
-
-.form label,
-.form input,
-.form textarea {
-  display: block;
-  width: 100%;
-}
-
-.form input,
-.form textarea {
-  font: inherit;
-  padding: 0.25rem;
-}
-
 .actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  margin:2rem;
 }
 
 .actions button {

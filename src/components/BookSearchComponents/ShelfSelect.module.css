@@ -1,0 +1,19 @@
+/* ShelfSelect.module.css */
+.shelfSelect {
+  padding: 8px;
+  margin-top: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.shelfSelect:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.shelfSelect option {
+  padding: 8px;
+}
