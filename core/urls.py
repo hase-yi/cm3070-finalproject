@@ -32,7 +32,7 @@ urlpatterns = [
     path("users/", UserListView.as_view(), name="user-list"),
     path("users/follow/<str:username>", follow_user, name="user-follow"),
     path("reading/", ReadingProgressListView.as_view(), name="reading-list-create"),
-    path("reading/", ReadingProgressDetailView.as_view(), name="reading-detail"),
+    path("reading/<int:pk>", ReadingProgressDetailView.as_view(), name="reading-detail"),
     path("reviews/", ReviewListView.as_view(), name="review-list-create"),
     path("reviews/<int:pk>/", ReviewDetailView.as_view(), name="review-detail"),
     path(
