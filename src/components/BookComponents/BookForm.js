@@ -3,6 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { createBook, updateBook } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
+import {
+	addReadingProgress,
+	updateReadingProgress,
+} from '../../features/readingProgressSlice';
+
 import classes from './BookForm.module.css';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
@@ -60,12 +65,28 @@ const BookForm = ({ method, book }) => {
 			if (method === 'POST') {
 				response = await dispatch(createBook(bookData)).unwrap();
 				bookId = response.id; // Extract the book ID from the response
+
+				// Initialize reading progress for the new book
+				const initialReadingProgress = {
+					book: bookId,
+					current_page: parseInt(formData.get('current_page'), 10) || 0,
+					status: formData.get('status') || 'W',
+				};
+				await dispatch(addReadingProgress(initialReadingProgress)).unwrap();
 				console.log('Book created successfully', response);
+
 			} else if (method === 'PATCH' && book) {
 				response = await dispatch(
 					updateBook({ id: book.id, updatedBook: bookData })
 				).unwrap();
 				bookId = response.id; // Extract the book ID from the response
+
+        const updatedReadingProgress = {
+          book: bookId,
+          current_page: parseInt(formData.get('current_page'), 10) || 0,
+          status: formData.get('status') || 'W',
+        };
+				await dispatch(updateReadingProgress({id:bookId, updatedProgress:updatedReadingProgress})).unwrap();
 				console.log('Book updated successfully', response);
 			}
 			// Navigate to the specific book route
@@ -143,6 +164,24 @@ const BookForm = ({ method, book }) => {
 				type="text"
 				defaultValue={book ? book.image : ''}
 			/>
+			      <Input
+        label="Current Page"
+        id="current_page"
+        name="current_page"
+        type="number"
+        defaultValue={book ? book.reading_progress?.current_page : 0}
+      />
+      <label htmlFor="status">Reading Status:</label>
+      <select
+        id="status"
+        name="status"
+        defaultValue={book ? book.reading_progress?.status : 'W'}
+      >
+        <option value="W">Want to Read</option>
+        <option value="R">Is Reading</option>
+        <option value="F">Finished Reading</option>
+        <option value="N">Not to Finish</option>
+      </select>
 
 			<div className={classes.actions}>
 				<FormButtons

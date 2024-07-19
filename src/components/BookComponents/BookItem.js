@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { fetchShelf } from '../../features/shelfSlice';
 import { deleteBook } from '../../features/bookSlice';
+
 import classes from './BookItem.module.css'; // Assuming you have CSS modules
 
 import ReadingProgress from './ReadingProgress';
