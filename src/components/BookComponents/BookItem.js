@@ -5,6 +5,8 @@ import { fetchShelf } from '../../features/shelfSlice';
 import { deleteBook } from '../../features/bookSlice';
 import classes from './BookItem.module.css'; // Assuming you have CSS modules
 
+import ReadingProgress from './ReadingProgress';
+import ShelfSelect from '../BookSearchComponents/ShelfSelect';
 
 function BookItem() {
 	const { bookId } = useParams();
@@ -42,34 +44,44 @@ function BookItem() {
 		}
 	};
 
-  console.log('BookItem render:', book); // Debug log
+	console.log('BookItem render:', book); // Debug log
 
-  if(status === 'loading'){
-    return <div>Loading...</div>;
-  }
-  if(status === 'failed'){
-    return <div>Error...{error}</div>;
-  }
-  if(!book){
-    return <div>Book not found</div>;
-  }
-
+	if (status === 'loading') {
+		return <div>Loading...</div>;
+	}
+	if (status === 'failed') {
+		return <div>Error...{error}</div>;
+	}
+	if (!book) {
+		return <div>Book not found</div>;
+	}
 
 	return (
-<article className={classes.book}>
-  <img src={book.image} alt={book.title}/>
-  <h1>{book.title}</h1>
-  <h1>{book.author}</h1>
-  <h1>{book.total_pages}</h1>
-  <h1>{book.release_year}</h1>
-  <h1>{book.shelf}</h1>
-  <h1>{book.image}</h1>
-  <h1>{book.isbn}</h1>
-  <menu className={classes.actions}>
-        <Link to="edit">Edit</Link>
-        <button onClick={startDeleteHandler}>Delete</button>
-      </menu>
-</article>
+		<article className={classes.book}>
+			<section className={classes.bookDetails}>
+			<div className={classes.imageAndProgress}>
+          <img src={book.image} alt={book.title} />
+          <div className={classes.readingProgress}>
+            <ReadingProgress bookId={numericBookId} totalPages={book.total_pages}/>
+          </div>
+        </div>
+				<div className={classes.bookInfo}>
+					<h1>Title:{book.title}</h1>
+					<h2>Author:{book.author}</h2>
+					<h1>Total page number:{book.total_pages}</h1>
+					<h1>Release Year: {book.release_year}</h1>
+					<h1>ISBN: {book.isbn}</h1>
+					<div className={classes.actions}>
+						<Link to="edit">Edit</Link>
+						<button onClick={startDeleteHandler}>Delete</button>
+					</div>
+					<ShelfSelect book={book} />
+				</div>
+			</section>
+			<section className={classes.readingProgress}>
+
+			</section>
+		</article>
 	);
 }
 

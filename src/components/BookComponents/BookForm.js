@@ -7,7 +7,6 @@ import classes from './BookForm.module.css';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
 
-
 const BookForm = ({ method, book }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -42,15 +41,18 @@ const BookForm = ({ method, book }) => {
 		// Optional integers
 		const totalPages = formData.get('total_pages');
 		if (totalPages) {
-			bookData.total_pages = totalPages;
+			bookData.total_pages = parseInt(totalPages, 10);
 		}
 
 		const releaseYear = formData.get('release_year');
-		if (releaseYear) {
-			bookData.release_year = releaseYear;
+		const releaseYearInt = parseInt(releaseYear, 10);
+
+		if (isNaN(releaseYearInt)) {
+			alert('Please enter a valid year.');
+			return;
 		}
 
-		console.log('Submitting book data:', bookData);
+		bookData.release_year = releaseYearInt;
 
 		try {
 			let bookId;
@@ -144,16 +146,15 @@ const BookForm = ({ method, book }) => {
 
 			<div className={classes.actions}>
 				<FormButtons
-				label="Cancel"
-									type="button"
-									onClick={() => navigate('..')}
-									disabled={isSubmitting}
-
+					label="Cancel"
+					type="button"
+					onClick={() => navigate('..')}
+					disabled={isSubmitting}
 				/>
 				<FormButtons
-				type="submit"
-				disabled={isSubmitting}
-				label={isSubmitting ? 'Submitting' : 'Save'}
+					type="submit"
+					disabled={isSubmitting}
+					label={isSubmitting ? 'Submitting' : 'Save'}
 				/>
 			</div>
 		</form>

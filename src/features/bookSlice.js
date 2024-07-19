@@ -7,6 +7,7 @@ export const fetchBook = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`books/${id}/`);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       // Check if the error is from Axios and has a response

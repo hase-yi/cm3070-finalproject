@@ -9,33 +9,79 @@ const initialState = {
 // Async Thunks
 export const fetchReadingProgress = createAsyncThunk(
   'readingProgress/fetchReadingProgress',
-  async () => {
-    const response = await axiosInstance.get('reading/');
-    return response.data;
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`reading/${id}`);
+      console.log(`Fetched Reading Progress for book ${id}:`, response.data); // Log the fetched data
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const addReadingProgress = createAsyncThunk(
   'readingProgress/addReadingProgress',
-  async (newProgress) => {
-    const response = await axiosInstance.post('reading/', newProgress);
-    return response.data;
+  async (newProgress, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('reading/', newProgress);
+      console.log('Added Reading Progress:', response.data);
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      console.error('Error message:', error.message);
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const updateReadingProgress = createAsyncThunk(
   'readingProgress/updateReadingProgress',
-  async ({ id, updatedProgress }) => {
-    const response = await axiosInstance.put(`reading/${id}/`, updatedProgress);
-    return response.data;
+  async ({ id, updatedProgress }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`reading/${id}/`, updatedProgress);
+      console.log('Updated Reading Progress:', response.data); // Log the updated progress
+      return response.data;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        console.error('Error response data:', error.response.data); // Log the error response data
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      console.error('Error message:', error.message); // Log the error message
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const deleteReadingProgress = createAsyncThunk(
   'readingProgress/deleteReadingProgress',
-  async (id) => {
-    await axiosInstance.delete(`reading/${id}/`);
-    return id;
+  async (id, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`reading/${id}/`);
+      console.log(`Deleted Reading Progress with ID: ${id}`);
+      return id;
+    } catch (error) {
+      // Check if the error is from Axios and has a response
+      if (error.response) {
+        console.error('Error response data:', error.response.data); // Log the error response data
+        return rejectWithValue(error.response.data);
+      }
+      // For other errors (like network issues)
+      console.error('Error message:', error.message); // Log the error message
+      return rejectWithValue(error.message);
+    }
   }
 );
 
