@@ -1,12 +1,12 @@
 from django.urls import path
 
-from core.views import CookieTokenObtainPairView, CookieTokenRefreshView
+from core.views import CookieTokenObtainPairView
 from .views import (
     BookListView,
     BookDetailView,
     CommentDetailView,
     CommentListView,
-    LogoutView,
+    ImageAssetView,
     ReadingProgressDetailView,
     ReadingProgressListView,
     ReviewDetailView,
@@ -20,7 +20,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path("logout/", LogoutView.as_view(), name="logout"),
     path("login/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     # path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("signup/", register_user, name="register_user"),
@@ -32,7 +31,9 @@ urlpatterns = [
     path("users/", UserListView.as_view(), name="user-list"),
     path("users/follow/<str:username>", follow_user, name="user-follow"),
     path("reading/", ReadingProgressListView.as_view(), name="reading-list-create"),
-    path("reading/<int:pk>", ReadingProgressDetailView.as_view(), name="reading-detail"),
+    path(
+        "reading/<int:pk>", ReadingProgressDetailView.as_view(), name="reading-detail"
+    ),
     path("reviews/", ReviewListView.as_view(), name="review-list-create"),
     path("reviews/<int:pk>/", ReviewDetailView.as_view(), name="review-detail"),
     path(
@@ -45,4 +46,5 @@ urlpatterns = [
         CommentDetailView.as_view(),
         name="comment-detail",
     ),
+    path("upload/", ImageAssetView.as_view(), name="upload"),
 ]

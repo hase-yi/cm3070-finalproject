@@ -207,3 +207,4 @@ class ImageAsset(models.Model):
             models.UniqueConstraint(fields=["book"], name="unique_book_image"),
             models.UniqueConstraint(fields=["shelf"], name="unique_shelf_image"),
         ]
+

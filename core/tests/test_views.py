@@ -3,8 +3,17 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from django.contrib.auth.models import User
-from core.models import Book, Comment, Following, ReadingProgress, Review, Shelf
+from core.models import (
+    Book,
+    Comment,
+    Following,
+    ImageAsset,
+    ReadingProgress,
+    Review,
+    Shelf,
+)
 from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
 import requests_mock
 
 
@@ -662,3 +671,176 @@ class CommentListViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class CommentDetailViewTests(APITestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="testpass1")
+        self.user2 = User.objects.create_user(username="user2", password="testpass2")
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            title="Test Book 1",
+            author="Test Author",
+            isbn="1234567890123",
+            total_pages=100,
+        )
+        self.review1 = Review.objects.create(
+            book=self.book1,
+            text="This is a test review.",
+            shared=True,
+            date="2024-01-01",
+        )
+        self.comment1 = Comment.objects.create(
+            review=self.review1,
+            text="This is a test comment.",
+            user=self.user1,
+            date="2024-01-01",
+        )
+        self.client.force_authenticate(user=self.user1)
+        self.url = reverse(
+            "comment-detail",
+            kwargs={"review_pk": self.review1.id, "comment_pk": self.comment1.id},
+        )
+
+    def test_retrieve_comment(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["review"], self.review1.id)
+        self.assertEqual(response.data["text"], "This is a test comment.")
+
+    def test_update_comment(self):
+        data = {
+            "text": "An updated comment text.",
+            "review": self.review1.id,
+        }
+        response = self.client.put(
+            self.url, data=json.dumps(data), content_type="application/json"
+        )
+        if response.status_code != status.HTTP_200_OK:
+            print(f"Response Data: {response.data}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.comment1.refresh_from_db()
+        self.assertEqual(self.comment1.text, "An updated comment text.")
+
+    def test_delete_comment(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        with self.assertRaises(Comment.DoesNotExist):
+            self.comment1.refresh_from_db()
+
+    def test_permission_denied_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.put(self.url, {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ImageAssetViewTests(APITestCase):
+    def setUp(self):
+        # Create user
+        self.user = User.objects.create_user(username="user", password="password")
+        # Create instances of Shelf and Book
+        self.shelf = Shelf.objects.create(
+            user=self.user,
+            title="Fantasy Shelf",
+            description="A collection of fantasy books",
+        )
+        self.book = Book.objects.create(
+            user=self.user,
+            isbn="1234567890123",
+            title="Fantasy Book",
+            author="Author Name",
+        )
+
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse("upload")
+
+    def test_create_image_asset_with_book(self):
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        data = {"file": image_file, "book": self.book.id}
+        response = self.client.post(self.url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ImageAsset.objects.count(), 1)
+        self.assertIsNotNone(ImageAsset.objects.get(book=self.book))
+
+    def test_create_image_asset_invalid_with_both_book_and_shelf(self):
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        data = {"file": image_file, "book": self.book.id, "shelf": self.shelf.id}
+        response = self.client.post(self.url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_image_asset_invalid_with_neither_book_nor_shelf(self):
+        image_file = SimpleUploadedFile(
+            "image.jpg", b"file_content", content_type="image/jpeg"
+        )
+        data = {"file": image_file}
+        response = self.client.post(self.url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TestCookieTokenObtainPairView(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", email="user@test.com", password="testpass123"
+        )
+        self.url = reverse("token_obtain_pair")
+
+    def test_token_in_cookie(self):
+        """
+        Ensure access and refresh tokens are set in cookies correctly and removed from the response.
+        """
+        response = self.client.post(
+            self.url, {"username": "testuser", "password": "testpass123"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check cookies for tokens
+        self.assertIn("access_token", response.cookies)
+        self.assertIn("refresh_token", response.cookies)
+
+        # Check the cookie properties
+        self.assertTrue(response.cookies["access_token"]["httponly"])
+        self.assertEqual(response.cookies["access_token"]["samesite"], "None")
+        self.assertTrue(response.cookies["access_token"]["secure"])
+
+        self.assertTrue(response.cookies["refresh_token"]["httponly"])
+        self.assertEqual(response.cookies["refresh_token"]["samesite"], "None")
+        self.assertTrue(response.cookies["refresh_token"]["secure"])
+
+        # Check response body does not have tokens
+        self.assertNotIn("access", response.data)
+        self.assertNotIn("refresh", response.data)
+
+
+class UserRegistrationTest(APITestCase):
+    def setUp(self):
+        self.url = reverse("register_user")
+
+    def test_user_registration_success(self):
+        data = {
+            "username": "newuser",
+            "email": "user@example.com",
+            "password": "testpass123",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.get().username, "newuser")
+
+    def test_user_registration_failure(self):
+        data = {
+            "username": "",  # Invalid username
+            "email": "user@example.com",
+            "password": "testpass123",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.count(), 0)

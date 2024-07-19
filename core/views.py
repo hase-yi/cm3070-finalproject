@@ -371,7 +371,9 @@ class CommentDetailView(
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return Comment.objects.for_user_and_followed(user=self.request.user)
+        return Comment.objects.for_user_and_followed(
+            user=self.request.user
+        )  # pragma: no cover
 
     def get_object(self):
         review_id = self.kwargs["review_pk"]
@@ -384,22 +386,9 @@ class CommentDetailView(
         return context
 
 
-class ImageAssetView(APIView):
-    def get(self, request, *args, **kwargs):
-        assets = ImageAsset.objects.all()
-        serializer = ImageAssetSerializer(
-            assets, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-        serializer = ImageAssetSerializer(
-            data=request.data, context={"request": request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ImageAssetView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageAssetSerializer
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -433,20 +422,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-class CookieTokenRefreshView(TokenRefreshView):
-    def finalize_response(self, request, response, *args, **kwargs):
-        if response.data.get("access"):
-            response.set_cookie(
-                "access_token",
-                response.data["access"],
-                httponly=True,
-                samesite="Lax",
-                secure=True,
-            )
-            del response.data["access"]
-        return super().finalize_response(request, response, *args, **kwargs)
-
-
 # User Registration View
 @api_view(["POST"])
 def register_user(request):
@@ -456,12 +431,3 @@ def register_user(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# logout
-class LogoutView(APIView):
-    def post(self, request):
-        response = JsonResponse({"detail": "Successfully logged out."})
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
-        return response
