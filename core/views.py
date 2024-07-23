@@ -240,12 +240,19 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
 
     def get_queryset(self):
         status = self.request.query_params.get("status", None)
+        book = self.request.query_params.get("book", None)
+
         if status:
-            return ReadingProgress.objects.for_user(self.request.user).filter(
+            reading_progress = ReadingProgress.objects.for_user(self.request.user).filter(
                 status=status
             )
         else:
-            return ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+            reading_progress = ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+
+        if book:
+            reading_progress.filter(book=book)
+
+        return reading_progress
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

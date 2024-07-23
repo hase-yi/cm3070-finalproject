@@ -38,12 +38,19 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class ReadingProgressSerializerPlain(serializers.ModelSerializer):
+    class Meta:
+        model = ReadingProgress
+        fields = "__all__"
+
+
 class BookSerializer(serializers.ModelSerializer):
+    reading_percentage = serializers.ReadOnlyField()
+    reading_progress = ReadingProgressSerializerPlain()
+
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=False
     )
-
-    reading_percentage = serializers.ReadOnlyField()
 
     class Meta:
         model = Book
