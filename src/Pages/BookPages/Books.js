@@ -12,7 +12,7 @@ const BooksPage = () => {
   const error = useSelector((state) => state.books.error);
 
   const params = useParams();
-  console.log("Params is " + params)
+  // console.log("Params is " + params)
 
   useEffect(() => {
     if (status === 'idle') {

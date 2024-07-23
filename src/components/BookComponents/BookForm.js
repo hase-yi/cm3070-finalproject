@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { createBook, updateBook } from '../../features/bookSlice';
@@ -11,8 +11,14 @@ import {
 import classes from './BookForm.module.css';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
+import { isValidISBN } from '../../utils/validation'
 
 const BookForm = ({ method, book }) => {
+	const [isReading, setIsReading] = useState(false);
+  const [readingStatus, setReadingStatus] = useState(book ? book.reading_progress?.status : 'W');
+	const [isbnError, setISBNError] = useState('');
+
+	console.log("Book for form is:", book)
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
@@ -36,14 +42,24 @@ const BookForm = ({ method, book }) => {
 		event.preventDefault();
 		const formData = new FormData(event.target);
 		const bookData = {
-			isbn: formData.get('isbn'),
 			title: formData.get('title'),
 			author: formData.get('author'),
 			shelf: formData.get('shelf'),
 			image: formData.get('image'),
+			currentPage:formData.get('current_page'),
+			status:formData.get('status')
 		};
+		console.log("Book date is:", bookData)
 
-		// Optional integers
+		let isbn = formData.get('isbn')
+		isbn = isbn.replace(/[-\s]/g, ''); 
+		if(!isValidISBN(isbn)){
+			setISBNError('Invalid ISBN. Please check and try again.');
+			return;
+		}
+		console.log(isbn)
+		bookData.isbn = isbn;
+
 		const totalPages = formData.get('total_pages');
 		if (totalPages) {
 			bookData.total_pages = parseInt(totalPages, 10);
@@ -58,6 +74,7 @@ const BookForm = ({ method, book }) => {
 		}
 
 		bookData.release_year = releaseYearInt;
+
 
 		try {
 			let bookId;
@@ -74,19 +91,24 @@ const BookForm = ({ method, book }) => {
 				};
 				await dispatch(addReadingProgress(initialReadingProgress)).unwrap();
 				console.log('Book created successfully', response);
-
 			} else if (method === 'PATCH' && book) {
 				response = await dispatch(
 					updateBook({ id: book.id, updatedBook: bookData })
 				).unwrap();
 				bookId = response.id; // Extract the book ID from the response
-
-        const updatedReadingProgress = {
-          book: bookId,
-          current_page: parseInt(formData.get('current_page'), 10) || 0,
-          status: formData.get('status') || 'W',
-        };
-				await dispatch(updateReadingProgress({id:bookId, updatedProgress:updatedReadingProgress})).unwrap();
+				console.log('Book updated as:', response.data);
+				let readingProgressId = book.reading_progress;
+				const updatedReadingProgress = {
+					id: readingProgressId,
+					current_page: parseInt(formData.get('current_page'), 10) || 0,
+					status: formData.get('status') || 'W',
+				};
+				await dispatch(
+					updateReadingProgress({
+						id: readingProgressId,
+						updatedProgress: updatedReadingProgress,
+					})
+				).unwrap();
 				console.log('Book updated successfully', response);
 			}
 			// Navigate to the specific book route
@@ -96,6 +118,12 @@ const BookForm = ({ method, book }) => {
 		}
 	};
 
+	const handleStatusChange = (event) => {
+    const status = event.target.value;
+    setReadingStatus(status);
+    setIsReading(status === 'R');
+  };
+	
 	return (
 		<form className={classes.form} onSubmit={handleSubmit}>
 			{error && <p className="error">{error}</p>}
@@ -108,6 +136,8 @@ const BookForm = ({ method, book }) => {
 					)}
 				</ul>
 			)}
+
+			{isbnError && <p className={classes.error}>{isbnError}</p>}
 			<Input
 				label="ISBN"
 				id="isbn"
@@ -115,6 +145,7 @@ const BookForm = ({ method, book }) => {
 				required
 				defaultValue={book ? book.isbn : ''}
 			/>
+
 			<Input
 				label="Title"
 				id="title"
@@ -164,18 +195,22 @@ const BookForm = ({ method, book }) => {
 				type="text"
 				defaultValue={book ? book.image : ''}
 			/>
-			      <Input
-        label="Current Page"
-        id="current_page"
-        name="current_page"
-        type="number"
-        defaultValue={book ? book.reading_progress?.current_page : 0}
-      />
+
+{isReading && (
+        <Input
+          label="Current Page"
+          id="current_page"
+          name="current_page"
+          type="number"
+          defaultValue="1"
+        />
+      )}
       <label htmlFor="status">Reading Status:</label>
       <select
         id="status"
         name="status"
-        defaultValue={book ? book.reading_progress?.status : 'W'}
+        defaultValue={readingStatus}
+        onChange={handleStatusChange}
       >
         <option value="W">Want to Read</option>
         <option value="R">Is Reading</option>

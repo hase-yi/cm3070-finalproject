@@ -3,12 +3,12 @@ import classes from './ReadingProgress.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import {fetchReadingProgress} from '../../features/readingProgressSlice'
 
-const ReadingProgress = ({bookId, totalPages}) => {
+const ReadingProgress = ({bookId}) => {
   const dispatch = useDispatch();
   const readingProgress = useSelector((state)=>state.readingProgress.readingProgress)
-  console.log("readingProgress is:",  readingProgress)
+  // console.log("readingProgress is:",  readingProgress)
   const currentProgress = readingProgress.find((progress)=>progress.book.id === bookId)
-  console.log("Filtered Progress is:", currentProgress )
+  // console.log("Filtered Progress is:", currentProgress )
 
   const status = useSelector((state) => state.readingProgress.status);
   const error = useSelector((state) => state.readingProgress.error);
@@ -17,6 +17,7 @@ const ReadingProgress = ({bookId, totalPages}) => {
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchReadingProgress(bookId));
+      // console.log('Dispatching fetchReadingProgress');
     }
   }, [status, dispatch, bookId]);
 
@@ -27,14 +28,19 @@ const ReadingProgress = ({bookId, totalPages}) => {
     return <div>Error fetching progress: {error}</div>;
   }
 
+  const progressPercentage = readingProgress?.reading_percentage ?? 0;
+
   return (
-    <div className={classes.progress}>
+    <div className={classes.progressContainer}>
       <h2>Reading Progress</h2>
       {readingProgress ? (
         <>
           <p>Current Page: {readingProgress.current_page}</p>
-          <p>Total Pages: {totalPages}</p>
-          <p>Progress: {((readingProgress.current_page / totalPages) * 100).toFixed(2)}%</p>
+
+          <p>Progress: {progressPercentage.toFixed(2)}%</p>
+          <div className={classes.progressBar}>
+            <div className={classes.progress} style={{ width: `${progressPercentage}%` }}></div>
+          </div>
         </>
       ) : (
         <p>No reading progress available</p>

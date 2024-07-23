@@ -9,10 +9,10 @@ const initialState = {
 // Async Thunks
 export const fetchReadingProgress = createAsyncThunk(
   'readingProgress/fetchReadingProgress',
-  async (id, { rejectWithValue }) => {
+  async (bookId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`reading/${id}`);
-      console.log(`Fetched Reading Progress for book ${id}:`, response.data); // Log the fetched data
+      const response = await axiosInstance.get(`reading/?book=${bookId}`);
+      // console.log(`Fetched Reading Progress for book ${bookId}:`, response.data); // Log the fetched data
       return response.data;
     } catch (error) {
       // Check if the error is from Axios and has a response

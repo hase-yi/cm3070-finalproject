@@ -17,6 +17,17 @@
   padding: 0.25rem;
 }
 
+.error {
+  color: var(--color-error, red); /* Fallback to red if --color-error is not defined */
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.form .error {
+  color: var(--color-error, red); /* Specific for errors inside forms */
+  padding-left: 0.25rem;
+}
+
 .actions {
   display: flex;
   gap: 1rem;

@@ -45,7 +45,7 @@ function BookItem() {
 		}
 	};
 
-	console.log('BookItem render:', book); // Debug log
+	// console.log('BookItem render:', book); // Debug log
 
 	if (status === 'loading') {
 		return <div>Loading...</div>;
@@ -63,7 +63,7 @@ function BookItem() {
 			<div className={classes.imageAndProgress}>
           <img src={book.image} alt={book.title} />
           <div className={classes.readingProgress}>
-            <ReadingProgress bookId={numericBookId} totalPages={book.total_pages}/>
+            <ReadingProgress bookId={numericBookId}/>
           </div>
         </div>
 				<div className={classes.bookInfo}>
