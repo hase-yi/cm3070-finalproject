@@ -46,7 +46,7 @@ class ReadingProgressSerializerPlain(serializers.ModelSerializer):
 
 class BookSerializer(serializers.ModelSerializer):
     reading_percentage = serializers.ReadOnlyField()
-    reading_progress = ReadingProgressSerializerPlain()
+    reading_progress = ReadingProgressSerializerPlain(required=False, allow_null=True)
 
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=False
