@@ -44,7 +44,6 @@ const authSlice = createSlice({
 			state.user = null;
 			state.status = 'idle';
 			state.error = null;
-			axiosInstance.post('/logout/', {}, { withCredentials: true });
 		},
 	},
 	extraReducers: (builder) => {

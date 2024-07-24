@@ -97,7 +97,8 @@ const BookForm = ({ method, book }) => {
 				).unwrap();
 				bookId = response.id; // Extract the book ID from the response
 				console.log('Book updated as:', response.data);
-				let readingProgressId = book.reading_progress;
+
+				let readingProgressId = book.reading_progress.id;
 				const updatedReadingProgress = {
 					id: readingProgressId,
 					current_page: parseInt(formData.get('current_page'), 10) || 0,
@@ -167,6 +168,28 @@ const BookForm = ({ method, book }) => {
 				type="number"
 				defaultValue={book ? book.total_pages : ''}
 			/>
+
+      <label htmlFor="status">Reading Status:</label>
+      <select
+        id="status"
+        name="status"
+        defaultValue={readingStatus}
+        onChange={handleStatusChange}
+      >
+        <option value="W">Want to Read</option>
+        <option value="R">Is Reading</option>
+        <option value="F">Finished Reading</option>
+        <option value="N">Not to Finish</option>
+      </select>
+{isReading && (
+        <Input
+          label="Current Page"
+          id="current_page"
+          name="current_page"
+          type="number"
+          defaultValue="1"
+        />
+      )}
 			<Input
 				label="Release Year"
 				id="release_year"
@@ -195,28 +218,6 @@ const BookForm = ({ method, book }) => {
 				type="text"
 				defaultValue={book ? book.image : ''}
 			/>
-
-{isReading && (
-        <Input
-          label="Current Page"
-          id="current_page"
-          name="current_page"
-          type="number"
-          defaultValue="1"
-        />
-      )}
-      <label htmlFor="status">Reading Status:</label>
-      <select
-        id="status"
-        name="status"
-        defaultValue={readingStatus}
-        onChange={handleStatusChange}
-      >
-        <option value="W">Want to Read</option>
-        <option value="R">Is Reading</option>
-        <option value="F">Finished Reading</option>
-        <option value="N">Not to Finish</option>
-      </select>
 
 			<div className={classes.actions}>
 				<FormButtons

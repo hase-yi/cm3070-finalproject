@@ -7,7 +7,7 @@ export const fetchBook = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`books/${id}/`);
-      console.log('Books are:', response.data)
+      console.log('Book is:', response.data)
       return response.data;
       
     } catch (error) {
@@ -79,8 +79,8 @@ export const createBook = createAsyncThunk('books/createBook', async (newBook, {
 export const updateBook = createAsyncThunk('books/updateBook', async ({ id, updatedBook }, { rejectWithValue }) => {
   try {
     const response = await axiosInstance.put(`books/${id}/`, updatedBook);
-    return response.data;
     console.log('updated books data is:', response.data)
+    return response.data;
   } catch (error) {
     if (!error.response) {
       throw error;

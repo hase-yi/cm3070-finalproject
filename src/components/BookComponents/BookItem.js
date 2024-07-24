@@ -63,7 +63,7 @@ function BookItem() {
 			<div className={classes.imageAndProgress}>
           <img src={book.image} alt={book.title} />
           <div className={classes.readingProgress}>
-            <ReadingProgress bookId={numericBookId}/>
+            <ReadingProgress book={book}/>
           </div>
         </div>
 				<div className={classes.bookInfo}>
