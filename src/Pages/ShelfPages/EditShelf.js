@@ -25,7 +25,7 @@ function EditShelfPage() {
   return (
     <div>
       <h1>Edit Shelf</h1>
-      {shelf && <ShelfForm method="PATCH" shelf={shelf} />}
+      {shelf && <ShelfForm method="PUT" shelf={shelf} />}
     </div>
   );
 }

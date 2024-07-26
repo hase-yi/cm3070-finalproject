@@ -35,7 +35,7 @@ function ShelfForm({ method, shelf }) {
 		try {
 			if (method === 'POST') {
 				await dispatch(createShelf(shelfData)).unwrap();
-			} else if (method === 'PATCH' && shelf) {
+			} else if (method === 'PUT' && shelf) {
 				await dispatch(
 					updateShelf({ id: shelf.id, updatedShelf: shelfData })
 				).unwrap();

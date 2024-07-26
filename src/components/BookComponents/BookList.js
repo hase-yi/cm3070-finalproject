@@ -29,8 +29,8 @@ const BookList = ({ shelfId }) => {
 		return <div>Books not found</div>;
 	}
 
-	const handleDelete = (bookId) => {
-		dispatch(deleteBook(bookId));
+	const handleDelete = (book) => {
+		dispatch(deleteBook(book));
 	};
 
 	return (
@@ -46,7 +46,7 @@ const BookList = ({ shelfId }) => {
 						</Link>
 						<div className={classes.actions}>
 							<Link to={`/books/${book.id}/edit`} ><button>Edit</button></Link>
-							<button onClick={() => handleDelete(book.id)}>Delete</button>
+							<button onClick={() => handleDelete(book)}>Delete</button>
 						</div>
 					</li>
 				))}

@@ -10,24 +10,25 @@ import ReadingProgress from './ReadingProgress';
 import ShelfSelect from '../BookSearchComponents/ShelfSelect';
 
 function BookItem() {
-	const { bookId } = useParams();
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
+  const { bookId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-	const numericBookId = parseInt(bookId, 10); //Ensure bookId is a number
+  const numericBookId = Number(bookId);
 
-	const book = useSelector((state) =>
-		state.books.books.find((book) => book.id === numericBookId)
-	);
+  const book = useSelector((state) =>
+    state.books.books.find((book) => book.id === numericBookId)
+  );
 
-	const status = useSelector((state) => state.books.status);
-	const error = useSelector((state) => state.books.error);
+  const status = useSelector((state) => state.books.status);
+  const error = useSelector((state) => state.books.error);
 
 	useEffect(() => {
 		if (status === 'idle' || !book) {
 			dispatch(fetchShelf(numericBookId));
 		}
 	}, [status, dispatch, numericBookId, book]);
+	
 
 	const startDeleteHandler = () => {
 		const proceed = window.confirm('Are you sure?');
@@ -35,7 +36,7 @@ function BookItem() {
 			// TODO: Navigate to the shelf page which the books are relative
 			navigate(`/shelves/${book.shelf}`, { replace: true });
 
-			dispatch(deleteBook(numericBookId)).then((result) => {
+			dispatch(deleteBook(book)).then((result) => {
 				if (result.meta.requestStatus === 'fulfilled') {
 					// console.log('Shelf deleted successfully, navigating to /shelves'); // Debug log
 				} else {
@@ -63,7 +64,7 @@ function BookItem() {
 			<div className={classes.imageAndProgress}>
           <img src={book.image} alt={book.title} />
           <div className={classes.readingProgress}>
-            <ReadingProgress book={book}/>
+            <ReadingProgress bookId={bookId} />
           </div>
         </div>
 				<div className={classes.bookInfo}>

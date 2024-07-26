@@ -12,7 +12,7 @@ const EditBookPage = () => {
   return (
     <div>
       <h1>Edit Book</h1>
-      {book && <BookForm method="PATCH" book={book} />}
+      {book && <BookForm method="PUT" bookId={bookId} />}
     </div>
   );
 };
