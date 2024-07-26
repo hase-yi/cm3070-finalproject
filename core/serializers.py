@@ -43,6 +43,11 @@ class ReadingProgressSerializerPlain(serializers.ModelSerializer):
         model = ReadingProgress
         fields = "__all__"
 
+    def to_representation(self, instance):
+        reading_progress = super().to_representation(instance)
+        reading_progress["percentage"] = instance.reading_percentage
+        return reading_progress
+
 
 class BookSerializer(serializers.ModelSerializer):
     reading_percentage = serializers.ReadOnlyField()

@@ -113,7 +113,7 @@ class ReadingProgress(models.Model):
     @property
     def reading_percentage(self):
         total_pages = self.book.total_pages
-        if total_pages > 0:
+        if total_pages and total_pages > 0:
             return (self.current_page / total_pages) * 100
         return 0
 
@@ -207,4 +207,3 @@ class ImageAsset(models.Model):
             models.UniqueConstraint(fields=["book"], name="unique_book_image"),
             models.UniqueConstraint(fields=["shelf"], name="unique_shelf_image"),
         ]
-
