@@ -13,6 +13,7 @@ const BOOK_FIELDS = [
 ];
 
 const READING_PROGRESS_FIELDS = ['book', 'status', 'current_page', 'shared'];
+const REVIEW_FIELDS=['book', 'date', 'shared', 'text']
 
 // Fetch one book by id
 export const fetchBook = createAsyncThunk(
@@ -178,6 +179,30 @@ export const createReadingProgress = createAsyncThunk(
 );
 
 
+export const createReview = createAsyncThunk(
+	'books/createReview',
+	async (book, { rejectWithValue }) => {
+		const forServer = selectFromObject(
+			book.review,
+			REVIEW_FIELDS
+		);
+
+		try {
+			const response = await axiosInstance.post('reviews/', forServer);
+			return response.data;
+		} catch (error) {
+			// Check if the error is from Axios and has a response
+			if (error.response) {
+				console.error('Error response data:', error.response.data);
+				return rejectWithValue(error.response.data);
+			}
+			// For other errors (like network issues)
+			console.error('Error message:', error.message);
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
 
 export const updateReadingProgress = createAsyncThunk(
 	'books/updateReadingProgress',
@@ -191,6 +216,35 @@ export const updateReadingProgress = createAsyncThunk(
 
 			const response = await axiosInstance.put(
 				`reading/${readingProgressId}/`,
+				forServer
+			);
+
+			return response.data;
+		} catch (error) {
+			// Check if the error is from Axios and has a response
+			if (error.response) {
+				console.error('Error response data:', error.response.data); // Log the error response data
+				return rejectWithValue(error.response.data);
+			}
+			// For other errors (like network issues)
+			console.error('Error message:', error.message); // Log the error message
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const updateReview = createAsyncThunk(
+	'books/updateReview',
+	async (book, { rejectWithValue }) => {
+		try {
+			const reviewId = book.review.id;
+			const forServer = selectFromObject(
+				book.review,
+				REVIEW_FIELDS
+			);
+
+			const response = await axiosInstance.put(
+				`review/${reviewId}/`,
 				forServer
 			);
 
