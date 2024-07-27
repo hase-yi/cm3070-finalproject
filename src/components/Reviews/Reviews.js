@@ -10,40 +10,58 @@ import classes from './Reviews.module.css'
 const Reviews=()=>{
 const [isSubmitting, setIsSubmitting] = useState(false);
 const [ isEditing, setIsEditing]=useState(false);
-  const { bookId } = useParams();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const numericBookId = Number(bookId);
+const { bookId } = useParams();
+const dispatch = useDispatch();
+const navigate = useNavigate();
 
-  const book = useSelector((state) =>
-    state.books.books.find((book) => book.id === numericBookId)
-  );
+const numericBookId = Number(bookId);
 
-  const status = useSelector((state) => state.books.status);
-  const error = useSelector((state) => state.books.error);
+const book = useSelector((state) =>
+  state.books.books.find((book) => book.id === numericBookId)
+);
 
+const status = useSelector((state) => state.books.status);
+const error = useSelector((state) => state.books.error);
+
+const [formData, setFormData] = useState({
+  review:{
+    text:book?.review?.text || '',
+    shared: book?.review?.shared || false
+  }
+})
 
 
   const handleEdit=(e)=>{
     setIsEditing (!isEditing);
   }
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      review: {
+        ...prevData.review,
+        [name]: value,
+      },
+    }));
+  };
 
 
   return (
     <>
       {isEditing ?
       <div>
-      <label htmlFor="description">Description</label>
+      <label htmlFor="text">Description</label>
 				<textarea
-					id="description"
-					name="description"
+					id="text"
+					name="text"
 					rows="5"
+          value = {formData.review.text}
+          onChange = {handleChange}
 					required
-					defaultValue=""
 				/>
-      </div> : <p>This is the review</p>}
+      </div> : <p>{formData.review.text}</p>}
       <button onClick = {handleEdit}  >Edit</button>
       <div className={classes.actions}>
         <FormButtons

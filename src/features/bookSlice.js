@@ -13,7 +13,7 @@ const BOOK_FIELDS = [
 ];
 
 const READING_PROGRESS_FIELDS = ['book', 'status', 'current_page', 'shared'];
-const REVIEW_FIELDS=['book', 'date', 'shared', 'text']
+const REVIEW_FIELDS = ['book', 'date', 'shared', 'text'];
 
 // Fetch one book by id
 export const fetchBook = createAsyncThunk(
@@ -178,14 +178,10 @@ export const createReadingProgress = createAsyncThunk(
 	}
 );
 
-
 export const createReview = createAsyncThunk(
 	'books/createReview',
 	async (book, { rejectWithValue }) => {
-		const forServer = selectFromObject(
-			book.review,
-			REVIEW_FIELDS
-		);
+		const forServer = selectFromObject(book.review, REVIEW_FIELDS);
 
 		try {
 			const response = await axiosInstance.post('reviews/', forServer);
@@ -202,7 +198,6 @@ export const createReview = createAsyncThunk(
 		}
 	}
 );
-
 
 export const updateReadingProgress = createAsyncThunk(
 	'books/updateReadingProgress',
@@ -238,10 +233,7 @@ export const updateReview = createAsyncThunk(
 	async (book, { rejectWithValue }) => {
 		try {
 			const reviewId = book.review.id;
-			const forServer = selectFromObject(
-				book.review,
-				REVIEW_FIELDS
-			);
+			const forServer = selectFromObject(book.review, REVIEW_FIELDS);
 
 			const response = await axiosInstance.put(
 				`review/${reviewId}/`,
@@ -374,7 +366,7 @@ const bookSlice = createSlice({
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						reading_progress: {...action.payload.book.reading_progress},
+						reading_progress: { ...action.payload.book.reading_progress },
 					};
 				}
 			})
@@ -386,7 +378,30 @@ const bookSlice = createSlice({
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						reading_progress: {...action.payload.book.reading_progress},
+						reading_progress: { ...action.payload.book.reading_progress },
+					};
+				}
+			})
+			.addCase(createReview.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				const index = state.books.findIndex(
+					(book) => book.id === action.payload.book.id
+				);
+				if (index !== -1) {
+					state.books[index] = {
+						...state.books[index],
+						review: { ...action.payload.book.review },
+					};
+				}
+			})
+			.addCase(updateReview.fulfilled, (state, action) => {
+				const index = state.books.findIndex(
+					(book) => book.id === action.payload.book.id
+				);
+				if (index !== -1) {
+					state.books[index] = {
+						...state.books[index],
+						review: { ...action.payload.book.review },
 					};
 				}
 			});
