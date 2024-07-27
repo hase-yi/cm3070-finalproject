@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { fetchBook } from '../../features/bookSlice';
 import BookItem from '../../components/BookComponents/BookItem';
+import Reviews from '../../components/Reviews/Reviews';
 
 const BookDetailPage = () => {
   const { bookId } = useParams();
@@ -30,7 +31,8 @@ const BookDetailPage = () => {
 
   return (
     <div>
-      {book && <BookItem book={book} />}
+      { <BookItem />}
+      {<Reviews />} 
     </div>
   );
 };

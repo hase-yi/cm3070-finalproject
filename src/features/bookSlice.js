@@ -177,6 +177,8 @@ export const createReadingProgress = createAsyncThunk(
 	}
 );
 
+
+
 export const updateReadingProgress = createAsyncThunk(
 	'books/updateReadingProgress',
 	async (book, { rejectWithValue }) => {
