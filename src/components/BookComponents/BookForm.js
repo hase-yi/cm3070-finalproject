@@ -39,7 +39,9 @@ const BookForm = ({ method, bookId }) => {
     reading_progress: {
       currentPage: book?.reading_progress?.current_page || 1,
       status: book?.reading_progress?.status || 'W',
+			shared: book?.reading_progress?.shared || false
     },
+	
   });
 
   const [isbnError, setISBNError] = useState('');
@@ -68,6 +70,7 @@ const BookForm = ({ method, bookId }) => {
         reading_progress: {
           currentPage: book.reading_progress?.current_page || 1,
           status: book.reading_progress?.status || 'W',
+					shared: book?.reading_progress?.shared || false
         },
       });
     }
@@ -90,6 +93,7 @@ const BookForm = ({ method, bookId }) => {
         [name]: value,
       },
     }));
+
   };
 
   const handleStatusChange = (event) => {
@@ -140,7 +144,7 @@ const BookForm = ({ method, bookId }) => {
         book: book?.id,
         current_page: parseInt(formData.reading_progress.currentPage, 10) || 0,
         status: formData.reading_progress.status || 'W',
-        shared: false,
+				shared: formData.reading_progress.shared === "on" || false
       },
     };
 
@@ -220,6 +224,17 @@ const BookForm = ({ method, bookId }) => {
         onChange={handleInputChange}
       />
 
+<div className={classes['status-current-page-container']}>
+
+<Input
+          label="Sharing"
+          id="shared"
+          name="shared"
+          type="checkbox"
+          checked={formData.reading_progress.shared}
+          onChange={handleReadingProgressChange}
+        />
+
       <label htmlFor="status">Reading Status:</label>
       <select
         id="status"
@@ -243,6 +258,7 @@ const BookForm = ({ method, bookId }) => {
           onChange={handleReadingProgressChange}
         />
       )}
+</div>
 
       <Input
         label="Release Year"

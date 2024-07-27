@@ -57,3 +57,10 @@
 .actions button[type='button']:hover {
   background-color: var(--color-gray-800);
 }
+
+
+.status-current-page-container {
+  border: 2px solid red; /* Red border with a width of 2px */
+  padding: 1rem; /* Optional padding inside the container */
+  margin-bottom: 1rem; /* Optional margin to space it out from other elements */
+}
