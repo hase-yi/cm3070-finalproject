@@ -49,10 +49,29 @@ class ReadingProgressSerializerPlain(serializers.ModelSerializer):
         return reading_progress
 
 
+class ReviewSerializerPlain(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        # First, get the original representation from the ModelSerializer
+        representation = super().to_representation(instance)
+
+        # Add the review to the representation if it exists
+        try:
+            comments = instance.comments
+            representation["comments"] = CommentSerializer(comments, many=True).data
+        except Comment.DoesNotExist:
+            representation["comments"] = None
+
+        return representation
+
+
 class BookSerializer(serializers.ModelSerializer):
     reading_percentage = serializers.ReadOnlyField()
     reading_progress = ReadingProgressSerializerPlain(required=False, allow_null=True)
-
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=False
     )
@@ -74,6 +93,19 @@ class BookSerializer(serializers.ModelSerializer):
             )
 
         return data
+
+    def to_representation(self, instance):
+        # First, get the original representation from the ModelSerializer
+        representation = super().to_representation(instance)
+
+        # Add the review to the representation if it exists
+        try:
+            review = instance.review
+            representation["review"] = ReviewSerializerPlain(review).data
+        except Review.DoesNotExist:
+            representation["review"] = None
+
+        return representation
 
 
 class SearchResultSerializer(serializers.Serializer):
