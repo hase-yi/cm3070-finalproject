@@ -14,6 +14,7 @@ const BOOK_FIELDS = [
 
 const READING_PROGRESS_FIELDS = ['book', 'status', 'current_page', 'shared'];
 const REVIEW_FIELDS = ['book', 'date', 'shared', 'text'];
+const COMMENTS_FIELDS = ['book', 'review', 'date', 'text', 'user'];
 
 // Fetch one book by id
 export const fetchBook = createAsyncThunk(
@@ -199,6 +200,27 @@ export const createReview = createAsyncThunk(
 	}
 );
 
+export const createComment = createAsyncThunk(
+	'books/createComments',
+	async (book, { rejectWithValue }) => {
+		const forServer = selectFromObject(book.review.comment, COMMENTS_FIELDS);
+
+		try {
+			const response = await axiosInstance.post('comments/', forServer);
+			return response.data;
+		} catch (error) {
+			// Check if the error is from Axios and has a response
+			if (error.response) {
+				console.error('Error response data:', error.response.data);
+				return rejectWithValue(error.response.data);
+			}
+			// For other errors (like network issues)
+			console.error('Error message:', error.message);
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
 export const updateReadingProgress = createAsyncThunk(
 	'books/updateReadingProgress',
 	async (book, { rejectWithValue }) => {
@@ -236,11 +258,34 @@ export const updateReview = createAsyncThunk(
 			const forServer = selectFromObject(book.review, REVIEW_FIELDS);
 
 			const response = await axiosInstance.put(
-				`review/${reviewId}/`,
+				`reviews/${reviewId}/`,
 				forServer
 			);
 
 			return response.data;
+		} catch (error) {
+			// Check if the error is from Axios and has a response
+			if (error.response) {
+				console.error('Error response data:', error.response.data); // Log the error response data
+				return rejectWithValue(error.response.data);
+			}
+			// For other errors (like network issues)
+			console.error('Error message:', error.message); // Log the error message
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+export const updateComment = createAsyncThunk(
+	async (book, { rejectWithValue }) => {
+		try {
+			const commentId = book.review.comment.id;
+			const forServer = selectFromObject(book.review.comment, COMMENTS_FIELDS);
+
+			const response = await axiosInstance.put(
+				`comments/${commentId}`,
+				forServer
+			);
 		} catch (error) {
 			// Check if the error is from Axios and has a response
 			if (error.response) {
@@ -402,6 +447,48 @@ const bookSlice = createSlice({
 					state.books[index] = {
 						...state.books[index],
 						review: { ...action.payload.book.review },
+					};
+				}
+			})
+			.addCase(createComment.fulfilled, (state, action) => {
+				console.log('comment is:', action.payload);
+				const bookIndex = state.books.findIndex(
+					(book) => book.id === action.payload.book.id
+				);
+
+				const comments = [...state.books[bookIndex].review.comments];
+				comments.push(action.payload.book.review.comment)
+
+				if (bookIndex !== -1) {
+					state.books[bookIndex] = {
+						...state.books[bookIndex],
+						review: {
+							...state.books[bookIndex].review,
+							comments: [ ...comments ],
+						},
+					};
+				}
+			})
+			.addCase(updateComment.fulfilled, (state, action) => {
+				console.log('comment is:', action.payload);
+				const bookIndex = state.books.findIndex(
+					(book) => book.id === action.payload.book.id
+				);
+
+				const commentIndex = state.books[bookIndex].review.comments.findIndex(
+					(comment) => comment.id === action.payload.book.review.comment.id
+				);
+
+				const comments = [...state.books[bookIndex].review.comments];
+				comments[commentIndex] = action.payload.book.review.comment;
+
+				if (bookIndex !== -1) {
+					state.books[bookIndex] = {
+						...state.books[bookIndex],
+						review: {
+							...state.books[bookIndex].review,
+							comments: [ ...comments ],
+						},
 					};
 				}
 			});
