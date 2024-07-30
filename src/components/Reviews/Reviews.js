@@ -44,7 +44,7 @@ const Reviews = () => {
 				review: { ...reviewData },
 			};
 
-			console.log('bookData :', bookData);
+			// console.log('bookData :', bookData);
 			if (!book?.review) {
 				dispatch(createReview(bookData)).unwrap();
 			} else {

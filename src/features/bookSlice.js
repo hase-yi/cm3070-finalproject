@@ -204,9 +204,11 @@ export const createComment = createAsyncThunk(
 	'books/createComments',
 	async (book, { rejectWithValue }) => {
 		const forServer = selectFromObject(book.review.comment, COMMENTS_FIELDS);
+		const reviewId =book.review.comment.review;
 
+		console.log("reviewId  is:", reviewId)
 		try {
-			const response = await axiosInstance.post('comments/', forServer);
+			const response = await axiosInstance.post(`reviews/${reviewId}/comments/`, forServer);
 			return response.data;
 		} catch (error) {
 			// Check if the error is from Axios and has a response
@@ -277,15 +279,19 @@ export const updateReview = createAsyncThunk(
 );
 
 export const updateComment = createAsyncThunk(
-	async (book, { rejectWithValue }) => {
+	async (book,{ rejectWithValue }) => {
 		try {
+			const reviewId = book.review.comment.review;
 			const commentId = book.review.comment.id;
 			const forServer = selectFromObject(book.review.comment, COMMENTS_FIELDS);
 
+
+
 			const response = await axiosInstance.put(
-				`comments/${commentId}`,
+				`reviews/${reviewId}/comments/${commentId}`,
 				forServer
 			);
+			return response.data;
 		} catch (error) {
 			// Check if the error is from Axios and has a response
 			if (error.response) {
@@ -428,7 +434,7 @@ const bookSlice = createSlice({
 				}
 			})
 			.addCase(createReview.fulfilled, (state, action) => {
-				state.status = 'succeeded';
+				state.satus = 'succeeded';
 				const index = state.books.findIndex(
 					(book) => book.id === action.payload.book.id
 				);
@@ -453,11 +459,12 @@ const bookSlice = createSlice({
 			.addCase(createComment.fulfilled, (state, action) => {
 				console.log('comment is:', action.payload);
 				const bookIndex = state.books.findIndex(
-					(book) => book.id === action.payload.book.id
+					(book) => book.id === action.payload.book
 				);
 
+				console.log("state.books[bookIndex] is: ", state.books[bookIndex] )
 				const comments = [...state.books[bookIndex].review.comments];
-				comments.push(action.payload.book.review.comment)
+				comments.push(action.payload)
 
 				if (bookIndex !== -1) {
 					state.books[bookIndex] = {
