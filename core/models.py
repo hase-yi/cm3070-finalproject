@@ -126,7 +126,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     shared = models.BooleanField(default=False)
-    date = models.DateField(default=timezone.now)
+    date = models.DateField(default=timezone.localdate)
 
     objects = BooksUserAccessManager()
 
@@ -162,7 +162,7 @@ class Comment(models.Model):
         Review, related_name="comments", on_delete=models.CASCADE
     )
     text = models.TextField()
-    date = models.DateField(default=timezone.now)
+    date = models.DateField(default=timezone.localdate)
 
     objects = CommentUserAccessManager()
 
