@@ -1,8 +1,27 @@
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-
+import { useDispatch, useSelector } from 'react-redux';
 import classes from './MainNavigation.module.css';
+import { getUsername } from '../features/authSlice';
 
 function MainNavigation() {
+	const user = useSelector((state) => state.auth.user);
+	const status = useSelector((state) => state.auth.status);
+	const error = useSelector((state) => state.auth.error);
+
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		if (status === 'idle' || !user) {
+			dispatch(getUsername())
+				.unwrap()
+				.catch((err) => {
+					console.error('Failed to fetch username:', err);
+				});
+		}
+	}, [status, dispatch, user]);
+
+	console.log("user is:", user)
 	return (
 		<header className={classes.header}>
 			<nav>
@@ -13,7 +32,7 @@ function MainNavigation() {
 							to="/"
 							className={({ isActive }) =>
 								isActive ? classes.active : undefined
-							}							
+							}
 							end={true} // This link will only be considered active if we are on "/"
 						>
 							Home

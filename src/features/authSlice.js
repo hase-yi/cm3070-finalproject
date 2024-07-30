@@ -7,15 +7,25 @@ const initialState = {
 	error: null,
 };
 
+// Async thunk to get username
+export const getUsername = createAsyncThunk(
+	'auth/getUsername',
+	async (_,{ rejectWithValue }) => {
+		try {
+			const response = await axiosInstance.get('/user/');
+			return response.data;
+		} catch (err) {
+			return rejectWithValue(err.response.data);
+		}
+	}
+);
+
 // Async thunk for user login
 export const loginUser = createAsyncThunk(
 	'auth/login',
 	async (credentials, { rejectWithValue }) => {
 		try {
-			const response = await axiosInstance.post(
-				'login/',
-				credentials,
-			);
+			const response = await axiosInstance.post('login/', credentials);
 			return response.data;
 		} catch (err) {
 			return rejectWithValue(err.response.data);
@@ -48,6 +58,10 @@ const authSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
+			.addCase(getUsername.fulfilled, (state,action) => {
+				state.status = 'succeeded';
+				state.user = action.payload.username;
+			})
 			.addCase(loginUser.pending, (state) => {
 				state.status = 'loading';
 			})
