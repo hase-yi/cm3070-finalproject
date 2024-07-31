@@ -21,7 +21,7 @@ function MainNavigation() {
 		}
 	}, [status, dispatch, user]);
 
-	console.log("user is:", user)
+	// console.log("user is:", user)
 	return (
 		<header className={classes.header}>
 			<nav>

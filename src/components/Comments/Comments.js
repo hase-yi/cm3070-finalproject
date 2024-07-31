@@ -7,79 +7,7 @@ import classes from './Comments.module.css';
 import { createComment, updateComment } from '../../features/bookSlice';
 
 const Comments = () => {
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [isEditing, setIsEditing] = useState(false);
-
-	const { bookId } = useParams();
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
-
-	const numericBookId = Number(bookId);
-
-	const book = useSelector((state) =>
-		state.books.books.find((book) => book.id === numericBookId)
-	);
-
-	const status = useSelector((state) => state.books.status);
-	const error = useSelector((state) => state.books.error);
-
-	console.log('comments are:', book?.review?.comments);
-
-	const [formData, setFormData] = useState({
-		comment: {
-			text: book?.review?.comments?.text || '',
-		},
-	});
-
-
-
-	const handleSubmit = async (event) => {
-		event.preventDefault();
-		setIsSubmitting(true);
-		const commentData = {
-      review:book.review.id,
-			book: bookId,
-			text: formData.comment.text,
-		};
-
-    console.log('review in commentData is: ', commentData.review)
-
-		try {
-			const bookData = {
-        review:{
-          comment: { ...commentData },
-        }
-			};
-			console.log('bookData :', bookData);
-      if(!book?.review?.comment){
-        dispatch(createComment(bookData)).unwrap();
-      }else {
-        bookData.comment.id = book.review.comment.id;
-        dispatch(updateComment(bookData)).unwrap();
-      }
-		} catch (err) {
-			console.error('Fail to save book', err);
-		}
-    setIsSubmitting(false);
-    setIsEditing(false);
-	};
-
-
-	const handleCommentChange = (event) => {
-		const { name, value } = event.target;
-		setFormData((prevData) => ({
-			...prevData,
-			comment: {
-				...prevData.comment,
-				[name]: value,
-			},
-		}));
-	};
-
-	const handleEdit = (e) => {
-		setIsEditing(!isEditing);
-	};
-
+	
 	if (book?.review?.comments) {
 		return (
 			<>
@@ -94,7 +22,7 @@ const Comments = () => {
 							placeholder="Write your comment here..."
 							onChange={handleCommentChange}
 							required
-              className={classes.addCommentInput}
+							className={classes.addCommentInput}
 						/>
 						<div className={classes.commentActions}>
 							<FormButtons
@@ -111,12 +39,8 @@ const Comments = () => {
 						</div>
 					</form>
 				) : (
-					<div className={classes.commentsContainer}>
-						<h2>Comments List</h2>
-						<ul>
-							{book.review.comments.map((comment) => (
-								<li key={comment.id} className={classes.commentContent}>
-									<p>{comment.text}</p>
+					
+									) : null}
 								</li>
 							))}
 						</ul>
@@ -135,7 +59,7 @@ const Comments = () => {
 		);
 	}
 
-	return <p>There is no Comments</p>;
+
 };
 
 export default Comments;
