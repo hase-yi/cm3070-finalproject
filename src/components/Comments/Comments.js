@@ -5,61 +5,33 @@ import Input from '../Input';
 import FormButtons from '../FormButtons';
 import classes from './Comments.module.css';
 import { createComment, updateComment } from '../../features/bookSlice';
+import Comment from './Comment'
 
 const Comments = () => {
-	
-	if (book?.review?.comments) {
+	const { bookId } = useParams();
+	const dispatch = useDispatch();
+
+	const numericBookId = Number(bookId);
+
+	const book = useSelector((state) =>
+		state.books.books.find((book) => book.id === numericBookId)
+	);
+
+	const status = useSelector((state) => state.books.status);
+	const error = useSelector((state) => state.books.error);
+
 		return (
-			<>
-				{isEditing ? (
-					<form className={classes.addCommentContainer} onSubmit={handleSubmit}>
-						<label htmlFor="text">Review</label>
-						<textarea
-							id="text"
-							name="text"
-							rows="5"
-							value={formData.comment.text}
-							placeholder="Write your comment here..."
-							onChange={handleCommentChange}
-							required
-							className={classes.addCommentInput}
-						/>
-						<div className={classes.commentActions}>
-							<FormButtons
-								label={isSubmitting ? 'Submitting' : 'Add Comment'}
-								type="submit"
-								disabled={isSubmitting}
-							/>
-							<FormButtons
-								label="Cancel"
-								type="button"
-								onClick={handleEdit}
-								className={classes.cancelButton}
-							/>
-						</div>
-					</form>
-				) : (
-					
-									) : null}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-				{!isEditing && (
-					<div className={classes.commentActions}>
-						<FormButtons
-							label="Add Comment"
-							type="button"
-							onClick={handleEdit}
-						/>
-					</div>
-				)}
-			</>
+			<div className={classes.commentsContainer}>
+				<h2>Comments</h2>
+				<ul>
+					{book.review.comments.map((comment) => (
+						<li key={comment.id} className={classes.commentContent}>
+							{<Comment bookId={bookId} commentId={comment.id} />}
+						</li>
+					))}
+				</ul>
+			</div>
 		);
-	}
-
-
 };
 
 export default Comments;

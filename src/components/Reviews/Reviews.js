@@ -1,4 +1,4 @@
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Input from '../Input';
@@ -12,7 +12,6 @@ const Reviews = () => {
 
 	const { bookId } = useParams();
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 
 	const numericBookId = Number(bookId);
 

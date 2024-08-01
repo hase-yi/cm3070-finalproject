@@ -4,7 +4,8 @@ import { useParams } from 'react-router-dom';
 import { fetchBook } from '../../features/bookSlice';
 import BookItem from '../../components/BookComponents/BookItem';
 import Reviews from '../../components/Reviews/Reviews';
-import ReadComments from '../../components/Comments/ReadComments';
+import Comment from '../../components/Comments/Comment';
+import Comments from '../../components/Comments/Comments';
 
 const BookDetailPage = () => {
   const { bookId } = useParams();
@@ -33,8 +34,8 @@ const BookDetailPage = () => {
   return (
     <div>
       { <BookItem />}
-      {<Reviews />} 
-      {<ReadComments/>}
+      {book?.review && <Reviews/>}
+      {book?.review?.comments && <Comments/>}
     </div>
   );
 };

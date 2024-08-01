@@ -1,8 +1,60 @@
 /* Comments.module.css */
-h2 {
-  color: #444;
+.commentsContainer {
+  max-width: 40rem;
+  margin: 1.5rem auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+  padding: 1rem;
 }
 
+.commentContent {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.addCommentInput {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.commentActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.commentActions button {
+  padding: 0.4rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+}
+
+.commentActions button.cancel {
+  background-color: #e91e63;
+  border-color: #e91e63;
+}
+
+.commentActions button:hover {
+  opacity: 0.8;
+}
+
+/* Comments.module.css */
 .commentsContainer {
   max-width: 40rem;
   margin: 1.5rem auto;
