@@ -118,6 +118,9 @@ class BookListView(ListAPIView, CreateAPIView):
         context.update({"request": self.request})
         return context
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class BookDetailView(
     RetrieveAPIView,
@@ -243,11 +246,13 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         book = self.request.query_params.get("book", None)
 
         if status:
-            reading_progress = ReadingProgress.objects.for_user(self.request.user).filter(
-                status=status
-            )
+            reading_progress = ReadingProgress.objects.for_user(
+                self.request.user
+            ).filter(status=status)
         else:
-            reading_progress = ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+            reading_progress = ReadingProgress.objects.for_user_and_followed(
+                user=self.request.user
+            )
 
         if book:
             reading_progress.filter(book=book)
@@ -260,7 +265,7 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        progress = serializer.save()
+        progress = serializer.save(user=self.request.user)
 
         Activity.objects.create(
             user=self.request.user,
@@ -312,7 +317,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        review = serializer.save()
+        review = serializer.save(user=self.request.user)
 
         Activity.objects.create(
             user=self.request.user,
@@ -352,7 +357,7 @@ class CommentListView(ListAPIView, CreateAPIView):
 
     def perform_create(self, serializer):
         review_id = self.kwargs["review_pk"]
-        comment = serializer.save(review_id=review_id)
+        comment = serializer.save(review_id=review_id, user=self.request.user)
 
         Activity.objects.create(
             user=self.request.user,
@@ -397,6 +402,9 @@ class ImageAssetView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ImageAssetSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def finalize_response(self, request, response, *args, **kwargs):
@@ -438,3 +446,9 @@ def register_user(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_username(request):
+    return JsonResponse({"username": request.user.username})

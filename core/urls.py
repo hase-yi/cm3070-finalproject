@@ -16,6 +16,7 @@ from .views import (
     ReviewListView,
     book_search,
     follow_user,
+    get_username,
     register_user,
 )
 
@@ -29,6 +30,7 @@ urlpatterns = [
     path("shelves/", ShelfListView.as_view(), name="shelf-list-create"),
     path("shelves/<int:pk>/", ShelfDetailView.as_view(), name="shelf-detail"),
     path("users/", UserListView.as_view(), name="user-list"),
+    path("user/",get_username, name="user-name" ),
     path("users/follow/<str:username>/", follow_user, name="user-follow"),
     path("reading/", ReadingProgressListView.as_view(), name="reading-list-create"),
     path(

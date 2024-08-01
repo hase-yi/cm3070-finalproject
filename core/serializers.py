@@ -3,6 +3,11 @@ from django.contrib.auth.models import User
 from .models import Book, ImageAsset, Review, Shelf, ReadingProgress, Comment
 
 
+class UsernameField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.username
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -72,9 +77,7 @@ class ReviewSerializerPlain(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     reading_percentage = serializers.ReadOnlyField()
     reading_progress = ReadingProgressSerializerPlain(required=False, allow_null=True)
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False
-    )
+    user = UsernameField(read_only=True)
 
     class Meta:
         model = Book
@@ -128,9 +131,7 @@ class UserListSerializer(BookSerializer):
 
 
 class ShelfSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False
-    )
+    user = UsernameField(read_only=True)
     books = BookSerializer(many=True, read_only=True)
 
     class Meta:
@@ -176,6 +177,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = UsernameField(read_only=True)
+
     class Meta:
         model = Comment
         fields = "__all__"
