@@ -1,11 +1,8 @@
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
 import classes from './Comments.module.css';
-import { createComment, updateComment } from '../../features/bookSlice';
 import Comment from './Comment'
+import CreateCommentSection from './CreateCommentSection'
 
 const Comments = () => {
 	const { bookId } = useParams();
@@ -30,6 +27,7 @@ const Comments = () => {
 						</li>
 					))}
 				</ul>
+				{<CreateCommentSection bookId={bookId} />}
 			</div>
 		);
 };
