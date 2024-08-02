@@ -308,6 +308,28 @@ export const updateComment = createAsyncThunk(
 	}
 );
 
+// Thunk to delete a comment
+export const deleteComment = createAsyncThunk(
+	'books/deleteComment',
+	async (book, { rejectWithValue }) => {
+		const reviewId = book.review.comment.review;
+		const commentId = book.review.comment.id;
+
+		try {
+			const response = await axiosInstance.delete(`reviews/${reviewId}/comments/${commentId}/`);
+			return book;
+		} catch (error) {
+			// Check if the error is from Axios and has a response
+			if (error.response) {
+				return rejectWithValue(error.response.data);
+			}
+			// For other errors (like network issues)
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
+
 const bookSlice = createSlice({
 	name: 'books',
 	initialState: {
@@ -503,7 +525,29 @@ const bookSlice = createSlice({
 						},
 					};
 				}
-			});
+			})
+			.addCase(deleteComment.fulfilled, (state, action) => {
+				const bookID = action.payload.review.comment.book;
+				const commentId = action.payload.review.comment.id;
+
+				const bookIndex = state.books.findIndex(
+					(book) => book.id === bookID
+				);
+
+				const comments = [...state.books[bookIndex].review.comments];
+
+				if (bookIndex !== -1) {
+					state.books[bookIndex] = {
+						...state.books[bookIndex],
+						review: {
+							...state.books[bookIndex].review,
+							comments: comments.filter((comment) => comment.id !== commentId)
+						},
+					};
+				}
+
+				state.status = 'succeeded';
+			})
 	},
 });
 

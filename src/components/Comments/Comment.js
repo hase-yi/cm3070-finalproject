@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
 import classes from './Comments.module.css';
-import { createComment, updateComment } from '../../features/bookSlice';
+import { createComment, deleteComment, updateComment } from '../../features/bookSlice';
 
 const Comment = ({ bookId, commentId }) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,7 +96,56 @@ const Comment = ({ bookId, commentId }) => {
 		setIsEditing(!isEditing);
 	};
 
-	const handleDelete = () => {};
+	const handleDelete = async (event) => {
+		event.preventDefault();
+
+		const proceed = window.confirm('Are you sure?');
+		if (!proceed) {
+			return
+		}
+
+		setIsSubmitting(true);
+	
+		// Validate that book.id exists and is a number
+		if (!book || typeof book.id !== 'number' || !Number.isInteger(book.id)) {
+			console.error('Book ID is either missing or not a valid number');
+			setIsSubmitting(false);
+			return; // Exit the function early if book.id is invalid
+		}
+	
+		const commentData = {
+			review: book.review.id,
+			book: book.id,
+		};
+		
+		try {
+			const bookData = {
+				review: {
+					comment: { ...commentData },
+				},
+			};
+	
+			// Ensure that comment.id exists and is set correctly
+			if (comment && comment.id) {
+				bookData.review.comment.id = comment.id;
+			} else {
+				console.error('Comment ID is missing');
+				throw new Error('Comment ID is missing');
+			}
+	
+			// Await the dispatch to ensure completion
+			await dispatch(deleteComment(bookData)).unwrap();
+	
+		} catch (err) {
+			console.error('Failed to save book:', err);
+		} finally {
+			// Reset the states regardless of success or failure
+			setIsSubmitting(false);
+			setIsEditing(false);
+		}
+
+
+	};
 
 	if (isEditing) {
 		return (
@@ -138,7 +187,7 @@ const Comment = ({ bookId, commentId }) => {
 					<FormButtons
 						label="Delete"
 						type="button"
-						onClick={() => handleDelete()}
+						onClick={handleDelete}
 					/>
 				</div>
 			)}
