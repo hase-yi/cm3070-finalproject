@@ -93,6 +93,17 @@ function MainNavigation() {
 							Scan
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="searchpeople"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Search People
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>

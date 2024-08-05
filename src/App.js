@@ -14,6 +14,7 @@ import ErrorPage from './Pages/Error';
 import ShelfDetailPage from './Pages/ShelfPages/ShelfDetail';
 import NewShelfPage from './Pages/ShelfPages/NewShelf';
 import EditShelfPage from './Pages/ShelfPages/EditShelf';
+import PeopleSearchPage from './Pages/PeopleSearchPage'
 import ShelfRootLayout from './Pages/ShelfPages/ShelfRoot';
 
 import BookRoot from './Pages/BookPages/BookRoot';
@@ -52,6 +53,8 @@ const routeDefinitions = createRoutesFromElements(
 			<Route path="auth" element={<AuthenticationPage />}></Route>
 			<Route path="search" element={<SearchPage />} />
 			<Route path="scan" element={<ScanPage />} />
+			<Route path="searchpeople" element={<PeopleSearchPage />} />
+
 		</Route>
 	</Route>
 );
