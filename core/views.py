@@ -187,10 +187,26 @@ class UserListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        users = User.objects.all()
         search_str = self.request.query_params.get("search", None)
+        relationship = self.request.query_params.get("relationship", None)
+
+        if relationship:
+            if relationship == "followers":
+                users = self.request.user.followers.all()
+            
+            if relationship == "followed":
+                try:
+                    users = Following.objects.get(user=self.request.user).followed_users.all()
+                except Following.DoesNotExist:
+                    users = Following.objects.none()
+        else:
+            users = User.objects.all()
+
+
         if search_str:
             users = users.filter(username__icontains=search_str)
+
+
         serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
 
