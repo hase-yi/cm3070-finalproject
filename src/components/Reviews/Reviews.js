@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
 import classes from './Reviews.module.css';
-import { createReview, updateReview } from '../../features/bookSlice';
+import { createReview, deleteReview, updateReview } from '../../features/bookSlice';
 
 const Reviews = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +55,7 @@ const Reviews = () => {
 		}
 
 		setIsSubmitting(false);
-    setIsEditing(false);
+		setIsEditing(false);
 	};
 
 	const handleEdit = (e) => {
@@ -72,6 +72,55 @@ const Reviews = () => {
 			},
 		}));
 	};
+
+	const handleDelete = async (event) => {
+		const proceed = window.confirm('Are you sure?');
+		if (!proceed) {
+			return
+		}
+
+		setIsSubmitting(true);
+	
+		// Validate that book.id exists and is a number
+		if (!book || typeof book.id !== 'number' || !Number.isInteger(book.id)) {
+			console.error('Book ID is either missing or not a valid number');
+			setIsSubmitting(false);
+			return; // Exit the function early if book.id is invalid
+		}
+	
+		const reviewData = {
+			book: book.id,
+		};
+		
+		console.log(reviewData)
+
+		try {
+			const bookData = {
+				review:{
+					...reviewData
+				}
+			};
+	
+			// Ensure that comment.id exists and is set correctly
+			if (book.review && book.review.id) {
+				bookData.review.id = book.review.id;
+			} else {
+				console.error('Review ID is missing');
+				throw new Error('Review ID is missing');
+			}
+	
+			// Await the dispatch to ensure completion
+			await dispatch(deleteReview(bookData)).unwrap();
+	
+		} catch (err) {
+			console.error('Failed to save book:', err);
+		} finally {
+			// Reset the states regardless of success or failure
+			setIsSubmitting(false);
+			setIsEditing(false);
+		}
+	}
+
 
 	if (isEditing) {
 		return (
@@ -97,6 +146,7 @@ const Reviews = () => {
 				</div>
 
 				<div className={classes.actions}>
+					<FormButtons label="Delete" type="button" onClick={handleDelete} />
 					<FormButtons
 						label="Cancel"
 						type="button"
@@ -110,16 +160,23 @@ const Reviews = () => {
 					/>
 				</div>
 			</form>
-		)
-  }
+		);
+	}
 
-	return (
-			<>
+	if (book?.review) {
+		return (
+			<div>
 				<p>{formData.review.text}</p>
 				<button onClick={handleEdit}>Edit</button>
-			</>
+			</div>
 		);
+	}
 	
+	return (
+		<div>
+			<button onClick={handleEdit}>Write Review</button>
+		</div>
+	);
 };
 
 export default Reviews;

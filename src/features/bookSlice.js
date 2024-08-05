@@ -281,10 +281,27 @@ export const updateReview = createAsyncThunk(
 	}
 );
 
+// Thunk to delete a review
+export const deleteReview = createAsyncThunk(
+	'books/deleteReview/',
+	async (book, { rejectWithValue }) => {
+		const reviewId = book.review.id;
+		try {
+			const response = await axiosInstance.delete(`reviews/${reviewId}/`);
+			return book
+		} catch (error) {
+			if (error.response) {
+				return rejectWithValue(error.response.data);
+			}
+			return rejectWithValue(error.message);
+		}
+	}
+);
+
 export const updateComment = createAsyncThunk(
 	'books/updateComment',
 	async (book, { rejectWithValue }) => {
-		console.log("Book in thunk:", book)
+		console.log('Book in thunk:', book);
 		try {
 			const reviewId = book.review.comment.review;
 			const commentId = book.review.comment.id;
@@ -316,7 +333,9 @@ export const deleteComment = createAsyncThunk(
 		const commentId = book.review.comment.id;
 
 		try {
-			const response = await axiosInstance.delete(`reviews/${reviewId}/comments/${commentId}/`);
+			const response = await axiosInstance.delete(
+				`reviews/${reviewId}/comments/${commentId}/`
+			);
 			return book;
 		} catch (error) {
 			// Check if the error is from Axios and has a response
@@ -328,7 +347,6 @@ export const deleteComment = createAsyncThunk(
 		}
 	}
 );
-
 
 const bookSlice = createSlice({
 	name: 'books',
@@ -459,7 +477,7 @@ const bookSlice = createSlice({
 				}
 			})
 			.addCase(createReview.fulfilled, (state, action) => {
-				state.satus = 'succeeded';
+				state.status = 'succeeded';
 				const index = state.books.findIndex(
 					(book) => book.id === action.payload.book.id
 				);
@@ -481,6 +499,21 @@ const bookSlice = createSlice({
 					};
 				}
 			})
+			.addCase(deleteReview.fulfilled, (state, action) => {
+
+				console.log('payload', action.payload)
+				const bookIndex = state.books.findIndex(
+					(book) => book.id === action.payload.review.book
+				);
+				if (bookIndex !== -1) {
+					state.books[bookIndex] = {
+						...state.books[bookIndex],
+						review: null
+					};
+					state.status = 'succeeded';
+				}
+			})
+
 			.addCase(createComment.fulfilled, (state, action) => {
 				console.log('comment is:', action.payload);
 				const bookIndex = state.books.findIndex(
@@ -507,12 +540,12 @@ const bookSlice = createSlice({
 					(book) => book.id === action.payload.book
 				);
 
-				console.log("bookIndex is:", bookIndex)
+				console.log('bookIndex is:', bookIndex);
 
 				const commentIndex = state.books[bookIndex].review.comments.findIndex(
 					(comment) => comment.id === action.payload.id
 				);
-				console.log("commentIndex is:", commentIndex)
+				console.log('commentIndex is:', commentIndex);
 				const comments = [...state.books[bookIndex].review.comments];
 				comments[commentIndex] = action.payload;
 
@@ -530,9 +563,7 @@ const bookSlice = createSlice({
 				const bookID = action.payload.review.comment.book;
 				const commentId = action.payload.review.comment.id;
 
-				const bookIndex = state.books.findIndex(
-					(book) => book.id === bookID
-				);
+				const bookIndex = state.books.findIndex((book) => book.id === bookID);
 
 				const comments = [...state.books[bookIndex].review.comments];
 
@@ -541,13 +572,13 @@ const bookSlice = createSlice({
 						...state.books[bookIndex],
 						review: {
 							...state.books[bookIndex].review,
-							comments: comments.filter((comment) => comment.id !== commentId)
+							comments: comments.filter((comment) => comment.id !== commentId),
 						},
 					};
 				}
 
 				state.status = 'succeeded';
-			})
+			});
 	},
 });
 

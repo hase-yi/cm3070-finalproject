@@ -34,7 +34,7 @@ const BookDetailPage = () => {
   return (
     <div>
       { <BookItem />}
-      {book?.review && <Reviews/>}
+      {<Reviews/>}
       {book?.review?.comments && <Comments/>}
     </div>
   );
