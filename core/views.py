@@ -269,7 +269,7 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        progress = serializer.save(user=self.request.user)
+        progress = serializer.save()
 
         Activity.objects.create(
             user=self.request.user,
@@ -313,7 +313,15 @@ class ReviewListView(ListAPIView, CreateAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        return Review.objects.for_user_and_followed(user=self.request.user)
+        username_filter = self.request.query_params.get("username", None)
+        limit = self.request.query_params.get("limit", 5)
+
+        reviews = Review.objects.for_user_and_followed(user=self.request.user)
+
+        if username_filter:
+            reviews = reviews.filter(book__user=User.objects.get(username=username_filter))
+
+        return reviews.order_by('date')[:limit]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
