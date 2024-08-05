@@ -183,12 +183,16 @@ def book_search(request):
 
     return Response(search_results, status=status.HTTP_200_OK)
 
-
-class UserListView(ListAPIView):
+class UserListView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UserListSerializer
-    queryset = User.objects.all()
 
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all()
+        search_str = self.request.query_params.get("search", None)
+        if search_str:
+            users = users.filter(username__icontains=search_str)
+        serializer = UserListSerializer(users, many=True)
+        return Response(serializer.data)
 
 class ActivityListView(ListAPIView):
     permission_classes = [IsAuthenticated]

@@ -124,7 +124,7 @@ class SearchResultSerializer(serializers.Serializer):
         return representation
 
 
-class UserListSerializer(BookSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username"]
