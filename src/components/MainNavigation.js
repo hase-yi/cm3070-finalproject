@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import classes from './MainNavigation.module.css';
 import { getUsername } from '../features/authSlice';
+import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
 
 function MainNavigation() {
 	const user = useSelector((state) => state.auth.user);
@@ -18,6 +19,9 @@ function MainNavigation() {
 				.catch((err) => {
 					console.error('Failed to fetch username:', err);
 				});
+
+			dispatch(fetchFollowedUsers()).unwrap()
+			dispatch(fetchFollowers()).unwrap()
 		}
 	}, [status, dispatch, user]);
 

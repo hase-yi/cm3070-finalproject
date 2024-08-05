@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../axiosInstance';
 import SharedReviews from '../components/Social/SharedReviews'
+import FollowUnfollowButton from '../components/Social/FollowUnfollowButton'
 
 
 function HomePage() {
@@ -33,7 +34,7 @@ function HomePage() {
       <h1>Profile of {username}</h1>
 
       <p>Browse your personal library </p>
-      {/* Follow Button */}
+      {<FollowUnfollowButton username={username}/>}
       {/* Show all recent reviews, comments and reading progress that is shared, clicking o them leads to that section in the respective book */}
       {<SharedReviews username={username}/>}
     </PageContent>

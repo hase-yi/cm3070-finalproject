@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { loginUser, logoutUser } from '../features/authSlice'; // Ensure logoutUser is imported
+import { getUsername as fetchUsername, loginUser, logoutUser } from '../features/authSlice'; // Ensure logoutUser is imported
 import navigateEmitter from '../navigateEmitter';
-import {store } from '../store/index'
+import { store } from '../store/index'
+import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
 
 function AuthenticationPage() {
   const [username, setUsername] = useState('');
@@ -18,6 +19,9 @@ function AuthenticationPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser({ username, password }));
+    dispatch(fetchUsername())
+    dispatch(fetchFollowedUsers())
+    dispatch(fetchFollowers())
     navigateEmitter.emit('navigate', '/');
   };
 
