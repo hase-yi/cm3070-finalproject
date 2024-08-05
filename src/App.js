@@ -54,6 +54,7 @@ const routeDefinitions = createRoutesFromElements(
 			<Route path="search" element={<SearchPage />} />
 			<Route path="scan" element={<ScanPage />} />
 			<Route path="searchpeople" element={<PeopleSearchPage />} />
+			<Route path="profiles/:username" element={<HomePage />} />
 
 		</Route>
 	</Route>

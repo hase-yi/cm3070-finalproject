@@ -45,7 +45,7 @@ function PeopleSearch() {
             <ul>
                 {searchResults.map((result) => (
                     <li key={result.username}>
-                        <a href={`/profile/${result.username}`}>{result.username}</a>
+                        <a href={`/profiles/${result.username}`}>{result.username}</a>
                     </li>
                 ))}
             </ul>
