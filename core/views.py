@@ -317,7 +317,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        review = serializer.save(user=self.request.user)
+        review = serializer.save()
 
         Activity.objects.create(
             user=self.request.user,
