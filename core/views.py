@@ -289,7 +289,15 @@ class ReadingProgressDetailView(
     serializer_class = ReadingProgressSerializer
 
     def get_queryset(self):
-        return ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+        username_filter = self.request.query_params.get("username", None)
+        limit = self.request.query_params.get("limit", 5)
+
+        reading_progress = ReadingProgress.objects.for_user_and_followed(user=self.request.user)
+
+        if username_filter:
+            reading_progress = reading_progress.filter(book__user=User.objects.get(username=username_filter))
+
+        return reading_progress.order_by('timestamp')[:limit]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

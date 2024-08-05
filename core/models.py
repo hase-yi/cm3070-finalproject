@@ -110,6 +110,17 @@ class ReadingProgress(models.Model):
     current_page = models.PositiveIntegerField(default=0)
     shared = models.BooleanField(default=False)
 
+    timestamp = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Object is being created
+            self.timestamp = timezone.now()
+        else:
+            # Object is being updated
+            self.timestamp = timezone.now()
+        super().save(*args, **kwargs)
+
     @property
     def reading_percentage(self):
         total_pages = self.book.total_pages
