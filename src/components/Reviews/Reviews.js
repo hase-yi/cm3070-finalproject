@@ -144,7 +144,7 @@ const Reviews = () => {
 		return (
 			<div>
 				<p>{formData.review.text}</p>
-				{user?.id === book?.user?.id && (
+				{user === book?.user && (
 					<button onClick={handleEdit}>Edit</button>
 				)}
 			</div>
@@ -153,7 +153,7 @@ const Reviews = () => {
 
 	return (
 		<div>
-			<button onClick={handleEdit}>Write Review</button>
+			{user === book?.user && <button onClick={handleEdit}>Write Review</button>}
 		</div>
 	);
 };

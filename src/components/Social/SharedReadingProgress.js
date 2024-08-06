@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosInstance';
 
 
-function SharedReviews({ username }) {
+function SharedReadingProgress({ username }) {
     const [readingProgresses, setReadingProgresses] = useState([]);
     const [loadingReadingProgresses, setLoadingReadingProgresses] = useState(false);
     const [errorReadingProgresses, setErrorReadingProgresses] = useState(null);
@@ -26,13 +26,13 @@ function SharedReviews({ username }) {
 
     return (
         <div style={{ background: "white", color: "black" }}>
-            <h2>Recent Reviews</h2>
+            <h2>Recent Reading Progress</h2>
             {loadingReadingProgresses && <p>Loading...</p>}
             {errorReadingProgresses && <p>{errorReadingProgresses}</p>}
             <ul>
-                {readingProgresses.map((review) => (
-                    <li key={review.id}>
-                        <a href={`/books/${review.book.id}`}>{review.book.title}</a>
+                {readingProgresses.map((progress) => (
+                    <li key={progress.id}>
+                        <a href={`/books/${progress.book.id}`}>{progress.book.title}</a>
                     </li>
                 ))}
             </ul>
@@ -41,4 +41,4 @@ function SharedReviews({ username }) {
     )
 }
 
-export default SharedReviews;
+export default SharedReadingProgress;

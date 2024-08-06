@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../axiosInstance';
 import SharedReviews from '../components/Social/SharedReviews'
 import FollowUnfollowButton from '../components/Social/FollowUnfollowButton'
-
+import SharedReadingProgress from '../components/Social/SharedReadingProgress'
 
 function HomePage() {
   const { username } = useParams();
@@ -38,6 +38,7 @@ function HomePage() {
       {/* Show all recent reviews, comments and reading progress that is shared, clicking o them leads to that section in the respective book */}
       
       {username && <SharedReviews username={username}/>}
+      {username && <SharedReadingProgress username={username}/>}
     </PageContent>
   )
 }
