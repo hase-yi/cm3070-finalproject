@@ -108,6 +108,16 @@ class BookSerializer(serializers.ModelSerializer):
         except Review.DoesNotExist:
             representation["review"] = None
 
+        # Remove fields that are not shared if accessed by different user
+        request_user = self.context["request"].user
+        if representation["user"] != request_user:
+            if representation["review"]:
+                if not representation["review"]["shared"]:
+                    representation["review"] = None
+            if representation["reading_progress"]:
+                if not representation["reading_progress"]["shared"]:
+                    representation["reading_progress"] = None
+
         return representation
 
 

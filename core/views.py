@@ -43,17 +43,7 @@ from .serializers import (
 from django.db.models import Q
 
 
-OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
 
-
-class BookListCreateView(generics.ListCreateAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-
-
-class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
 
 
 import logging
@@ -66,6 +56,7 @@ from .models import Shelf
 from .serializers import ShelfSerializer
 
 logger = logging.getLogger(__name__)
+OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
 
 
 class ShelfListView(ListAPIView, CreateAPIView):
@@ -135,8 +126,8 @@ class BookDetailView(
     def get_queryset(self):
         return Book.objects.filter(
             Q(user=self.request.user)
-            &( Q(review__shared=True)
-            | Q(reading_progress__shared=True))
+            | Q(review__shared=True)
+            | Q(reading_progress__shared=True)
         )
 
     def get_serializer_context(self):
@@ -277,7 +268,7 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         limit = self.request.query_params.get("limit", 5)
 
         if username_filter:
-            reading_progress = reading_progress.filter(
+            reading_progress = ReadingProgress.objects.filter(
                 Q(book__user=User.objects.get(username=username_filter))
                 & Q(shared=True)
             )
