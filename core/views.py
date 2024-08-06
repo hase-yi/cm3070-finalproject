@@ -133,7 +133,11 @@ class BookDetailView(
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        return Book.objects.filter(Q(user=self.request.user) | Q(review__shared=True)| Q(reading_progress__shared=True))
+        return Book.objects.filter(
+            Q(user=self.request.user)
+            &( Q(review__shared=True)
+            | Q(reading_progress__shared=True))
+        )
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -198,7 +202,9 @@ class UserListView(APIView):
             users = User.objects.filter(following__in=self.request.user.followers.all())
         elif relationship == "followed":
             try:
-                users = Following.objects.get(user=self.request.user).followed_users.all()
+                users = Following.objects.get(
+                    user=self.request.user
+                ).followed_users.all()
             except Following.DoesNotExist:
                 users = User.objects.none()
         elif relationship is None:
@@ -270,26 +276,25 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         username_filter = self.request.query_params.get("username", None)
         limit = self.request.query_params.get("limit", 5)
 
-
-        if status:
-            reading_progress = ReadingProgress.objects.for_user(
-                self.request.user
-            ).filter(status=status)
-        else:
-            reading_progress = ReadingProgress.objects.for_user_and_followed(
-                user=self.request.user
+        if username_filter:
+            reading_progress = reading_progress.filter(
+                Q(book__user=User.objects.get(username=username_filter))
+                & Q(shared=True)
             )
+        else:
+            if status:
+                reading_progress = ReadingProgress.objects.for_user(
+                    self.request.user
+                ).filter(status=status)
+            else:
+                reading_progress = ReadingProgress.objects.for_user_and_followed(
+                    user=self.request.user
+                )
 
         if book:
             reading_progress.filter(book=book)
 
-        if username_filter:
-            reading_progress = reading_progress.filter(
-                book__user=User.objects.get(username=username_filter)
-            )
-
         limited = reading_progress.order_by("timestamp")[:limit]
-
         return limited
 
     def get_serializer_context(self):
@@ -318,7 +323,7 @@ class ReadingProgressDetailView(
     serializer_class = ReadingProgressSerializer
 
     def get_queryset(self):
-        return ReadingProgress.objects.filter(Q(book__user=self.request.user) | Q(shared=True))
+        return ReadingProgress.objects.filter(book__user=self.request.user)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -347,11 +352,11 @@ class ReviewListView(ListAPIView, CreateAPIView):
 
         if username_filter:
             reviews = Review.objects.filter(
-                book__user=User.objects.get(username=username_filter)
-            ).filter(shared=True)
+                Q(book__user=User.objects.get(username=username_filter))
+                & Q(shared=True)
+            )
         else:
             reviews = Review.objects.for_user_and_followed(user=self.request.user)
-
 
         return reviews.order_by("date")[:limit]
 
