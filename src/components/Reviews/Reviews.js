@@ -19,6 +19,9 @@ const Reviews = () => {
 		state.books.books.find((book) => book.id === numericBookId)
 	);
 
+	const user = useSelector((state) => state.auth.user);
+
+
 	const status = useSelector((state) => state.books.status);
 	const error = useSelector((state) => state.books.error);
 
@@ -121,6 +124,15 @@ const Reviews = () => {
 		}
 	}
 
+	if (book?.review) {
+		return (
+			<div>
+				<p>{formData.review.text}</p>
+				{user === book.user &&
+					<button onClick={handleEdit}>Edit</button>}
+			</div>
+		);
+	}
 
 	if (isEditing) {
 		return (
@@ -163,14 +175,7 @@ const Reviews = () => {
 		);
 	}
 
-	if (book?.review) {
-		return (
-			<div>
-				<p>{formData.review.text}</p>
-				<button onClick={handleEdit}>Edit</button>
-			</div>
-		);
-	}
+
 	
 	return (
 		<div>

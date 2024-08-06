@@ -34,9 +34,10 @@ function HomePage() {
       <h1>Profile of {username}</h1>
 
       <p>Browse your personal library </p>
-      {<FollowUnfollowButton username={username}/>}
+      {username && <FollowUnfollowButton username={username}/>}
       {/* Show all recent reviews, comments and reading progress that is shared, clicking o them leads to that section in the respective book */}
-      {<SharedReviews username={username}/>}
+      
+      {username && <SharedReviews username={username}/>}
     </PageContent>
   )
 }

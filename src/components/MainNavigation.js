@@ -20,8 +20,12 @@ function MainNavigation() {
 					console.error('Failed to fetch username:', err);
 				});
 
-			dispatch(fetchFollowedUsers()).unwrap()
-			dispatch(fetchFollowers()).unwrap()
+			dispatch(fetchFollowedUsers()).unwrap().catch((err) => {
+				console.error('Failed to get who you are following:', err);
+			});
+			dispatch(fetchFollowers()).unwrap().catch((err) => {
+				console.error('Failed to get your followers:', err);
+			});
 		}
 	}, [status, dispatch, user]);
 
@@ -39,7 +43,7 @@ function MainNavigation() {
 							}
 							end={true} // This link will only be considered active if we are on "/"
 						>
-							Home
+							{user}'s Home
 						</NavLink>
 					</li>
 					<li>
