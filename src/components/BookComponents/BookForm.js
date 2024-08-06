@@ -217,8 +217,8 @@ const BookForm = ({ method, bookId }) => {
 
       <Input
         label="Total Pages"
-        id="total_pages"
-        name="total_pages"
+        id="totalPages"
+        name="totalPages"
         type="number"
         value={formData.totalPages}
         onChange={handleInputChange}
