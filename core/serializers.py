@@ -110,7 +110,8 @@ class BookSerializer(serializers.ModelSerializer):
 
         # Remove fields that are not shared if accessed by different user
         request_user = self.context["request"].user
-        if representation["user"] != request_user:
+ 
+        if representation["user"] != str(request_user):
             if representation["review"]:
                 if not representation["review"]["shared"]:
                     representation["review"] = None
@@ -119,6 +120,14 @@ class BookSerializer(serializers.ModelSerializer):
                     representation["reading_progress"] = None
 
         return representation
+    
+
+class BookSerializerPlain(serializers.ModelSerializer):
+    user = UsernameField(read_only=True)
+
+    class Meta:
+        model = Book
+        fields = ['id', 'title', 'user', 'author']
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -170,19 +179,18 @@ class ReadingProgressSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         reading_progress = super().to_representation(instance)
-        reading_progress["book"] = BookSerializer(instance.book).data
+        reading_progress["book"] = BookSerializerPlain(instance.book).data
         return reading_progress
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Review
         fields = "__all__"
 
     def to_representation(self, instance):
         review = super().to_representation(instance)
-        review["book"] = BookSerializer(instance.book).data
+        review["book"] = BookSerializerPlain(instance.book).data
         return review
 
 

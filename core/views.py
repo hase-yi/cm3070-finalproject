@@ -268,10 +268,10 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         limit = self.request.query_params.get("limit", 5)
 
         if username_filter:
-            reading_progress = ReadingProgress.objects.filter(
-                Q(book__user=User.objects.get(username=username_filter))
-                & Q(shared=True)
-            )
+            reading_progress = ReadingProgress.objects.filter(book__user=User.objects.get(username=username_filter))
+            if username_filter != self.request.user.username:
+                reading_progress = reading_progress.filter(shared=True)
+            
         else:
             if status:
                 reading_progress = ReadingProgress.objects.for_user(
@@ -342,10 +342,9 @@ class ReviewListView(ListAPIView, CreateAPIView):
         limit = self.request.query_params.get("limit", 5)
 
         if username_filter:
-            reviews = Review.objects.filter(
-                Q(book__user=User.objects.get(username=username_filter))
-                & Q(shared=True)
-            )
+            reviews = Review.objects.filter(book__user=User.objects.get(username=username_filter))
+            if username_filter != self.request.user.username:
+                reviews = reviews.filter(shared=True)
         else:
             reviews = Review.objects.for_user_and_followed(user=self.request.user)
 
