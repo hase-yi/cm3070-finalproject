@@ -40,6 +40,8 @@ from .serializers import (
     UserListSerializer,
     UserSerializer,
 )
+from django.db.models import Q
+
 
 OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
 
@@ -131,7 +133,7 @@ class BookDetailView(
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        return Book.objects.for_user(user=self.request.user)
+        return Book.objects.filter(Q(user=self.request.user) | Q(review__shared=True)| Q(reading_progress__shared=True))
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -183,6 +185,7 @@ def book_search(request):
 
     return Response(search_results, status=status.HTTP_200_OK)
 
+
 class UserListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -190,25 +193,25 @@ class UserListView(APIView):
         search_str = self.request.query_params.get("search", None)
         relationship = self.request.query_params.get("relationship", None)
 
-        if relationship:
-            if relationship == "followers":
-                users = self.request.user.followers.all()
-            
-            if relationship == "followed":
-                try:
-                    users = Following.objects.get(user=self.request.user).followed_users.all()
-                except Following.DoesNotExist:
-                    users = Following.objects.none()
-        else:
+        if relationship == "followers":
+            # Get the User objects from the Following instances
+            users = User.objects.filter(following__in=self.request.user.followers.all())
+        elif relationship == "followed":
+            try:
+                users = Following.objects.get(user=self.request.user).followed_users.all()
+            except Following.DoesNotExist:
+                users = User.objects.none()
+        elif relationship is None:
             users = User.objects.all()
-
+        else:
+            return Response({"error": "Invalid relationship value."}, status=400)
 
         if search_str:
             users = users.filter(username__icontains=search_str)
 
-
         serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
+
 
 class ActivityListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -264,6 +267,9 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
     def get_queryset(self):
         status = self.request.query_params.get("status", None)
         book = self.request.query_params.get("book", None)
+        username_filter = self.request.query_params.get("username", None)
+        limit = self.request.query_params.get("limit", 5)
+
 
         if status:
             reading_progress = ReadingProgress.objects.for_user(
@@ -277,7 +283,14 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         if book:
             reading_progress.filter(book=book)
 
-        return reading_progress
+        if username_filter:
+            reading_progress = reading_progress.filter(
+                book__user=User.objects.get(username=username_filter)
+            )
+
+        limited = reading_progress.order_by("timestamp")[:limit]
+
+        return limited
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -305,15 +318,7 @@ class ReadingProgressDetailView(
     serializer_class = ReadingProgressSerializer
 
     def get_queryset(self):
-        username_filter = self.request.query_params.get("username", None)
-        limit = self.request.query_params.get("limit", 5)
-
-        reading_progress = ReadingProgress.objects.for_user_and_followed(user=self.request.user)
-
-        if username_filter:
-            reading_progress = reading_progress.filter(book__user=User.objects.get(username=username_filter))
-
-        return reading_progress.order_by('timestamp')[:limit]
+        return ReadingProgress.objects.filter(Q(book__user=self.request.user) | Q(shared=True))
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -340,12 +345,15 @@ class ReviewListView(ListAPIView, CreateAPIView):
         username_filter = self.request.query_params.get("username", None)
         limit = self.request.query_params.get("limit", 5)
 
-        reviews = Review.objects.for_user_and_followed(user=self.request.user)
-
         if username_filter:
-            reviews = reviews.filter(book__user=User.objects.get(username=username_filter))
+            reviews = Review.objects.filter(
+                book__user=User.objects.get(username=username_filter)
+            ).filter(shared=True)
+        else:
+            reviews = Review.objects.for_user_and_followed(user=self.request.user)
 
-        return reviews.order_by('date')[:limit]
+
+        return reviews.order_by("date")[:limit]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

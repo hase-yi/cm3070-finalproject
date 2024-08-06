@@ -75,7 +75,7 @@ class Book(models.Model):
 class BooksUserAccessManager(models.Manager):
     def for_user(self, user):
         return self.filter(book__user=user)
-
+    
     def for_user_and_followed(self, user):
         # Get the users that the given user is following
         following = Following.objects.filter(user=user).values_list(
@@ -110,7 +110,7 @@ class ReadingProgress(models.Model):
     current_page = models.PositiveIntegerField(default=0)
     shared = models.BooleanField(default=False)
 
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:
