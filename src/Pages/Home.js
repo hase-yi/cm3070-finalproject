@@ -5,6 +5,7 @@ import axiosInstance from '../axiosInstance';
 import SharedReviews from '../components/Social/SharedReviews'
 import FollowUnfollowButton from '../components/Social/FollowUnfollowButton'
 import SharedReadingProgress from '../components/Social/SharedReadingProgress'
+import Activity from "../components/Social/Activity";
 import { useDispatch, useSelector } from 'react-redux';
 
 function HomePage() {
@@ -22,6 +23,8 @@ function HomePage() {
       
       {<SharedReviews username={username ? username : user}/>}
       {<SharedReadingProgress username={username ? username : user}/>}
+      {!username && <Activity/>}
+
     </PageContent>
   )
 }
