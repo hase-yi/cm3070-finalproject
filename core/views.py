@@ -31,6 +31,7 @@ from .models import (
     Comment,
 )
 from .serializers import (
+    ActivitySerializer,
     BookSerializer,
     ImageAssetSerializer,
     ReviewSerializer,
@@ -212,8 +213,19 @@ class UserListView(APIView):
 
 class ActivityListView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UserListSerializer
-    queryset = Activity.objects.all()
+    serializer_class = ActivitySerializer
+
+    def get_queryset(self):
+        try:
+            users = Following.objects.get(
+                user=self.request.user
+            ).followed_users.all()
+        except Following.DoesNotExist:
+            users = User.objects.none()
+
+        limit = self.request.query_params.get("limit", 5)
+
+        return Activity.objects.filter(user__in=users).order_by('-timestamp')[:limit]
 
 
 @api_view(["POST", "DELETE"])

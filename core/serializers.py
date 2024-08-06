@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, ImageAsset, Review, Shelf, ReadingProgress, Comment
+from .models import Activity, Book, ImageAsset, Review, Shelf, ReadingProgress, Comment
 
 
 class UsernameField(serializers.RelatedField):
@@ -217,3 +217,11 @@ class ImageAssetSerializer(serializers.ModelSerializer):
                 "An image must be associated with either a book or a shelf."
             )
         return data
+
+class ActivitySerializer(serializers.ModelSerializer):
+    user = UsernameField(read_only=True)
+    book = BookSerializerPlain()
+
+    class Meta:
+        model = Activity
+        fields = "__all__"

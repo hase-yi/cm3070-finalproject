@@ -191,6 +191,17 @@ class Activity(models.Model):
 
     objects = BooksUserAccessManager()
 
+    timestamp = models.DateTimeField(null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Object is being created
+            self.timestamp = timezone.now()
+        else:
+            # Object is being updated
+            self.timestamp = timezone.now()
+        super().save(*args, **kwargs)
+
 
 class Following(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

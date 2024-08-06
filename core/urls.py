@@ -2,6 +2,7 @@ from django.urls import path
 
 from core.views import CookieTokenObtainPairView
 from .views import (
+    ActivityListView,
     BookListView,
     BookDetailView,
     CommentDetailView,
@@ -49,4 +50,5 @@ urlpatterns = [
         name="comment-detail",
     ),
     path("upload/", ImageAssetView.as_view(), name="upload"),
+    path('activities/', ActivityListView.as_view(), name='activity-list')
 ]
