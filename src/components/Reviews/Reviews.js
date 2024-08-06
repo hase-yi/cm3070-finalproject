@@ -21,10 +21,6 @@ const Reviews = () => {
 
 	const user = useSelector((state) => state.auth.user);
 
-
-	const status = useSelector((state) => state.books.status);
-	const error = useSelector((state) => state.books.error);
-
 	const [formData, setFormData] = useState({
 		review: {
 			text: book?.review?.text || '',
@@ -35,6 +31,7 @@ const Reviews = () => {
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		setIsSubmitting(true);
+
 		const reviewData = {
 			book: bookId,
 			text: formData.review.text,
@@ -42,97 +39,65 @@ const Reviews = () => {
 		};
 
 		try {
-			const bookData = {
-				review: { ...reviewData },
-			};
+			const bookData = { review: { ...reviewData } };
 
-			// console.log('bookData :', bookData);
 			if (!book?.review) {
-				dispatch(createReview(bookData)).unwrap();
+				await dispatch(createReview(bookData)).unwrap();
 			} else {
 				bookData.review.id = book.review.id;
-				dispatch(updateReview(bookData)).unwrap();
+				await dispatch(updateReview(bookData)).unwrap();
 			}
 		} catch (err) {
-			console.error('Fail to save book', err);
+			console.error('Failed to save book', err);
+		} finally {
+			setIsSubmitting(false);
+			setIsEditing(false);
 		}
-
-		setIsSubmitting(false);
-		setIsEditing(false);
 	};
 
-	const handleEdit = (e) => {
+	const handleEdit = () => {
+		if (isEditing) {
+			setFormData({
+				review: {
+					text: book?.review?.text || '',
+					shared: book?.review?.shared || false,
+				},
+			});
+		}
 		setIsEditing(!isEditing);
 	};
 
 	const handleReviewChange = (e) => {
-		const { name, value } = e.target;
+		const { name, value, type, checked } = e.target;
+
 		setFormData((prevData) => ({
 			...prevData,
 			review: {
 				...prevData.review,
-				[name]: value,
+				[name]: type === 'checkbox' ? checked : value,
 			},
 		}));
 	};
 
-	const handleDelete = async (event) => {
+	const handleDelete = async () => {
 		const proceed = window.confirm('Are you sure?');
-		if (!proceed) {
-			return
-		}
+		if (!proceed) return;
 
 		setIsSubmitting(true);
-	
-		// Validate that book.id exists and is a number
-		if (!book || typeof book.id !== 'number' || !Number.isInteger(book.id)) {
-			console.error('Book ID is either missing or not a valid number');
-			setIsSubmitting(false);
-			return; // Exit the function early if book.id is invalid
-		}
-	
-		const reviewData = {
-			book: book.id,
-		};
-		
-		console.log(reviewData)
 
 		try {
-			const bookData = {
-				review:{
-					...reviewData
-				}
-			};
-	
-			// Ensure that comment.id exists and is set correctly
-			if (book.review && book.review.id) {
-				bookData.review.id = book.review.id;
+			if (book?.review?.id) {
+				await dispatch(deleteReview({ book: book.id, review: { id: book.review.id } })).unwrap();
 			} else {
-				console.error('Review ID is missing');
 				throw new Error('Review ID is missing');
 			}
-	
-			// Await the dispatch to ensure completion
-			await dispatch(deleteReview(bookData)).unwrap();
-	
 		} catch (err) {
-			console.error('Failed to save book:', err);
+			console.error('Failed to delete review:', err);
 		} finally {
-			// Reset the states regardless of success or failure
 			setIsSubmitting(false);
 			setIsEditing(false);
 		}
-	}
-
-	if (book?.review) {
-		return (
-			<div>
-				<p>{formData.review.text}</p>
-				{user === book.user &&
-					<button onClick={handleEdit}>Edit</button>}
-			</div>
-		);
-	}
+	};
 
 	if (isEditing) {
 		return (
@@ -175,8 +140,17 @@ const Reviews = () => {
 		);
 	}
 
+	if (book?.review) {
+		return (
+			<div>
+				<p>{formData.review.text}</p>
+				{user?.id === book?.user?.id && (
+					<button onClick={handleEdit}>Edit</button>
+				)}
+			</div>
+		);
+	}
 
-	
 	return (
 		<div>
 			<button onClick={handleEdit}>Write Review</button>

@@ -5,12 +5,12 @@ import axiosInstance from '../../axiosInstance';
 function SharedReviews({ username }) {
     const [reviews, setReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
-    const [errorReviews, setErrorreviews] = useState(null);
+    const [errorReviews, setErrorReviews] = useState(null);
 
     useEffect(() => {
         if (username) {
             setLoadingReviews(true);
-            setErrorreviews(null);
+            setErrorReviews(null);
 
             axiosInstance.get(`/reviews/`, { params: { username: username } })
                 .then((response) => {
@@ -18,7 +18,7 @@ function SharedReviews({ username }) {
                     setLoadingReviews(false);
                 })
                 .catch((err) => {
-                    setErrorreviews('An error occurred while fetching the reviews.');
+                    setErrorReviews('An error occurred while fetching the reviews.');
                     setLoadingReviews(false);
                 });
         }
