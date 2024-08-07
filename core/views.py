@@ -1,60 +1,25 @@
 import logging
-from venv import logger
+
 import requests
-from django.shortcuts import render
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.response import Response
-from functools import wraps
-from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
-from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework import mixins, generics
-from rest_framework.generics import (
-    CreateAPIView,
-    ListAPIView,
-    UpdateAPIView,
-    DestroyAPIView,
-    RetrieveAPIView,
-)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import (
-    Activity,
-    Book,
-    Following,
-    ImageAsset,
-    Review,
-    Shelf,
-    ReadingProgress,
-    Comment,
-)
-from .serializers import (
-    ActivitySerializer,
-    BookSerializer,
-    ImageAssetSerializer,
-    ReviewSerializer,
-    ShelfSerializer,
-    ReadingProgressSerializer,
-    CommentSerializer,
-    UserListSerializer,
-    UserSerializer,
-)
 from django.db.models import Q
-
-
-
-
-
-import logging
-from django.http import Http404
-from rest_framework import status
+from django.http import JsonResponse
+from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import mixins, generics
-from .models import Shelf
-from .serializers import ShelfSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .models import (Activity, Book, Comment, Following, ImageAsset,
+                     ReadingProgress, Review, Shelf)
+from .serializers import (ActivitySerializer, BookSerializer,
+                          CommentSerializer, ImageAssetSerializer,
+                          ReadingProgressSerializer, ReviewSerializer,
+                          ShelfSerializer, UserListSerializer, UserSerializer)
 
 logger = logging.getLogger(__name__)
 OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
@@ -217,15 +182,13 @@ class ActivityListView(ListAPIView):
 
     def get_queryset(self):
         try:
-            users = Following.objects.get(
-                user=self.request.user
-            ).followed_users.all()
+            users = Following.objects.get(user=self.request.user).followed_users.all()
         except Following.DoesNotExist:
             users = User.objects.none()
 
         limit = self.request.query_params.get("limit", 5)
 
-        return Activity.objects.filter(user__in=users).order_by('-timestamp')[:limit]
+        return Activity.objects.filter(user__in=users).order_by("-timestamp")[:limit]
 
 
 @api_view(["POST", "DELETE"])
@@ -280,10 +243,12 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         limit = self.request.query_params.get("limit", 5)
 
         if username_filter:
-            reading_progress = ReadingProgress.objects.filter(book__user=User.objects.get(username=username_filter))
+            reading_progress = ReadingProgress.objects.filter(
+                book__user=User.objects.get(username=username_filter)
+            )
             if username_filter != self.request.user.username:
                 reading_progress = reading_progress.filter(shared=True)
-            
+
         else:
             if status:
                 reading_progress = ReadingProgress.objects.for_user(
@@ -354,7 +319,9 @@ class ReviewListView(ListAPIView, CreateAPIView):
         limit = self.request.query_params.get("limit", 5)
 
         if username_filter:
-            reviews = Review.objects.filter(book__user=User.objects.get(username=username_filter))
+            reviews = Review.objects.filter(
+                book__user=User.objects.get(username=username_filter)
+            )
             if username_filter != self.request.user.username:
                 reviews = reviews.filter(shared=True)
         else:
@@ -449,14 +416,6 @@ class CommentDetailView(
         return context
 
 
-class ImageAssetView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ImageAssetSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
 class CookieTokenObtainPairView(TokenObtainPairView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get("access"):
@@ -503,3 +462,46 @@ def register_user(request):
 @permission_classes([IsAuthenticated])
 def get_username(request):
     return JsonResponse({"username": request.user.username})
+
+
+
+
+class ImageAssetListCreateView(generics.ListCreateAPIView):
+    queryset = ImageAsset.objects.all()
+    serializer_class = ImageAssetSerializer
+
+    def perform_create(self, serializer):
+        # Retrieve book and shelf from the validated data
+        book = serializer.validated_data.get("book")
+        shelf = serializer.validated_data.get("shelf")
+
+        # Ensure only one of book or shelf is set
+        if book and shelf:
+            raise ValidationError(
+                "An image can be associated with either a book or a shelf, not both."
+            )
+        if not book and not shelf:
+            raise ValidationError(
+                "An image must be associated with either a book or a shelf."
+            )
+
+        # Delete the existing image if a new image is being uploaded
+        if book:
+            existing_image = ImageAsset.objects.filter(book=book).first()
+        elif shelf:
+            existing_image = ImageAsset.objects.filter(shelf=shelf).first()
+
+        if existing_image:
+            existing_image.delete()
+
+        # Save the new image
+        serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )

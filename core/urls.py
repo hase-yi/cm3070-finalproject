@@ -7,7 +7,7 @@ from .views import (
     BookDetailView,
     CommentDetailView,
     CommentListView,
-    ImageAssetView,
+    ImageAssetListCreateView,
     ReadingProgressDetailView,
     ReadingProgressListView,
     ReviewDetailView,
@@ -49,6 +49,6 @@ urlpatterns = [
         CommentDetailView.as_view(),
         name="comment-detail",
     ),
-    path("upload/", ImageAssetView.as_view(), name="upload"),
+    path("upload/", ImageAssetListCreateView.as_view(), name="upload"),
     path('activities/', ActivityListView.as_view(), name='activity-list')
 ]
