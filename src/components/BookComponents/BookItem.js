@@ -8,6 +8,7 @@ import classes from './BookItem.module.css'; // Assuming you have CSS modules
 
 import ReadingProgress from './ReadingProgress';
 import ShelfSelect from '../BookSearchComponents/ShelfSelect';
+import ReadingStatusForm from './ReadingStatusForm';
 
 function BookItem() {
 	const { bookId } = useParams();
@@ -63,9 +64,11 @@ function BookItem() {
 			<section className={classes.bookDetails}>
 				<div className={classes.imageAndProgress}>
 					<img src={book.image} alt={book.title} />
-					<div className={classes.readingProgress}>
+					
+					{book?.reading_progress && <div className={classes.readingProgress}>
 						<ReadingProgress bookId={bookId} />
-					</div>
+					</div>}
+					{<ReadingStatusForm bookId={bookId}/>}
 				</div>
 				<div className={classes.bookInfo}>
 					<h1>Title:{book.title}</h1>

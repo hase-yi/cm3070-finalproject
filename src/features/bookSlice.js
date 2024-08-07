@@ -453,16 +453,17 @@ const bookSlice = createSlice({
 				state.error = action.payload || 'Failded to search books';
 			})
 			.addCase(createReadingProgress.fulfilled, (state, action) => {
-				state.status = 'succeeded';
 				const index = state.books.findIndex(
 					(book) => book.id === action.payload.book
 				);
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						reading_progress: { ...action.payload.book.reading_progress },
+						reading_progress: { ...action.payload },
 					};
 				}
+				state.status = 'succeeded';
+
 			})
 			.addCase(updateReadingProgress.fulfilled, (state, action) => {
 				const index = state.books.findIndex(
@@ -472,21 +473,24 @@ const bookSlice = createSlice({
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						reading_progress: { ...action.payload.book.reading_progress },
+						reading_progress: { ...action.payload },
 					};
 				}
+				state.status = 'succeeded';
+
 			})
 			.addCase(createReview.fulfilled, (state, action) => {
-				state.status = 'succeeded';
 				const index = state.books.findIndex(
 					(book) => book.id === action.payload.book.id
 				);
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						review: { ...action.payload.book.review },
+						review: { ...action.payload },
 					};
 				}
+				state.status = 'succeeded';
+
 			})
 			.addCase(updateReview.fulfilled, (state, action) => {
 				const index = state.books.findIndex(
@@ -495,9 +499,11 @@ const bookSlice = createSlice({
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						review: { ...action.payload.book.review },
+						review: { ...action.payload },
 					};
 				}
+				state.status = 'succeeded';
+
 			})
 			.addCase(deleteReview.fulfilled, (state, action) => {
 
