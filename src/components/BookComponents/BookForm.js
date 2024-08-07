@@ -8,11 +8,11 @@ import {
   updateReadingProgress,
 } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
-
 import classes from './BookForm.module.css';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
 import { isValidISBN } from '../../utils/validation';
+import axiosInstance from '../../axiosInstance'; // Import axios instance
 
 const BookForm = ({ method, bookId }) => {
   const numericBookId = Number(bookId);
@@ -39,13 +39,14 @@ const BookForm = ({ method, bookId }) => {
     reading_progress: {
       currentPage: book?.reading_progress?.current_page || 1,
       status: book?.reading_progress?.status || 'W',
-			shared: book?.reading_progress?.shared || false
+      shared: book?.reading_progress?.shared || false,
     },
-	
   });
 
   const [isbnError, setISBNError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(book?.image || null);
 
   const isReading = formData.reading_progress.status === 'R';
 
@@ -70,9 +71,10 @@ const BookForm = ({ method, bookId }) => {
         reading_progress: {
           currentPage: book.reading_progress?.current_page || 1,
           status: book.reading_progress?.status || 'W',
-					shared: book?.reading_progress?.shared || false
+          shared: book?.reading_progress?.shared || false,
         },
       });
+      setPreviewImage(book.image || null);
     }
   }, [book]);
 
@@ -85,15 +87,15 @@ const BookForm = ({ method, bookId }) => {
   };
 
   const handleReadingProgressChange = (e) => {
-    const { name, value } = e.target;
+		const { name, value, type, checked } = e.target;
+
     setFormData((prevData) => ({
       ...prevData,
       reading_progress: {
         ...prevData.reading_progress,
-        [name]: value,
+				[name]: type === 'checkbox' ? checked : value,
       },
     }));
-
   };
 
   const handleStatusChange = (event) => {
@@ -105,6 +107,11 @@ const BookForm = ({ method, bookId }) => {
         status,
       },
     }));
+  };
+
+  const handleFileChange = (file) => {
+    setImageFile(file); // Set the selected image file
+    setPreviewImage(URL.createObjectURL(file)); // Set the preview image URL
   };
 
   const validateForm = () => {
@@ -144,7 +151,7 @@ const BookForm = ({ method, bookId }) => {
         book: book?.id,
         current_page: parseInt(formData.reading_progress.currentPage, 10) || 0,
         status: formData.reading_progress.status || 'W',
-				shared: formData.reading_progress.shared === "on" || false
+        shared: formData.reading_progress.shared === "on" || false,
       },
     };
 
@@ -166,11 +173,52 @@ const BookForm = ({ method, bookId }) => {
 
         await dispatch(updateReadingProgress(bookData)).unwrap();
       }
+
+      if (imageFile) {
+        const imageUrl = await uploadImage(bookId || book.id); // Upload image after form submission
+        const updatedBookData = {
+          ...bookData,
+          image: imageUrl,
+        };
+        await updateBookWithImage(bookId || book.id, updatedBookData); // Update book with the image URL
+      }
+
       navigate(`/books/${bookId}`);
     } catch (err) {
       console.error('Failed to save book:', err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const uploadImage = async (bookId) => {
+    const formData = new FormData();
+    formData.append('file', imageFile);
+    formData.append('book', bookId);
+
+    try {
+      const response = await axiosInstance.post('/upload/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.file; // Assuming the image URL is returned in the `file` field
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      throw err;
+    }
+  };
+
+  const updateBookWithImage = async (bookId, updatedBookData) => {
+    try {
+      await dispatch(
+        updateBook({
+          id: bookId,
+          ...updatedBookData, // Spread the full book data with the new image URL
+        })
+      ).unwrap();
+    } catch (err) {
+      console.error('Failed to update book with image URL:', err);
     }
   };
 
@@ -224,9 +272,8 @@ const BookForm = ({ method, bookId }) => {
         onChange={handleInputChange}
       />
 
-<div className={classes['status-current-page-container']}>
-
-<Input
+      <div className={classes['status-current-page-container']}>
+        <Input
           label="Sharing"
           id="shared"
           name="shared"
@@ -235,30 +282,30 @@ const BookForm = ({ method, bookId }) => {
           onChange={handleReadingProgressChange}
         />
 
-      <label htmlFor="status">Reading Status:</label>
-      <select
-        id="status"
-        name="status"
-        value={formData.reading_progress.status}
-        onChange={handleStatusChange}
-      >
-        <option value="W">Want to Read</option>
-        <option value="R">Is Reading</option>
-        <option value="F">Finished Reading</option>
-        <option value="N">Not to Finish</option>
-      </select>
+        <label htmlFor="status">Reading Status:</label>
+        <select
+          id="status"
+          name="status"
+          value={formData.reading_progress.status}
+          onChange={handleStatusChange}
+        >
+          <option value="W">Want to Read</option>
+          <option value="R">Is Reading</option>
+          <option value="F">Finished Reading</option>
+          <option value="N">Not to Finish</option>
+        </select>
 
-      {isReading && (
-        <Input
-          label="Current Page"
-          id="current_page"
-          name="currentPage"
-          type="number"
-          value={formData.reading_progress.currentPage}
-          onChange={handleReadingProgressChange}
-        />
-      )}
-</div>
+        {isReading && (
+          <Input
+            label="Current Page"
+            id="current_page"
+            name="currentPage"
+            type="number"
+            value={formData.reading_progress.currentPage}
+            onChange={handleReadingProgressChange}
+          />
+        )}
+      </div>
 
       <Input
         label="Release Year"
@@ -285,14 +332,18 @@ const BookForm = ({ method, bookId }) => {
         ))}
       </select>
 
-      <Input
-        label="Image URL"
-        id="image"
-        name="image"
-        type="text"
-        value={formData.image}
-        onChange={handleInputChange}
+      <label htmlFor="imageUpload">Upload Image</label>
+      <input
+        id="imageUpload"
+        type="file"
+        accept="image/*"
+        onChange={(e) => handleFileChange(e.target.files[0])}
       />
+      {previewImage && (
+        <div className={classes.imagePreview}>
+          <img src={previewImage} alt="Image Preview" />
+        </div>
+      )}
 
       <div className={classes.actions}>
         <FormButtons
