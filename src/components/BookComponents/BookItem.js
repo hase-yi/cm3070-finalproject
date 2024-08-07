@@ -64,11 +64,13 @@ function BookItem() {
 			<section className={classes.bookDetails}>
 				<div className={classes.imageAndProgress}>
 					<img src={book.image} alt={book.title} />
-					
-					{book?.reading_progress && <div className={classes.readingProgress}>
-						<ReadingProgress bookId={bookId} />
-					</div>}
-					{<ReadingStatusForm bookId={bookId}/>}
+
+					{book?.reading_progress && (
+						<div className={classes.readingProgress}>
+							<ReadingProgress bookId={bookId} />
+						</div>
+					)}
+					{<ReadingStatusForm bookId={bookId} />}
 				</div>
 				<div className={classes.bookInfo}>
 					<h1>Title:{book.title}</h1>

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import classes from './BookList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { fetchBooksForShelf,deleteBook } from '../../features/bookSlice';
+import { fetchBooksForShelf, deleteBook } from '../../features/bookSlice';
 
 const BookList = ({ shelfId, readingListStatus }) => {
 	const dispatch = useDispatch();
@@ -19,22 +19,18 @@ const BookList = ({ shelfId, readingListStatus }) => {
 	const error = useSelector((state) => state.books.error);
 
 	// Filter books based on reading_progress.status if the query parameter exists
-	let filteredBooks = books
+	let filteredBooks = books;
 	if (readingListStatus) {
-		filteredBooks =  books.filter(
-						(book) =>
-								book.reading_progress &&
-								book.reading_progress.status === readingListStatus
-				)
+		filteredBooks = books.filter(
+			(book) =>
+				book.reading_progress &&
+				book.reading_progress.status === readingListStatus
+		);
 	}
 
 	if (shelfId) {
-		filteredBooks =  books.filter(
-						(book) =>
-								book.shelf === shelfId
-				)
+		filteredBooks = books.filter((book) => book.shelf === shelfId);
 	}
-		
 
 	if (status === 'loading') {
 		return <div>Loading...</div>;
@@ -62,7 +58,9 @@ const BookList = ({ shelfId, readingListStatus }) => {
 							</div>
 						</Link>
 						<div className={classes.actions}>
-							<Link to={`/books/${book.id}/edit`} ><button>Edit</button></Link>
+							<Link to={`/books/${book.id}/edit`}>
+								<button>Edit</button>
+							</Link>
 							<button onClick={() => handleDelete(book)}>Delete</button>
 						</div>
 					</li>

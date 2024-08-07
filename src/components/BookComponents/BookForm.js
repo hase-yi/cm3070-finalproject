@@ -134,15 +134,15 @@ const BookForm = ({ method, bookId }) => {
 				response = await dispatch(updateBook(bookData)).unwrap();
 			}
 
-      const bookId = response.id || book.id
-      console.log(bookId)
+			const bookId = response.id || book.id;
+			console.log(bookId);
 
 			if (imageFile && bookId) {
 				// Ensure bookId is defined before attempting image upload
 				const imageUrl = await uploadImage(bookId); // Upload image after form submission
 				const updatedBookData = {
 					...bookData,
-          id: bookId,
+					id: bookId,
 					image: imageUrl,
 				};
 				await updateBookWithImage(updatedBookData); // Update book with the image URL

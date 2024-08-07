@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import classes from './BookNavigation.module.css'
+import classes from './BookNavigation.module.css';
 
 const BookNavigation = () => {
-  return (
-    <header className={classes.header}>
-      <nav>
-        <ul className={classes.list}>
-        <li>
+	return (
+		<header className={classes.header}>
+			<nav>
+				<ul className={classes.list}>
+					<li>
 						<NavLink
 							to=""
 							className={({ isActive }) =>
@@ -18,25 +18,24 @@ const BookNavigation = () => {
 							All books
 						</NavLink>
 					</li>
-          <li>
-            {/* <Link to="/books/new">Add New Book(to be changed)</Link> */}
-            <li>
-						<NavLink
-							to="new"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							New Book
-						</NavLink>
+					<li>
+						{/* <Link to="/books/new">Add New Book(to be changed)</Link> */}
+						<li>
+							<NavLink
+								to="new"
+								className={({ isActive }) =>
+									isActive ? classes.active : undefined
+								}
+								end
+							>
+								New Book
+							</NavLink>
+						</li>
 					</li>
-          </li>
-        </ul>
-      </nav>
-    </header>
-  );
+				</ul>
+			</nav>
+		</header>
+	);
 };
 
 export default BookNavigation;
-
