@@ -112,6 +112,39 @@ function MainNavigation() {
 							Search People
 						</NavLink>
 					</li>
+					<li>
+						<NavLink
+							to="books/?list=W"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Want To Read
+						</NavLink>
+					</li>
+					<li>
+						<NavLink
+							to="books/?list=R"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Is Reading
+						</NavLink>
+					</li>
+					<li>
+						<NavLink
+							to="books/?list=F"
+							className={({ isActive }) =>
+								isActive ? classes.active : undefined
+							}
+							end
+						>
+							Finished Reading
+						</NavLink>
+					</li>
 				</ul>
 			</nav>
 		</header>

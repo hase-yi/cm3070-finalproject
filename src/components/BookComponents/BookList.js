@@ -4,9 +4,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { fetchBooksForShelf,deleteBook } from '../../features/bookSlice';
 
-const BookList = ({ shelfId }) => {
+const BookList = ({ shelfId, readingListStatus }) => {
 	const dispatch = useDispatch();
 
+	// TODO: Introduce global hot loading
 	useEffect(() => {
 		if (shelfId) {
 			dispatch(fetchBooksForShelf(shelfId));
@@ -17,7 +18,23 @@ const BookList = ({ shelfId }) => {
 	const status = useSelector((state) => state.books.status);
 	const error = useSelector((state) => state.books.error);
 
+	// Filter books based on reading_progress.status if the query parameter exists
+	let filteredBooks = books
+	if (readingListStatus) {
+		filteredBooks =  books.filter(
+						(book) =>
+								book.reading_progress &&
+								book.reading_progress.status === readingListStatus
+				)
+	}
 
+	if (shelfId) {
+		filteredBooks =  books.filter(
+						(book) =>
+								book.shelf === shelfId
+				)
+	}
+		
 
 	if (status === 'loading') {
 		return <div>Loading...</div>;
@@ -36,7 +53,7 @@ const BookList = ({ shelfId }) => {
 	return (
 		<div className={classes.books}>
 			<ul className={classes.list}>
-				{books.map((book) => (
+				{filteredBooks.map((book) => (
 					<li key={book.id} className={classes.item}>
 						<Link to={`/books/${book.id}`}>
 							<img src={book.image} alt={book.title} />

@@ -14,7 +14,7 @@ import ErrorPage from './Pages/Error';
 import ShelfDetailPage from './Pages/ShelfPages/ShelfDetail';
 import NewShelfPage from './Pages/ShelfPages/NewShelf';
 import EditShelfPage from './Pages/ShelfPages/EditShelf';
-import PeopleSearchPage from './Pages/PeopleSearchPage'
+import PeopleSearchPage from './Pages/PeopleSearchPage';
 import ShelfRootLayout from './Pages/ShelfPages/ShelfRoot';
 
 import BookRoot from './Pages/BookPages/BookRoot';
@@ -28,7 +28,6 @@ import SearchPage from './Pages/BookSearchPage';
 import NavigationLayout from './NavigationLayout';
 import ScanPage from './Pages/BookScanPage';
 
-
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
 	<Route path="/" element={<RootLayout />} errorElement={<ErrorPage />}>
@@ -36,7 +35,7 @@ const routeDefinitions = createRoutesFromElements(
 			<Route index element={<HomePage />} />
 			<Route path="shelves" element={<ShelfRootLayout />}>
 				<Route index element={<ShelvesPage />} />
-				<Route path=":shelfId" >
+				<Route path=":shelfId">
 					<Route index element={<ShelfDetailPage />} />
 					<Route path="edit" element={<EditShelfPage />} />
 				</Route>
@@ -44,7 +43,7 @@ const routeDefinitions = createRoutesFromElements(
 			</Route>
 			<Route path="books" element={<BookRoot />}>
 				<Route index element={<BooksPage />} />
-				<Route path=":bookId" >
+				<Route path=":bookId">
 					<Route index element={<BookDetailPage />} />
 					<Route path="edit" element={<EditBookPage />} />
 				</Route>
@@ -55,7 +54,6 @@ const routeDefinitions = createRoutesFromElements(
 			<Route path="scan" element={<ScanPage />} />
 			<Route path="searchpeople" element={<PeopleSearchPage />} />
 			<Route path="profiles/:username" element={<HomePage />} />
-
 		</Route>
 	</Route>
 );
