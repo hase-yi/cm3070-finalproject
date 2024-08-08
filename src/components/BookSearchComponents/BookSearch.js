@@ -1,50 +1,114 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classes from './BookSearch.module.css';
-// import {fetchShelves} from '../../features/shelfSlice'
-import { searchBook } from '../../features/bookSlice';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
-import ShelfSelect from './ShelfSelect';
-
-
+import { fetchBooks } from '../../features/bookSlice';
+import axiosInstance from '../../axiosInstance';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const BookSearch = () => {
-	const [title, setTitle] = useState('');
 	const dispatch = useDispatch();
-	const { books, loading, error } = useSelector((state) => state.books);
+	const navigate = useNavigate()
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [searchResults, setSearchResults] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
+	const [searchTerm, setSearchTerm] = useState(''); // State for the input value
 
+	const status = useSelector((state) => state.books.status);
+	const books = useSelector((state) => state.books.books);
 
-	const handleSearch = () => {
-		dispatch(searchBook({ title }));
+	// Fetch books when the status is 'idle'
+	useEffect(() => {
+		if (status === 'idle') {
+			dispatch(fetchBooks());
+		}
+	}, [dispatch, status]);
+
+	// Set searchTerm from URL search params on page load
+	useEffect(() => {
+		const search = searchParams.get('search');
+		if (search) {
+			setSearchTerm(search);
+		}
+	}, [searchParams]);
+
+	// Debounced search effect
+	useEffect(() => {
+		if (searchTerm !== '') {
+			const handler = setTimeout(() => {
+				setLoading(true);
+				setError(null);
+
+				const local_results = books
+					.filter((book) => book.title.toLowerCase().includes(searchTerm.toLowerCase()))
+					.map((b) => {
+						return { type: 'local', book: b };
+					});
+
+				setSearchResults(local_results);
+
+				axiosInstance
+					.get(`/books/search/`, { params: { title: searchTerm } })
+					.then((response) => {
+						const remote_results = response.data.map((book) => {
+							return { type: 'remote', book: book };
+						});
+						setSearchResults(local_results.concat(remote_results));
+						setLoading(false);
+					})
+					.catch((err) => {
+						setError('An error occurred while fetching the search results.');
+						setLoading(false);
+					});
+			}, 500); // 500ms debounce delay
+
+			return () => {
+				clearTimeout(handler); // Cleanup the timeout if searchTerm changes
+			};
+		} else {
+			setSearchResults([]); // Clear results if searchTerm is empty
+		}
+	}, [searchTerm, books]);
+
+	const handleSearch = (e) => {
+		const newQuery = e.target.value;
+		setSearchTerm(newQuery);
+		setSearchParams({ search: newQuery });
 	};
+
+		// Handle navigation to /books/new with book data as state
+		const handleExternalBookClick = (book) => {
+			navigate('/books/new', { state: { bookPrototype: book } });
+		};
 
 	return (
 		<div className={classes.form}>
 			<div className={classes.input}>
-				<Input
+				<input
 					type="text"
-					value={title}
-					onChange={(e) => setTitle(e.target.value)}
 					placeholder="Search by title"
-				/>
+					value={searchTerm || ''}
+					onChange={handleSearch}
+				/>{' '}
 			</div>
-
-			<FormButtons
-				className={classes.actions}
-				label="Search"
-				onClick={handleSearch}
-				disabled={loading}
-			/>
 
 			{loading && <p className={classes.loadingIndictor}>Loading...</p>}
 			{error && <p className={classes.feedbackMessage}>Error:{error}</p>}
 			<ul className={classes.results}>
-				{books.map((book, index) => (
+				{searchResults.map((book, index) => (
 					<li key={index} className={classes.bookItem}>
-						<ShelfSelect book={book.book}/>
-						{book.book?.image &&  <img src={book.book.image} alt={book.book.title}/>}
-						{book.book?.title} by {book.book?.author}				
+						{book.book?.image && (
+							<img src={book.book.image} alt={book.book.title} />
+						)}
+						{book.book?.title} by {book.book?.author}
+						<p>{book.type}</p>
+						{book.type === 'local' ? (
+							<a href={`/books/${book.book.id}`}>Go to book</a>
+						) : (
+							<button onClick={() => handleExternalBookClick(book.book)}>
+								Add to Library
+							</button>
+						)}
 					</li>
 				))}
 			</ul>

@@ -39,11 +39,11 @@ export const validateBookForm = (values) => {
 
 export function isValidISBN(isbn) {
 
-	if (isbn.length !== 13) {
+	if (isbn.length !== 13 && isbn.length !== 10) {
     return false
   }
     
-  for (let i = 0; i < 13; i++) {
+  for (let i = 0; i < isbn.length; i++) {
     let digit = parseInt(isbn.charAt(i));
     if (isNaN(digit)) return false;
   }

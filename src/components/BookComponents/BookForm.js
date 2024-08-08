@@ -14,8 +14,18 @@ import FormButtons from '../FormButtons';
 import { isValidISBN } from '../../utils/validation';
 import axiosInstance from '../../axiosInstance'; // Import axios instance
 import ReadingStatusForm from './ReadingStatusForm';
+import { useLocation } from 'react-router-dom';
+
 
 const BookForm = ({ method, bookId }) => {
+	const location = useLocation();
+	const bookPrototype = location.state?.bookPrototype;
+
+  if (bookPrototype) {
+    method = "POST"
+  }
+
+
 	const numericBookId = Number(bookId);
 
 	const book = useSelector((state) =>
@@ -30,19 +40,19 @@ const BookForm = ({ method, bookId }) => {
 	const navigate = useNavigate();
 
 	const [formData, setFormData] = useState({
-		title: book?.title || '',
-		author: book?.author || '',
-		isbn: book?.isbn || '',
-		totalPages: book?.total_pages || '',
-		releaseYear: book?.release_year || '',
+		title: book?.title || bookPrototype?.title || '',
+		author: book?.author || bookPrototype?.author || '',
+		isbn: book?.isbn || bookPrototype?.isbn || '',
+		totalPages: book?.total_pages || bookPrototype?.total_pages || '',
+		releaseYear: book?.release_year || bookPrototype?.release_year || '',
 		shelf: book?.shelf || '',
-		image: book?.image || '',
+		image: book?.image || bookPrototype?.image || '',
 	});
 
 	const [isbnError, setISBNError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
-	const [previewImage, setPreviewImage] = useState(book?.image || null);
+	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image|| null);
 
 	// Fetch shelves on mount
 	useEffect(() => {
