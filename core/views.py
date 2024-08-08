@@ -113,14 +113,6 @@ def book_search(request):
     if not title_str and not isbn_str:
         return Response(search_results, status=status.HTTP_200_OK)
 
-    # Local search
-    local_books = Book.objects.for_user(user=request.user)
-    local_str = isbn_str if isbn_str else title_str
-    if local_str:
-        local_books = list(local_books.search_local(local_str).values())
-        for book in local_books:
-            search_results.append({"book": book, "type": "local"})
-
     # Remote search
     remote_params = {"isbn": isbn_str} if isbn_str else {"title": title_str}
 
@@ -142,7 +134,7 @@ def book_search(request):
                 ),
             }
 
-            search_results.append({"book": book_data, "type": "external"})
+            search_results.append(book_data)
 
     return Response(search_results, status=status.HTTP_200_OK)
 
