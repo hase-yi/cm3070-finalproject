@@ -29,7 +29,7 @@ const BookList = ({ shelfId, readingListStatus }) => {
 	}
 
 	if (shelfId) {
-		filteredBooks = books.filter((book) => book.shelf === shelfId);
+		filteredBooks = books.filter((book) => book.shelf === Number(shelfId));
 	}
 
 	if (status === 'loading') {
