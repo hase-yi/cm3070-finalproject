@@ -270,7 +270,7 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
             book=progress.book,
             reading_progress=progress,
             text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
-            backlink="",  # TODO: Add backlink
+            backlink=f"/books/{progress.book.id}",
         )
 
 
@@ -298,7 +298,7 @@ class ReadingProgressDetailView(
             book=progress.book,
             reading_progress=progress,
             text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
-            backlink="",  # TODO: Add backlink
+            backlink=f"/books/{progress.book.id}",
         )
 
 
@@ -334,7 +334,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
             book=review.book,
             review=review,
             text=f"{self.request.user} wrote a review for {review.book.title}",
-            backlink="",  # TODO: Add backlink
+            backlink=f"/books/{review.book.id}",
         )
 
 
@@ -375,7 +375,7 @@ class CommentListView(ListAPIView, CreateAPIView):
             review=comment.review,
             comment=comment,
             text=f"{self.request.user} replied to the review of {comment.book.user.username}'s review of {comment.book.title}",
-            backlink="",  # TODO: Add backlink
+            backlink=f"/books/{comment.book.id}",
         )
 
     def get_serializer_context(self):
