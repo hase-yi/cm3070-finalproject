@@ -40,26 +40,24 @@ const BookList = ({ shelfId, readingListStatus }) => {
 	};
 
 	return (
-		<div className={classes.books}>
-			<ul className={classes.list}>
-				{filteredBooks.map((book) => (
-					<li key={book.id} className={classes.item}>
-						<Link to={`/books/${book.id}`}>
-							<img src={book.image} alt={book.title} />
-							<div className={classes.content}>
-								<h2>{book.title}</h2>
+		<div className='grid' >
+			{filteredBooks.map((book) => (
+				<div key={book.id} className='s12 m6 l3' >
+					<Link to={`/books/${book.id}`}>
+						<article className='no-padding'>
+							<div className='responsive medium-height'>
+								<img src={book.image} alt={book.title} className='responsive' />
 							</div>
-						</Link>
-						<div className={classes.actions}>
-							<Link to={`/books/${book.id}/edit`}>
-								<button>Edit</button>
-							</Link>
-							<button onClick={() => handleDelete(book)}>Delete</button>
-						</div>
-					</li>
-				))}
-			</ul>
+							<div className='padding' >
+								<h5>{book.title}</h5>
+								<p>{book.author}</p>
+							</div>
+						</article>
+					</Link>
+				</div>
+			))}
 		</div>
+
 	);
 };
 

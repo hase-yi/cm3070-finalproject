@@ -26,7 +26,7 @@ function ShelfDetailPage() {
   return (
     <div>
       {shelf && <ShelfItem shelf={shelf} />}
-      <hr class="large"/>
+      <hr className="large"/>
       <BookList shelfId={shelfId} />
     </div>
   );

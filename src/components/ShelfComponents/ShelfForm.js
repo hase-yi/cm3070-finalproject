@@ -113,71 +113,81 @@ function ShelfForm({ method, shelf }) {
     };
 
     return (
-        <form className={classes.form} onSubmit={handleSubmit}>
-            {error && <p className="error">{error}</p>}
-            {validationErrors && (
-                <ul>
-                    {Object.entries(validationErrors).map(([field, errors]) =>
-                        errors.map((error, index) => (
-                            <li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
-                        ))
-                    )}
-                </ul>
-            )}
-            <div className={classes.form}>
-                <Input
-                    label="Shelf Name"
-                    id="title"
-                    type="text"
-                    name="title"
-                    required
-                    defaultValue={shelfData.title}
-                />
+        <article className='no-padding'>
+            <form className={classes.form} onSubmit={handleSubmit}>
 
-                <label htmlFor="description">Description</label>
-                <textarea
-                    id="description"
-                    name="description"
-                    rows="5"
-                    required
-                    defaultValue={shelfData.description}
-                />
-
-                <label htmlFor="imageUpload">Upload Image</label>
-                <input
-                    id="imageUpload"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e.target.files[0])}
-                />
-                {previewImage && (
-                    <div className={classes.imagePreview}>
-                        <img src={previewImage} alt="Image Preview" />
+                <div className='grid no-space'>
+                    <div className='s6'>
+                        {previewImage && (
+                            <div className={classes.imagePreview}>
+                                <img src={previewImage} alt="Image Preview" />
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
-            <div className={classes.actions}>
-                {shelf && (
-                    <FormButtons
-                        onClick={() => handleDelete(shelf.id)}
-                        label="Delete"
-                        type="button"
-                        disabled={isSubmitting}
-                    />
-                )}
-                <FormButtons
-                    onClick={() => navigate('..')}
-                    label="Cancel"
-                    type="button"
-                    disabled={isSubmitting}
-                />
-                <FormButtons
-                    label={isSubmitting ? 'Submitting' : 'Save'}
-                    type="submit"
-                    disabled={isSubmitting}
-                />
-            </div>
-        </form>
+                    <div className='s6'>
+                        <div className='padding'>
+                            {error && <p className="error">{error}</p>}
+                            {validationErrors && (
+                                <ul>
+                                    {Object.entries(validationErrors).map(([field, errors]) =>
+                                        errors.map((error, index) => (
+                                            <li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
+                                        ))
+                                    )}
+                                </ul>
+                            )}
+                            <Input
+                                label="Shelf Name"
+                                id="title"
+                                type="text"
+                                name="title"
+                                required
+                                defaultValue={shelfData.title}
+                            />
+
+                            <label htmlFor="description">Description</label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="5"
+                                required
+                                defaultValue={shelfData.description}
+                            />
+
+                            <label htmlFor="imageUpload">Upload Image</label>
+                            <input
+                                id="imageUpload"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(e.target.files[0])}
+                            />
+
+                            {shelf && (
+                                <FormButtons
+                                    onClick={() => handleDelete(shelf.id)}
+                                    label="Delete"
+                                    type="button"
+                                    disabled={isSubmitting}
+                                />
+                            )}
+                            <FormButtons
+                                onClick={() => navigate('..')}
+                                label="Cancel"
+                                type="button"
+                                disabled={isSubmitting}
+                            />
+                            <FormButtons
+                                label={isSubmitting ? 'Submitting' : 'Save'}
+                                type="submit"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </article>
+
+
     );
 }
 

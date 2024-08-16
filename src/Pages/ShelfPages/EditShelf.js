@@ -7,7 +7,7 @@ import ShelfForm from '../../components/ShelfComponents/ShelfForm';
 function EditShelfPage() {
   const { shelfId } = useParams();
   const dispatch = useDispatch();
-  const shelf = useSelector((state) => 
+  const shelf = useSelector((state) =>
     state.shelves.shelves.find((shelf) => shelf.id === parseInt(shelfId))
   );
   const status = useSelector((state) => state.shelves.status);
@@ -19,12 +19,12 @@ function EditShelfPage() {
     }
   }, [dispatch, shelfId, shelf]);
 
-  if (status === 'loading') return <p style={{ textAlign: 'center' }}>Loading...</p>;
-  if (status === 'failed') return <p style={{ textAlign: 'center' }}>{error}</p>;
+  if (status === 'loading') return <progress class="circle"></progress>;
+  if (status === 'failed') return <p className='error'>{error}</p>;
 
   return (
     <div>
-      <h1>Edit Shelf</h1>
+      <h3>Edit {shelf.title}</h3>
       {shelf && <ShelfForm method="PUT" shelf={shelf} />}
     </div>
   );

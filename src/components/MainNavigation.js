@@ -116,6 +116,8 @@ function MainNavigation() {
 				<div>Finished Reading</div>
 			</NavLink>
 		</nav>
+
+		
 	);
 }
 
