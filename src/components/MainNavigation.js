@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import classes from './MainNavigation.module.css';
 import { getUsername } from '../features/authSlice';
 import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
 import { fetchBooks } from '../features/bookSlice';
@@ -36,128 +35,87 @@ function MainNavigation() {
 			});
 		}
 
-		
+
 	}, [status, dispatch, user]);
 
 	// console.log("user is:", user)
 	return (
-		<header className={classes.header}>
-			<nav>
-				<ul className={classes.list}>
-					<li>
-						{/* wether the link is active, so it shows if the link is active */}
-						<NavLink
-							to="/"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end={true} // This link will only be considered active if we are on "/"
-						>
-							{user}'s Home
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="shelves"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Shelves
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="auth"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Authentication
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="search"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Search
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="books/new"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Add Book
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="scan"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Scan
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="searchpeople"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Search People
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="books/?list=W"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Want To Read
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="books/?list=R"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Is Reading
-						</NavLink>
-					</li>
-					<li>
-						<NavLink
-							to="books/?list=F"
-							className={({ isActive }) =>
-								isActive ? classes.active : undefined
-							}
-							end
-						>
-							Finished Reading
-						</NavLink>
-					</li>
-				</ul>
-			</nav>
-		</header>
+		<nav className="left drawer">
+			<div className="large-space l m"></div>
+
+			<NavLink
+				to="/"
+				end
+			>
+				<i>home</i>
+				<div>{user}'s Home</div>
+			</NavLink>
+			<NavLink
+				to="/shelves"
+				end
+			>
+				<i>library_books</i>
+				<div>Shelves</div>
+			</NavLink>
+			<NavLink
+				to="/auth"
+				end
+			>
+				<i>lock</i>
+				<div>Authentication</div>
+			</NavLink>
+			<NavLink
+				to="/search"
+				end
+			>
+				<i>search</i>
+				<div>Search</div>
+			</NavLink>
+			<NavLink
+				to="/books/new"
+				end
+			>
+				<i>add_box</i>
+				<div>Add Book</div>
+			</NavLink>
+			<NavLink
+				to="/scan"
+				end
+			>
+				<i>qr_code_scanner</i>
+				<div>Scan</div>
+			</NavLink>
+			<NavLink
+				to="/searchpeople"
+				end
+			>
+				<i>person_search</i>
+				<div>Search People</div>
+			</NavLink>
+			<hr></hr>
+			<label>Reading Lists</label>
+			<NavLink
+				to="/books/?list=W"
+				end
+			>
+				<i>favorite_border</i>
+				<div>Want To Read</div>
+			</NavLink>
+			<NavLink
+				to="/books/?list=R"
+				end
+			>
+				<i>book</i>
+				<div>Is Reading</div>
+			</NavLink>
+			<NavLink
+				to="/books/?list=F"
+				end
+			>
+				<i>done</i>
+				<div>Finished Reading</div>
+			</NavLink>
+		</nav>
 	);
 }
 

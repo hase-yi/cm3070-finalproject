@@ -25,10 +25,10 @@ function SharedReviews({ username }) {
     }, [username]);
 
     return (
-        <div style={{ background: "white", color: "black" }}>
-            <h2>Recent Reviews</h2>
-            {loadingReviews && <p>Loading...</p>}
-            {errorReviews && <p>{errorReviews}</p>}
+        <article>
+            <h5>Recent Reviews</h5>
+            {loadingReviews && <progress className="circle"></progress>}
+            {errorReviews && <p className='error'>{errorReviews}</p>}
             <ul>
                 {reviews.map((review) => (
                     <li key={review.id}>
@@ -37,7 +37,7 @@ function SharedReviews({ username }) {
                 ))}
             </ul>
             {/* TODO: Load more button */}
-        </div>
+        </article>
     )
 }
 

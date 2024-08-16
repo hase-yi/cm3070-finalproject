@@ -25,10 +25,10 @@ function SharedReadingProgress({ username }) {
     }, [username]);
 
     return (
-        <div style={{ background: "white", color: "black" }}>
-            <h2>Recent Reading Progress</h2>
-            {loadingReadingProgresses && <p>Loading...</p>}
-            {errorReadingProgresses && <p>{errorReadingProgresses}</p>}
+        <article>
+            <h5>Recent Reading Progress</h5>
+            {loadingReadingProgresses &&  <progress className="circle"></progress>}
+            {errorReadingProgresses && <p className='error'>{errorReadingProgresses}</p>}
             <ul>
                 {readingProgresses.map((progress) => (
                     <li key={progress.id}>
@@ -36,8 +36,7 @@ function SharedReadingProgress({ username }) {
                     </li>
                 ))}
             </ul>
-            {/* TODO: Load more button */}
-        </div>
+        </article>
     )
 }
 

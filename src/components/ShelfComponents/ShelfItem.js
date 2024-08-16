@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { fetchShelf, deleteShelf } from '../../features/shelfSlice';
-import classes from './ShelfItem.module.css';
 
 function ShelfItem() {
   const { shelfId } = useParams();
@@ -29,7 +28,7 @@ function ShelfItem() {
     const proceed = window.confirm('Are you sure?');
     if (proceed) {
       // NOTE: Navigate away from details first...
-      navigate('/shelves'); 
+      navigate('/shelves');
 
       // ... then delete
       dispatch(deleteShelf(numericShelfId)).then((result) => {
@@ -42,10 +41,8 @@ function ShelfItem() {
     }
   };
 
-  // console.log('ShelfItem render:', shelf); 
-
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <progress class="circle"></progress>;
   }
 
   if (status === 'failed') {
@@ -57,14 +54,36 @@ function ShelfItem() {
   }
 
   return (
-    <article className={classes.shelf}>
-      <img src={shelf.image} alt={shelf.title} />
-      <h1>{shelf.title}</h1>
-      <p>{shelf.description}</p>
-      <menu className={classes.actions}>
-        <Link to="edit">Edit</Link>
-        <button onClick={startDeleteHandler}>Delete</button>
-      </menu>
+    <article className='no-padding'>
+      <div className='grid no-space'>
+        <div className='s6'>
+          <img src={shelf.image} alt={shelf.title} className='responsive large-height' />
+        </div>
+
+        <div className='s6'>
+          <div className='padding'>
+            <h3>{shelf.title}</h3>
+            <p>{shelf.description}</p>
+            <div className='medium-height'></div>
+            <div className='row'>
+              <div className='max'></div>
+              <Link to="edit">
+                <button>
+                  <i>edit</i>
+                  <span>Edit</span>
+                </button>
+              </Link>
+
+              <button onClick={startDeleteHandler} className='error'>
+                <i>delete</i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </article>
   );
 }

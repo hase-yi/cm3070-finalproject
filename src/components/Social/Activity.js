@@ -28,8 +28,8 @@ function Activity() {
     }, [followedUsers]);
 
     return (
-        <div style={{ background: "white", color: "black" }}>
-            <h2>Recent Activity</h2>
+        <article>
+            <h5>Recent Activity</h5>
             {loadingActivities && <p>Loading...</p>}
             {errorActivities && <p>{errorActivities}</p>}
             <ul>
@@ -39,8 +39,7 @@ function Activity() {
                     </li>
                 ))}
             </ul>
-            {/* TODO: Load more button */}
-        </div>
+        </article>
     )
 }
 

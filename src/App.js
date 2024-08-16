@@ -28,6 +28,7 @@ import SearchPage from './Pages/BookSearchPage';
 import NavigationLayout from './NavigationLayout';
 import ScanPage from './Pages/BookScanPage';
 
+
 const routeDefinitions = createRoutesFromElements(
 	// path dependent wrapper Route
 	<Route path="/" element={<RootLayout />} errorElement={<ErrorPage />}>

@@ -1,7 +1,6 @@
 import PageContent from "../components/PageContent";
 import { useParams } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../axiosInstance';
+import React from 'react';
 import SharedReviews from '../components/Social/SharedReviews'
 import FollowUnfollowButton from '../components/Social/FollowUnfollowButton'
 import SharedReadingProgress from '../components/Social/SharedReadingProgress'
@@ -11,19 +10,42 @@ import { useDispatch, useSelector } from 'react-redux';
 function HomePage() {
   const { username } = useParams();
 
-	const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.user);
 
   return (
-    <PageContent title="Welcome">
-      <h1>Profile of {username}</h1>
+    <PageContent title={username ? `Profile of ${username}` : `Welcome back ${user}`}>
+      {username &&
+        <div className="s12 m12 l12 row">
+          <div className="max">
+          </div>
+          <div>
+            <FollowUnfollowButton username={username} />
+          </div>
 
-      <p>Browse your personal library </p>
-      {username && <FollowUnfollowButton username={username}/>}
-      {/* Show all recent reviews, comments and reading progress that is shared, clicking o them leads to that section in the respective book */}
-      
-      {<SharedReviews username={username ? username : user}/>}
-      {<SharedReadingProgress username={username ? username : user}/>}
-      {!username && <Activity/>}
+        </div>
+      }
+
+      <div className="s12 m6 l6">
+        {<SharedReviews username={username ? username : user} />}
+      </div>
+      <div className="s12 m6 l6">
+        {<SharedReadingProgress username={username ? username : user} />}
+      </div>
+      <div className="s12 m12 l12">
+        {!username && <Activity />}
+      </div>
+      {!username &&
+        <article className="s12 m6 l6">
+            Go to your books
+        </article >
+      }
+      {!username &&
+        <article className="s12 m6 l6">
+            Add new book
+        </article >
+      }
+
+
 
     </PageContent>
   )

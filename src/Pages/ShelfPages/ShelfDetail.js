@@ -26,8 +26,7 @@ function ShelfDetailPage() {
   return (
     <div>
       {shelf && <ShelfItem shelf={shelf} />}
-      <h2>Books in {shelf.title}</h2>
-      <Link to="/books/new"><button>Add New Book</button></Link>
+      <hr class="large"/>
       <BookList shelfId={shelfId} />
     </div>
   );
