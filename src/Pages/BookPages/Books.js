@@ -15,12 +15,6 @@ const BooksPage = () => {
   const status = useSelector((state) => state.books.status);
   const error = useSelector((state) => state.books.error);
 
-  useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchBooks());
-    }
-  }, [dispatch, status]);
-
   if (status === 'loading') {
     return <p>Loading...</p>;
   }

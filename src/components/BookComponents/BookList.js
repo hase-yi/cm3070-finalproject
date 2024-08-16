@@ -7,13 +7,6 @@ import { fetchBooksForShelf, deleteBook } from '../../features/bookSlice';
 const BookList = ({ shelfId, readingListStatus }) => {
 	const dispatch = useDispatch();
 
-	// TODO: Introduce global hot loading
-	useEffect(() => {
-		if (shelfId) {
-			dispatch(fetchBooksForShelf(shelfId));
-		}
-	}, [dispatch, shelfId]);
-
 	const books = useSelector((state) => state.books.books);
 	const status = useSelector((state) => state.books.status);
 	const error = useSelector((state) => state.books.error);

@@ -1,11 +1,16 @@
 import { Outlet } from "react-router-dom";
+import { NavLink } from 'react-router-dom';
 
-import ShelfNavigation from "../../components/ShelfComponents/ShelfNavigation";
 
 function ShelfRootLayout(){
   return (
     <>
-    <ShelfNavigation />
+    	<NavLink
+							to="new"
+							end
+						>
+							New Shelf
+						</NavLink>
     <Outlet/>
     </>
   )

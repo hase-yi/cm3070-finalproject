@@ -17,13 +17,6 @@ const BookSearch = () => {
 	const status = useSelector((state) => state.books.status);
 	const books = useSelector((state) => state.books.books);
 
-	// Fetch books when the status is 'idle'
-	useEffect(() => {
-		if (status === 'idle') {
-			dispatch(fetchBooks());
-		}
-	}, [dispatch, status]);
-
 	// Set searchTerm from URL search params on page load
 	useEffect(() => {
 		const search = searchParams.get('search');
@@ -50,9 +43,11 @@ const BookSearch = () => {
 				axiosInstance
 					.get(`/books/search/`, { params: { title: searchTerm } })
 					.then((response) => {
-						const remote_results = response.data.map((book) => {
-							return { type: 'remote', book: book };
-						});
+						const remote_results = response.data
+                        .filter(remoteBook => !local_results.some(localResult => localResult.book.isbn === remoteBook.isbn))
+                        .map((book) => {
+                            return { type: 'remote', book: book };
+                        });
 						setSearchResults(local_results.concat(remote_results));
 						setLoading(false);
 					})

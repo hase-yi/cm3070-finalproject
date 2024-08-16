@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import classes from './MainNavigation.module.css';
 import { getUsername } from '../features/authSlice';
 import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
+import { fetchBooks } from '../features/bookSlice';
+import { fetchShelves } from '../features/shelfSlice';
 
 function MainNavigation() {
 	const user = useSelector((state) => state.auth.user);
@@ -26,7 +28,15 @@ function MainNavigation() {
 			dispatch(fetchFollowers()).unwrap().catch((err) => {
 				console.error('Failed to get your followers:', err);
 			});
+			dispatch(fetchBooks()).unwrap().catch((err) => {
+				console.error('Failed to get your books:', err);
+			});
+			dispatch(fetchShelves()).unwrap().catch((err) => {
+				console.error('Failed to get your shelves:', err);
+			});
 		}
+
+		
 	}, [status, dispatch, user]);
 
 	// console.log("user is:", user)

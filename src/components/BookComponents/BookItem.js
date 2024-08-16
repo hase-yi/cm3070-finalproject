@@ -7,7 +7,6 @@ import { deleteBook } from '../../features/bookSlice';
 import classes from './BookItem.module.css'; // Assuming you have CSS modules
 
 import ReadingProgress from './ReadingProgress';
-import ShelfSelect from '../BookSearchComponents/ShelfSelect';
 import ReadingStatusForm from './ReadingStatusForm';
 
 function BookItem() {
@@ -82,7 +81,6 @@ function BookItem() {
 						<div className={classes.actions}>
 							<Link to="edit">Edit</Link>
 							<button onClick={startDeleteHandler}>Delete</button>
-							<ShelfSelect book={book} />
 						</div>
 					)}
 				</div>

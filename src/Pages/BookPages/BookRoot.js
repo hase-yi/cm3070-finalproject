@@ -1,13 +1,17 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 
-import BookNavigation from '../../components/BookComponents/BookNavigation';
+import { NavLink } from 'react-router-dom';
 
 const BookRoot = () => {
   return (
     <div>
-      <BookNavigation/>
-      <Outlet />
+<NavLink
+								to="new"
+								end
+							>
+								New Book
+							</NavLink>      <Outlet />
     </div>
   );
 };

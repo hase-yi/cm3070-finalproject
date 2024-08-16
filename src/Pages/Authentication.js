@@ -8,6 +8,9 @@ import {
 import navigateEmitter from '../navigateEmitter';
 import { store } from '../store/index';
 import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
+import { fetchShelves
+ } from '../features/shelfSlice';
+ import { fetchBooks } from '../features/bookSlice';
 
 function AuthenticationPage() {
 	const [username, setUsername] = useState('');
@@ -34,6 +37,14 @@ function AuthenticationPage() {
 			.then(() => {
 				return dispatch(fetchFollowers()).unwrap();
 			})
+			.then(() => {
+				return dispatch(fetchBooks()).unwrap()
+			}
+			).then(() => {
+				return dispatch(fetchShelves
+					()).unwrap()
+			}
+			)
 			.then(() => {
 				navigateEmitter.emit('navigate', '/');
 			})

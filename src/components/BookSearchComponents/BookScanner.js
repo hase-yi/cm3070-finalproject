@@ -1,45 +1,71 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Quagga from 'quagga';
-import classes from './BookScanner.module.css';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const BookScanner = ({ onDetected }) => {
+const BookScanner = ({ onDetected, cooldown = 500 }) => { // cooldown is in milliseconds
   const scannerRef = useRef(null);
-  const [scannerError, setScannerError] = useState('');
+  const [lastDetected, setLastDetected] = useState(0); // Track the time of last detection
+  const navigate = useNavigate();
+  const location = useLocation(); // Use this to listen to route changes
 
   useEffect(() => {
-    Quagga.init({
-      inputStream: {
-        type: 'LiveStream',
-        target: scannerRef.current,
-        constraints: {
-          width: 640,
-          height: 480,
-          facingMode: 'environment',
+      Quagga.init({
+        inputStream: {
+          type: 'LiveStream',
+          target: scannerRef.current, // Use the scannerRef to target the DOM element
+          constraints: {
+            facingMode: 'environment' // Use the rear camera
+          }
         },
-      },
-      decoder: {
-        readers: ['ean_reader'],
-      },
-    }, (err) => {
-      if (err) {
-        console.error(err);
-        setScannerError('Error initializing scanner: ' + err.message);
-        return;
-      }
-      Quagga.start();
-    });
+        decoder: {
+          readers: ['ean_reader'] // Specify the types of barcodes you want to decode
+        }
+      }, (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        Quagga.start();
+      });
 
-    Quagga.onDetected(onDetected);
+      Quagga.onDetected(handleDetected);
+    
 
     return () => {
       Quagga.stop();
-      Quagga.offDetected(onDetected);
+      Quagga.offDetected(handleDetected);
     };
-  }, [onDetected]);
+  }, []);
+
+  const handleDetected = (result) => {
+    const now = Date.now();
+    if (now - lastDetected < cooldown) {
+      // If within cooldown period, ignore detection
+      return;
+    }
+    setLastDetected(now); // Update the time of last detection
+
+    // Call the onDetected prop function and pass the result
+    if (onDetected) {
+      onDetected(result);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      Quagga.stop(); // Stop the scanner when component unmounts
+    };
+  }, []);
+
+  // React to route changes using location
+  useEffect(() => {
+    Quagga.stop(); // Stop the camera on route change
+  }, [location]);
+
 
   return (
-    <div className={classes.scannerContainer} ref={scannerRef}>
-      {scannerError && <div className={classes.errorMessage}>{scannerError}</div>}
+    <div>
+      <div ref={scannerRef} />
     </div>
   );
 };
