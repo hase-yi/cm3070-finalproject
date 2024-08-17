@@ -3,6 +3,7 @@ import classes from './BookList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { fetchBooksForShelf, deleteBook } from '../../features/bookSlice';
+import ImageWithLoading  from '../ImageWithLoading'
 
 const BookList = ({ shelfId, readingListStatus }) => {
 	const dispatch = useDispatch();
@@ -45,9 +46,7 @@ const BookList = ({ shelfId, readingListStatus }) => {
 				<div key={book.id} className='s12 m6 l3' >
 					<Link to={`/books/${book.id}`}>
 						<article className='no-padding'>
-							<div className='responsive medium-height'>
-								<img src={book.image} alt={book.title} className='responsive' />
-							</div>
+							<ImageWithLoading src={book.image} alt={book.title}/>
 							<div className='padding' >
 								<h5>{book.title}</h5>
 								<p>{book.author}</p>

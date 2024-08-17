@@ -6,7 +6,6 @@ import {
     updateShelf,
     deleteShelf,
 } from '../../features/shelfSlice';
-import classes from './ShelfForm.module.css';
 import Input from '../Input';
 import FormButtons from '../FormButtons.js';
 import axiosInstance from '../../axiosInstance';
@@ -114,15 +113,13 @@ function ShelfForm({ method, shelf }) {
 
     return (
         <article className='no-padding'>
-            <form className={classes.form} onSubmit={handleSubmit}>
-
+            <form onSubmit={handleSubmit}>
                 <div className='grid no-space'>
                     <div className='s6'>
                         {previewImage && (
-                            <div className={classes.imagePreview}>
-                                <img src={previewImage} alt="Image Preview" />
-                            </div>
+                            <img src={previewImage} alt="Image Preview" className="responsive large-height" />
                         )}
+
                     </div>
                     <div className='s6'>
                         <div className='padding'>
@@ -136,51 +133,76 @@ function ShelfForm({ method, shelf }) {
                                     )}
                                 </ul>
                             )}
-                            <Input
-                                label="Shelf Name"
-                                id="title"
-                                type="text"
-                                name="title"
-                                required
-                                defaultValue={shelfData.title}
-                            />
+                            <div class="field label border">
+                                <input
+                                    type="text"
+                                    id="title"
+                                    name="title"
+                                    required
+                                    defaultValue={shelfData.title}
+                                />
+                                <label>Shelf Name</label>
+                            </div>
 
-                            <label htmlFor="description">Description</label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                rows="5"
-                                required
-                                defaultValue={shelfData.description}
-                            />
+                            <div class="field border label textarea">
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows="5"
+                                    required
+                                    defaultValue={shelfData.description}
+                                ></textarea>
+                                <label>Description</label>
+                            </div>
 
-                            <label htmlFor="imageUpload">Upload Image</label>
-                            <input
-                                id="imageUpload"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileChange(e.target.files[0])}
-                            />
+                            <div class="field label prefix border responsive">
+                                <i>attach_file</i>
+                                <input
+                                    type="file"
+                                    id="imageUpload"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e.target.files[0])}
+                                />
+                                <input type="text" />
+                                <label>Shelf Image</label>
+                            </div>
 
-                            {shelf && (
-                                <FormButtons
-                                    onClick={() => handleDelete(shelf.id)}
-                                    label="Delete"
+
+                        </div>
+                    </div>
+                    <div className='s12'>
+                        <div className='padding'>
+                            <hr className='medium'></hr>
+                            <div className='row'>
+                                <div className='max'></div>
+                                {shelf && (
+                                    <button
+                                        onClick={() => handleDelete(shelf.id)}
+                                        type="button"
+                                        disabled={isSubmitting}
+                                        className='error'>
+                                        <i>delete</i>
+                                        <span>Delete</span>
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => navigate('..')}
+                                    label="Cancel"
                                     type="button"
                                     disabled={isSubmitting}
-                                />
-                            )}
-                            <FormButtons
-                                onClick={() => navigate('..')}
-                                label="Cancel"
-                                type="button"
-                                disabled={isSubmitting}
-                            />
-                            <FormButtons
-                                label={isSubmitting ? 'Submitting' : 'Save'}
-                                type="submit"
-                                disabled={isSubmitting}
-                            />
+                                >
+                                    <i>undo</i>
+                                    <span>Cancel</span>
+                                </button>
+                                <button
+                                    label={isSubmitting ? 'Submitting' : 'Save'}
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                >
+                                                    <i>save</i>
+                                                    <span>Save</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
