@@ -24,18 +24,20 @@ const BookDetailPage = () => {
   }, [dispatch, bookId, book]);
 
   if (status === 'loading') {
-    return <p>Loading...</p>;
+    return <progress class="circle"></progress>;
   }
 
   if (status === 'failed') {
-    return <p>{error}</p>;
+    return <p className='error'>{error}</p>;
   }
 
   return (
     <div>
-      { <BookItem />}
-      {<Reviews/>}
-      {book?.review?.comments && <Comments/>}
+      {<BookItem />}
+      <hr className='large'></hr>
+      {<Reviews />}
+      <hr className='large'></hr>
+      {book?.review && <Comments />}
     </div>
   );
 };

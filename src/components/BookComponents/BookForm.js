@@ -3,9 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
 	createBook,
-	createReadingProgress,
 	updateBook,
-	updateReadingProgress,
 } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
 import classes from './BookForm.module.css';
@@ -13,7 +11,6 @@ import Input from '../Input';
 import FormButtons from '../FormButtons';
 import { isValidISBN } from '../../utils/validation';
 import axiosInstance from '../../axiosInstance'; // Import axios instance
-import ReadingStatusForm from './ReadingStatusForm';
 import { useLocation } from 'react-router-dom';
 
 

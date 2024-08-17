@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ImageWithLoading = ({ src, alt }) => {
+const ImageWithLoading = ({ src, alt, height='medium-height' }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // This function will be called when the image is loaded
@@ -9,7 +9,7 @@ const ImageWithLoading = ({ src, alt }) => {
   };
 
   return (
-    <div className='responsive medium-height'>
+    <div className={`responsive ${height}`}>
       {isLoading && (
         <div
           style={{

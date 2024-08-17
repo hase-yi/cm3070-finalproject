@@ -3,15 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { fetchShelf } from '../../features/shelfSlice';
 import { deleteBook } from '../../features/bookSlice';
+import ImageWithLoading from '../ImageWithLoading'
 
-import classes from './BookItem.module.css'; // Assuming you have CSS modules
-
-import ReadingProgress from './ReadingProgress';
-import ReadingStatusForm from './ReadingStatusForm';
+import ReadingProgressForm from './ReadingProgressForm';
 
 function BookItem() {
 	const { bookId } = useParams();
 	const dispatch = useDispatch();
+						
 	const navigate = useNavigate();
 
 	const numericBookId = Number(bookId);
@@ -49,44 +48,50 @@ function BookItem() {
 	// console.log('BookItem render:', book); // Debug log
 
 	if (status === 'loading') {
-		return <div>Loading...</div>;
+		return <progress className="circle"></progress>;
 	}
 	if (status === 'failed') {
-		return <div>Error...{error}</div>;
+		return <p className='error'>{error}</p>;
 	}
 	if (!book) {
 		return <div>Book not found</div>;
 	}
 
 	return (
-		<article className={classes.book}>
-			<section className={classes.bookDetails}>
-				<div className={classes.imageAndProgress}>
-					<img src={book.image} alt={book.title} />
+		<div className='grid'>
+			<div className='s12 m6 l5'>
+				<article className='no-padding'>
+					<ImageWithLoading src={book.image} alt={book.title} height={'large-height'} />
+				</article>
+			</div>
+			<div className='s12 m6 l7'>
+				<article>
+					<h3>{book.title}</h3>
+					<h5>{book.author}</h5>
+					<p>Released {book.release_year}, page count {book.total_pages}</p>
+					<p>ISBN: {book.isbn}</p>
 
-					{book?.reading_progress && (
-						<div className={classes.readingProgress}>
-							<ReadingProgress bookId={bookId} />
-						</div>
-					)}
-					{<ReadingStatusForm bookId={bookId} />}
-				</div>
-				<div className={classes.bookInfo}>
-					<h1>Title:{book.title}</h1>
-					<h2>Author:{book.author}</h2>
-					<h1>Total page number:{book.total_pages}</h1>
-					<h1>Release Year: {book.release_year}</h1>
-					<h1>ISBN: {book.isbn}</h1>
 					{user === book.user && (
-						<div className={classes.actions}>
-							<Link to="edit">Edit</Link>
-							<button onClick={startDeleteHandler}>Delete</button>
-						</div>
-					)}
-				</div>
-			</section>
-			<section className={classes.readingProgress}></section>
-		</article>
+						<div className='row'>
+							<div className='max'></div>
+							<Link to="edit">
+								<button>
+									<i>edit</i>
+									<span>Edit</span>
+								</button>
+							</Link>
+							<button onClick={startDeleteHandler} className='error'>
+								<i>delete</i>
+								<span>Delete</span>
+							</button>
+						</div>)}
+				</article>
+				<article>
+					{<ReadingProgressForm bookId={bookId} />}
+				</article>
+			</div>
+		</div>
+
 	);
 }
 
