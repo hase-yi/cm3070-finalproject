@@ -1,9 +1,7 @@
-import { Link } from 'react-router-dom';
-import classes from './BookList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { fetchBooksForShelf, deleteBook } from '../../features/bookSlice';
-import ImageWithLoading  from '../ImageWithLoading'
+import { Link } from 'react-router-dom';
+import { deleteBook } from '../../features/bookSlice';
+import ImageWithLoading from '../ImageWithLoading';
 
 const BookList = ({ shelfId, readingListStatus }) => {
 	const dispatch = useDispatch();

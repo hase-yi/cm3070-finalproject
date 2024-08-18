@@ -4,7 +4,7 @@ import BookForm from '../../components/BookComponents/BookForm';
 const NewBookPage = () => {
   return (
     <div>
-      <h1>Add New Book(the navigation)</h1>
+      <h3>Add New Book</h3>
       <BookForm method="POST" />
     </div>
   );

@@ -91,7 +91,6 @@ function BookItem() {
 				</article>
 			</div>
 		</div>
-
 	);
 }
 

@@ -11,7 +11,7 @@ const EditBookPage = () => {
 
   return (
     <div>
-      <h1>Edit Book</h1>
+      <h3>Edit {book.title}</h3>
       {book && <BookForm method="PUT" bookId={bookId} />}
     </div>
   );

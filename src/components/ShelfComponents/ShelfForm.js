@@ -6,8 +6,6 @@ import {
     updateShelf,
     deleteShelf,
 } from '../../features/shelfSlice';
-import Input from '../Input';
-import FormButtons from '../FormButtons.js';
 import axiosInstance from '../../axiosInstance';
 
 function ShelfForm({ method, shelf }) {
@@ -119,6 +117,19 @@ function ShelfForm({ method, shelf }) {
                         {previewImage && (
                             <img src={previewImage} alt="Image Preview" className="responsive large-height" />
                         )}
+                        <div className='padding'>
+                            <div className="field label prefix border responsive">
+                                <i>attach_file</i>
+                                <input
+                                    type="file"
+                                    id="imageUpload"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e.target.files[0])}
+                                />
+                                <input type="text" />
+                                <label>Shelf Image</label>
+                            </div>
+                        </div>
 
                     </div>
                     <div className='s6'>
@@ -155,17 +166,6 @@ function ShelfForm({ method, shelf }) {
                                 <label>Description</label>
                             </div>
 
-                            <div className="field label prefix border responsive">
-                                <i>attach_file</i>
-                                <input
-                                    type="file"
-                                    id="imageUpload"
-                                    accept="image/*"
-                                    onChange={(e) => handleFileChange(e.target.files[0])}
-                                />
-                                <input type="text" />
-                                <label>Shelf Image</label>
-                            </div>
 
 
                         </div>
@@ -199,8 +199,8 @@ function ShelfForm({ method, shelf }) {
                                     type="submit"
                                     disabled={isSubmitting}
                                 >
-                                                    <i>save</i>
-                                                    <span>Save</span>
+                                    <i>save</i>
+                                    <span>Save</span>
                                 </button>
                             </div>
                         </div>

@@ -7,10 +7,8 @@ import {
 } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
 import classes from './BookForm.module.css';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
 import { isValidISBN } from '../../utils/validation';
-import axiosInstance from '../../axiosInstance'; // Import axios instance
+import axiosInstance from '../../axiosInstance';
 import { useLocation } from 'react-router-dom';
 
 
@@ -18,9 +16,9 @@ const BookForm = ({ method, bookId }) => {
 	const location = useLocation();
 	const bookPrototype = location.state?.bookPrototype;
 
-  if (bookPrototype) {
-    method = "POST"
-  }
+	if (bookPrototype) {
+		method = "POST"
+	}
 
 
 	const numericBookId = Number(bookId);
@@ -49,7 +47,7 @@ const BookForm = ({ method, bookId }) => {
 	const [isbnError, setISBNError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
-	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image|| null);
+	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image || null);
 
 	// Fetch shelves on mount
 	useEffect(() => {
@@ -194,105 +192,154 @@ const BookForm = ({ method, bookId }) => {
 	};
 
 	return (
-		<form className={classes.form} onSubmit={handleSubmit}>
-			{error && <p className="error">{error}</p>}
-			{validationErrors && (
-				<ul>
-					{Object.entries(validationErrors).map(([field, errors]) =>
-						errors.map((error, index) => (
-							<li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
-						))
-					)}
-				</ul>
-			)}
+		<form onSubmit={handleSubmit}>
+			<div className='grid'>
+				<div className='s12 m6 l5'>
+					<article className='no-padding'>
+						{previewImage && (
+							<div >
+								<img src={previewImage} alt="Image Preview" className='responsive' />
+							</div>
+						)}
 
-			{isbnError && <p className={classes.error}>{isbnError}</p>}
-			<Input
-				label="ISBN"
-				id="isbn"
-				name="isbn"
-				required
-				value={formData.isbn}
-				onChange={handleInputChange}
-			/>
-
-			<Input
-				label="Title"
-				id="title"
-				name="title"
-				required
-				value={formData.title}
-				onChange={handleInputChange}
-			/>
-
-			<Input
-				label="Author"
-				id="author"
-				name="author"
-				required
-				value={formData.author}
-				onChange={handleInputChange}
-			/>
-
-			<Input
-				label="Total Pages"
-				id="totalPages"
-				name="totalPages"
-				type="number"
-				value={formData.totalPages}
-				onChange={handleInputChange}
-			/>
-
-			<Input
-				label="Release Year"
-				id="release_year"
-				name="releaseYear"
-				type="number"
-				value={formData.releaseYear}
-				onChange={handleInputChange}
-			/>
-
-			<label htmlFor="shelf">Shelf:</label>
-			<select
-				id="shelf"
-				name="shelf"
-				required
-				value={formData.shelf}
-				onChange={handleInputChange}
-			>
-				<option value="">Select Shelf</option>
-				{shelves.map((shelf) => (
-					<option key={shelf.id} value={shelf.id}>
-						{shelf.title}
-					</option>
-				))}
-			</select>
-
-			<label htmlFor="imageUpload">Upload Image</label>
-			<input
-				id="imageUpload"
-				type="file"
-				accept="image/*"
-				onChange={(e) => handleFileChange(e.target.files[0])}
-			/>
-			{previewImage && (
-				<div className={classes.imagePreview}>
-					<img src={previewImage} alt="Image Preview" />
+						<div className='padding'>
+							<div class="field label prefix border">
+								<i>attach_file</i>
+								<input
+									id="imageUpload"
+									type="file"
+									accept="image/*"
+									onChange={(e) => handleFileChange(e.target.files[0])}
+								/>
+								<input type="text" />
+								<label>Upload Image</label>
+							</div>
+						</div>
+					</article>
 				</div>
-			)}
+				<div className='s12 m6 l7'>
+					{error && <p className="error">{error}</p>}
+					{validationErrors && (
+						<ul>
+							{Object.entries(validationErrors).map(([field, errors]) =>
+								errors.map((error, index) => (
+									<li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
+								))
+							)}
+						</ul>
+					)}
+					{isbnError && <p className={classes.error}>{isbnError}</p>}
 
-			<div className={classes.actions}>
-				<FormButtons
-					label="Cancel"
-					type="button"
-					onClick={() => navigate('..')}
-					disabled={isSubmitting}
-				/>
-				<FormButtons
-					type="submit"
-					disabled={isSubmitting}
-					label={isSubmitting ? 'Submitting' : 'Save'}
-				/>
+
+					<article className='fill'>
+						<div class="field label border responsive">
+							<input
+								type="text"
+								id="title"
+								name="title"
+								required
+								value={formData.title}
+								onChange={handleInputChange}
+							/>
+							<label>Title</label>
+						</div>
+
+						<div class="field label border responsive">
+							<input
+								type="text"
+								id="author"
+								name="author"
+								required
+								value={formData.author}
+								onChange={handleInputChange}
+							/>
+							<label>Author</label>
+						</div>
+
+						<div class="field label border responsive">
+							<input
+								type="number"
+								id="release_year"
+								name="releaseYear"
+								value={formData.releaseYear}
+								onChange={handleInputChange}
+							/>
+							<label>Release Year</label>
+						</div>
+
+
+						<div class="field label border responsive">
+							<input
+								type="number"
+								id="totalPages"
+								name="totalPages"
+								value={formData.totalPages}
+								onChange={handleInputChange}
+							/>
+							<label>Total Pages</label>
+						</div>
+
+						<div class="field label border responsive">
+							<input
+								type="text"
+								id="isbn"
+								name="isbn"
+								required
+								value={formData.isbn}
+								onChange={handleInputChange}
+							/>
+							<label>ISBN</label>
+						</div>
+
+
+						<div className='row'>
+							<div className='max'></div>
+
+							<button
+								type="button"
+								onClick={() => navigate('..')}
+								disabled={isSubmitting}
+							>
+								<i>undo</i>
+								<span>Cancel</span>
+							</button>
+
+							<button
+								type="submit"
+								disabled={isSubmitting}
+							>
+								<i>save</i>
+								<span>{isSubmitting ? 'Submitting' : 'Save'}</span>
+							</button>
+						</div>
+					</article>
+					<article className='fill'>
+
+
+						<div class="field suffix border">
+							<select
+
+								id="shelf"
+								name="shelf"
+								required
+								value={formData.shelf}
+								onChange={handleInputChange}
+							>
+								<option value="">Select Shelf</option>
+								{shelves.map((shelf) => (
+									<option key={shelf.id} value={shelf.id}>
+										{shelf.title}
+									</option>
+								))}
+							</select>
+							<i>arrow_drop_down</i>
+							<span class="helper">Shelf</span>
+						</div>
+
+
+
+					</article>
+				</div>
 			</div>
 		</form>
 	);
