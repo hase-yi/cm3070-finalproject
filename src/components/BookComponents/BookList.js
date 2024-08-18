@@ -25,7 +25,7 @@ const BookList = ({ shelfId, readingListStatus }) => {
 	}
 
 	if (status === 'loading') {
-		return <div>Loading...</div>;
+		return <div className='row center-align'><progress className="circle"></progress></div>;
 	}
 	if (status === 'failed') {
 		return <div>Error...{error}</div>;

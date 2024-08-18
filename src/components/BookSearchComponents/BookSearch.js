@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import classes from './BookSearch.module.css';
-import { fetchBooks } from '../../features/bookSlice';
 import axiosInstance from '../../axiosInstance';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import ImageWithLoading from '../ImageWithLoading';
+import { Link } from 'react-router-dom';
 
 const BookSearch = () => {
 	const dispatch = useDispatch();
@@ -44,10 +44,10 @@ const BookSearch = () => {
 					.get(`/books/search/`, { params: { title: searchTerm } })
 					.then((response) => {
 						const remote_results = response.data
-                        .filter(remoteBook => !local_results.some(localResult => localResult.book.isbn === remoteBook.isbn))
-                        .map((book) => {
-                            return { type: 'remote', book: book };
-                        });
+							.filter(remoteBook => !local_results.some(localResult => localResult.book.isbn === remoteBook.isbn))
+							.map((book) => {
+								return { type: 'remote', book: book };
+							});
 						setSearchResults(local_results.concat(remote_results));
 						setLoading(false);
 					})
@@ -71,43 +71,59 @@ const BookSearch = () => {
 		setSearchParams({ search: newQuery });
 	};
 
-		// Handle navigation to /books/new with book data as state
-		const handleExternalBookClick = (book) => {
-			navigate('/books/new', { state: { bookPrototype: book } });
-		};
+	// Handle navigation to /books/new withbook data as state
+	const handleExternalBookClick = (book) => {
+		navigate('/books/new', { state: { bookPrototype: book } });
+	};
 
 	return (
-		<div className={classes.form}>
-			<div className={classes.input}>
+		<>
+			<div class="field large prefix round fill">
+				<i class="front">search</i>
 				<input
 					type="text"
 					placeholder="Search by title"
 					value={searchTerm || ''}
 					onChange={handleSearch}
-				/>{' '}
+				/>
+							
+
 			</div>
 
-			{loading && <p className={classes.loadingIndictor}>Loading...</p>}
-			{error && <p className={classes.feedbackMessage}>Error:{error}</p>}
-			<ul className={classes.results}>
+			{loading && <progress></progress>
+							}
+			{error && <p className='error'>{error}</p>}
+			<div className='grid'>
 				{searchResults.map((book, index) => (
-					<li key={index} className={classes.bookItem}>
-						{book.book?.image && (
-							<img src={book.book.image} alt={book.book.title} />
-						)}
-						{book.book?.title} by {book.book?.author}
-						<p>{book.type}</p>
-						{book.type === 'local' ? (
-							<a href={`/books/${book.book.id}`}>Go to book</a>
-						) : (
-							<button onClick={() => handleExternalBookClick(book.book)}>
-								Add to Library
-							</button>
-						)}
-					</li>
+					<div key={book.book?.isbn} className='s12 m6 l4' >
+						<article className='no-padding'>
+							<ImageWithLoading src={book.book?.image} alt={book.book?.title} />
+							<div className='padding' >
+								<h5>{book.book?.title}</h5>
+								<p>{book.book?.author}</p>
+								<p>{book.book?.isbn}</p>
+
+							</div>
+							<div className='padding'>
+								{book.type === 'local' ? (
+
+									<Link to={`/books/${book.book.id}`} className='responsive'>
+										<button className='responsive'>
+											<i>link</i>
+											<span>Go to book</span>
+										</button>
+									</Link>) : (
+									<button onClick={() => handleExternalBookClick(book.book)} className='responsive'>
+										<i>add</i>
+										<span>Add to Library</span>
+									</button>
+								)}
+							</div>
+						</article>
+					</div>
 				))}
-			</ul>
-		</div>
+			</div>
+		</>
 	);
 };
 
