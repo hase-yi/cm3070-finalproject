@@ -42,7 +42,7 @@ function ShelfItem() {
   };
 
   if (status === 'loading') {
-    return <progress class="circle"></progress>;
+    return <progress className="circle"></progress>;
   }
 
   if (status === 'failed') {

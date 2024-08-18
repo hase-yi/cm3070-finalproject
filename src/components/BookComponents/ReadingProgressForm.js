@@ -95,7 +95,7 @@ const ReadingProgressForm = ({ bookId }) => {
 		<form onSubmit={handleSubmit}>
 			<h6>Reading Progress</h6>
 			<div className='space'></div>
-			<label class="checkbox">
+			<label className="checkbox">
 				<input
 					id="shared"
 					name="shared"
@@ -106,7 +106,7 @@ const ReadingProgressForm = ({ bookId }) => {
 				<span>Share this reading progress</span>
 			</label>
 
-			<div class="field suffix border responsive">
+			<div className="field suffix border responsive">
 				<select
 					id="status"
 					name="status"
@@ -119,14 +119,15 @@ const ReadingProgressForm = ({ bookId }) => {
 					<option value="N">Not to Finish</option>
 				</select>
 				<i>arrow_drop_down</i>
-				<span class="helper">Reading List</span>
+				<span className="helper">Reading List</span>
 			</div>
 
-			<progress value={`${book.reading_progress.current_page}`} max={`${book.total_pages}`}></progress>
+			{book?.reading_progress && <progress value={`${book.reading_progress.current_page}`} max={`${book.total_pages}`}></progress>
+			}
 
 
 			{isReading && (
-				<div class="field label border responsive">
+				<div className="field label border responsive">
 					<input
 						label="Current Page"
 						id="current_page"
@@ -135,7 +136,7 @@ const ReadingProgressForm = ({ bookId }) => {
 						value={readingProgress.currentPage}
 						onChange={handleInputChange}
 					/>
-					<label>Number</label>
+					<label>Current Page</label>
 				</div>
 
 			)}

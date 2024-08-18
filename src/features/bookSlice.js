@@ -486,7 +486,8 @@ const bookSlice = createSlice({
 				if (index !== -1) {
 					state.books[index] = {
 						...state.books[index],
-						review: { ...action.payload },
+						review: { ...action.payload, comments: [] },
+						
 					};
 				}
 				state.status = 'succeeded';
@@ -506,10 +507,8 @@ const bookSlice = createSlice({
 
 			})
 			.addCase(deleteReview.fulfilled, (state, action) => {
-
-				console.log('payload', action.payload)
 				const bookIndex = state.books.findIndex(
-					(book) => book.id === action.payload.review.book
+					(book) => book.id === action.payload.book
 				);
 				if (bookIndex !== -1) {
 					state.books[bookIndex] = {

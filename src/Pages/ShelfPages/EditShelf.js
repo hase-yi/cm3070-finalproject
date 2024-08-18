@@ -19,7 +19,7 @@ function EditShelfPage() {
     }
   }, [dispatch, shelfId, shelf]);
 
-  if (status === 'loading') return <progress class="circle"></progress>;
+  if (status === 'loading') return <progress className="circle"></progress>;
   if (status === 'failed') return <p className='error'>{error}</p>;
 
   return (

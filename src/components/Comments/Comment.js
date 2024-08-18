@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
-import classes from './Comments.module.css';
 import { createComment, deleteComment, updateComment } from '../../features/bookSlice';
 
 const Comment = ({ bookId, commentId }) => {
@@ -30,36 +29,36 @@ const Comment = ({ bookId, commentId }) => {
 
 	const [formData, setFormData] = useState({
 		comment: {
-			text: book?.review?.comments?.text || '',
+			text: comment.text || '',
 		},
 	});
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		setIsSubmitting(true);
-	
+
 		// Validate that book.id exists and is a number
 		if (!book || typeof book.id !== 'number' || !Number.isInteger(book.id)) {
 			console.error('Book ID is either missing or not a valid number');
 			setIsSubmitting(false);
 			return; // Exit the function early if book.id is invalid
 		}
-	
+
 		const commentData = {
 			review: book.review.id,
 			book: book.id,
 			text: formData.comment.text,
 		};
-	
+
 		console.log('Review in commentData is: ', commentData.review);
-	
+
 		try {
 			const bookData = {
 				review: {
 					comment: { ...commentData },
 				},
 			};
-	
+
 			// Ensure that comment.id exists and is set correctly
 			if (comment && comment.id) {
 				bookData.review.comment.id = comment.id;
@@ -67,10 +66,10 @@ const Comment = ({ bookId, commentId }) => {
 				console.error('Comment ID is missing');
 				throw new Error('Comment ID is missing');
 			}
-	
+
 			// Await the dispatch to ensure completion
 			await dispatch(updateComment(bookData)).unwrap();
-	
+
 		} catch (err) {
 			console.error('Failed to save book:', err);
 		} finally {
@@ -79,7 +78,7 @@ const Comment = ({ bookId, commentId }) => {
 			setIsEditing(false);
 		}
 	};
-	
+
 
 	const handleCommentChange = (e, commentId) => {
 		const { name, value } = e.target;
@@ -105,26 +104,26 @@ const Comment = ({ bookId, commentId }) => {
 		}
 
 		setIsSubmitting(true);
-	
+
 		// Validate that book.id exists and is a number
 		if (!book || typeof book.id !== 'number' || !Number.isInteger(book.id)) {
 			console.error('Book ID is either missing or not a valid number');
 			setIsSubmitting(false);
 			return; // Exit the function early if book.id is invalid
 		}
-	
+
 		const commentData = {
 			review: book.review.id,
 			book: book.id,
 		};
-		
+
 		try {
 			const bookData = {
 				review: {
 					comment: { ...commentData },
 				},
 			};
-	
+
 			// Ensure that comment.id exists and is set correctly
 			if (comment && comment.id) {
 				bookData.review.comment.id = comment.id;
@@ -132,10 +131,10 @@ const Comment = ({ bookId, commentId }) => {
 				console.error('Comment ID is missing');
 				throw new Error('Comment ID is missing');
 			}
-	
+
 			// Await the dispatch to ensure completion
 			await dispatch(deleteComment(bookData)).unwrap();
-	
+
 		} catch (err) {
 			console.error('Failed to save book:', err);
 		} finally {
@@ -143,55 +142,70 @@ const Comment = ({ bookId, commentId }) => {
 			setIsSubmitting(false);
 			setIsEditing(false);
 		}
-
-
 	};
 
 	if (isEditing) {
 		return (
-			<form className={classes.addCommentContainer} onSubmit={handleSubmit}>
-				<label htmlFor="text">Review</label>
-				<textarea
-					id="text"
-					name="text"
-					rows="5"
-					value={formData.comment.text}
-					placeholder="Write your comment here..."
-					onChange={handleCommentChange}
-					required
-					className={classes.addCommentInput}
-				/>
-				<div className={classes.commentActions}>
-					<FormButtons
-						label={isSubmitting ? 'Submitting' : 'Add Comment'}
-						type="submit"
-						disabled={isSubmitting}
-					/>
-					<FormButtons
-						label="Cancel"
-						type="button"
-						onClick={handleEdit}
-						className={classes.cancelButton}
-					/>
-				</div>
-			</form>
+			<article className="round">
+				<form onSubmit={handleSubmit}>
+					<div className='row'>
+						<div className='max field textarea border'>
+							<textarea
+								id="text"
+								name="text"
+								rows="5"
+								value={formData.comment.text}
+								onChange={handleCommentChange}
+								required
+							></textarea>
+						</div>
+						{user === comment.user && (
+							<div >
+								<button
+									type="submit"
+									disabled={isSubmitting}
+								>
+									<i>save</i>
+									<span>{isSubmitting ? 'Submitting' : 'Save'}</span>
+								</button>
+								<button
+									onClick={handleEdit}
+								>
+									<i>undo</i>
+									<span>Cancel</span>
+								</button>
+							</div>
+						)}
+					</div>
+				</form>
+			</article>
 		);
 	}
 
 	return (
-		<>
-			<p>{comment.text}</p>
-			{user === comment.user && (
-				<div className={classes.commentActions}>
-					<FormButtons label="Edit" type="button" onClick={handleEdit} />
-					<FormButtons
-						label="Delete"
-						type="button"
-						onClick={handleDelete}
-					/>
+		<article className="round">
+			<div className='row'>
+				<div className='max'>
+					<p>{comment.text}</p>
 				</div>
-			)}
-		</>
+				{user === comment.user && (
+					<div >
+						<button
+							onClick={handleEdit}>
+							<i>edit</i>
+							<span>Edit</span>
+						</button>
+						<button
+							onClick={handleDelete}
+							className='error'
+						>
+							<i>delete</i>
+							<span>Delete</span>
+						</button>
+					</div>
+				)}
+			</div>
+		</article>
 	);
 };
 

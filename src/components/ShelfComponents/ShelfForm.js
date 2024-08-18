@@ -133,7 +133,7 @@ function ShelfForm({ method, shelf }) {
                                     )}
                                 </ul>
                             )}
-                            <div class="field label border">
+                            <div className="field label border">
                                 <input
                                     type="text"
                                     id="title"
@@ -144,7 +144,7 @@ function ShelfForm({ method, shelf }) {
                                 <label>Shelf Name</label>
                             </div>
 
-                            <div class="field border label textarea">
+                            <div className="field border label textarea">
                                 <textarea
                                     id="description"
                                     name="description"
@@ -155,7 +155,7 @@ function ShelfForm({ method, shelf }) {
                                 <label>Description</label>
                             </div>
 
-                            <div class="field label prefix border responsive">
+                            <div className="field label prefix border responsive">
                                 <i>attach_file</i>
                                 <input
                                     type="file"

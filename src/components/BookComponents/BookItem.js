@@ -65,7 +65,7 @@ function BookItem() {
 				</article>
 			</div>
 			<div className='s12 m6 l7'>
-				<article>
+				<article className='fill'>
 					<h3>{book.title}</h3>
 					<h5>{book.author}</h5>
 					<p>Released {book.release_year}, page count {book.total_pages}</p>
@@ -86,7 +86,7 @@ function BookItem() {
 							</button>
 						</div>)}
 				</article>
-				<article>
+				<article className='fill'>
 					{<ReadingProgressForm bookId={bookId} />}
 				</article>
 			</div>

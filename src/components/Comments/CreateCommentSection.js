@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FormButtons from '../FormButtons';
-import classes from './Comments.module.css';
 import { createComment } from '../../features/bookSlice';
 
 const CreateCommentSection = ({ bookId }) => {
@@ -53,7 +52,7 @@ const CreateCommentSection = ({ bookId }) => {
 
 			// Await the dispatch to ensure completion
 			await dispatch(createComment(bookData)).unwrap();
-      formData.comment.text = ""
+			formData.comment.text = ""
 		} catch (err) {
 			console.error('Failed to save book:', err);
 		} finally {
@@ -74,26 +73,32 @@ const CreateCommentSection = ({ bookId }) => {
 	};
 
 	return (
-		<form className={classes.addCommentContainer} onSubmit={handleSubmit}>
-			<label htmlFor="text">Review</label>
-			<textarea
-				id="text"
-				name="text"
-				rows="5"
-				value={formData.comment.text}
-				placeholder="Write your comment here..."
-				onChange={handleCommentChange}
-				required
-				className={classes.addCommentInput}
-			/>
-			<div className={classes.commentActions}>
-				<FormButtons
-					label={isSubmitting ? 'Submitting' : 'Add Comment'}
-					type="submit"
-					disabled={isSubmitting}
-				/>
-			</div>
-		</form>
+		<article className="round">
+			<form onSubmit={handleSubmit}>
+				<div className='row'>
+					<div className='max field textarea border'>
+						<textarea
+							id="text"
+							name="text"
+							rows="5"
+							value={formData.comment.text}
+							placeholder="Write your comment here..."
+							onChange={handleCommentChange}
+							required
+						></textarea>
+					</div>
+					<div >
+						<button
+							type="submit"
+							disabled={isSubmitting}
+						>
+							<i>add</i>
+							<span>{isSubmitting ? 'Submitting' : 'Add Comment'}</span>
+						</button>
+					</div>
+				</div>
+			</form>
+		</article>
 	);
 };
 

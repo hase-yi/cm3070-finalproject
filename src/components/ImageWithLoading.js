@@ -23,7 +23,7 @@ const ImageWithLoading = ({ src, alt, height='medium-height' }) => {
             alignItems: 'center',
           }}
         >
-          <progress class="circle"></progress>
+          <progress className="circle"></progress>
         </div>
       )}
       <img

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Input from '../Input';
 import FormButtons from '../FormButtons';
-import classes from './Reviews.module.css';
 import { createReview, deleteReview, updateReview } from '../../features/bookSlice';
 
 const Reviews = () => {
@@ -101,40 +100,46 @@ const Reviews = () => {
 
 	if (isEditing) {
 		return (
-			<form className={classes.reviewContainer} onSubmit={handleSubmit}>
-				<div>
-					<label htmlFor="text">Review</label>
-					<textarea
-						id="text"
-						name="text"
-						rows="5"
-						value={formData.review.text}
-						onChange={handleReviewChange}
-						required
-					/>
-					<Input
-						label="Sharing"
+			<form onSubmit={handleSubmit}>
+				<label className="checkbox">
+					<input
 						id="shared"
 						name="shared"
 						type="checkbox"
 						checked={formData.review.shared}
 						onChange={handleReviewChange}
 					/>
-				</div>
+					<span>Share this review</span>
+				</label>
+				<div className='row'>
+					<div className='field textarea border max'>
+						<textarea
+							id="text"
+							name="text"
+							rows="5"
+							value={formData.review.text}
+							onChange={handleReviewChange}
+							required
+						>
+						</textarea>
+					</div>
 
-				<div className={classes.actions}>
-					<FormButtons label="Delete" type="button" onClick={handleDelete} />
-					<FormButtons
-						label="Cancel"
-						type="button"
-						onClick={handleEdit}
-						disabled={isSubmitting}
-					/>
-					<FormButtons
-						type="submit"
-						disabled={isSubmitting}
-						label={isSubmitting ? 'Submitting' : 'Save'}
-					/>
+					<div >
+						<button
+							onClick={handleEdit}
+							disabled={isSubmitting}
+						>
+							<i>undo</i>
+							<span>Cancel</span>
+						</button>
+						<button
+							type="submit"
+							disabled={isSubmitting}
+						>
+							<i>save</i>
+							<span>{isSubmitting ? 'Submitting' : 'Save'}</span>
+						</button>
+					</div>
 				</div>
 			</form>
 		);
@@ -143,17 +148,41 @@ const Reviews = () => {
 	if (book?.review) {
 		return (
 			<div>
-				<p>{formData.review.text}</p>
-				{user === book?.user && (
-					<button onClick={handleEdit}>Edit</button>
-				)}
+				<div className='row'>
+					<div className='max'>
+						<blockquote>
+							<p className="italic">{book.review.date}</p>
+							{formData.review.text}
+						</blockquote>
+					</div>
+					{user === book?.user && (
+						<div>
+							<button onClick={handleEdit}>
+								<i>edit</i>
+								<span>Edit Review</span>
+							</button>
+
+							<button
+								className='error'
+								onClick={handleDelete} >
+								<i>delete</i>
+								<span>Delete</span>
+							</button>
+						</div>
+					)}
+				</div>
 			</div>
+
 		);
 	}
 
 	return (
-		<div>
-			{user === book?.user && <button onClick={handleEdit}>Write Review</button>}
+		<div className='row center-align'>
+			{user === book?.user &&
+				<button onClick={handleEdit}>
+					<i>edit</i>
+					<span>Write Review</span>
+				</button>}
 		</div>
 	);
 };
