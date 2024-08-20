@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import FormButtons from '../FormButtons';
 import { createComment } from '../../features/bookSlice';
 
 const CreateCommentSection = ({ bookId }) => {

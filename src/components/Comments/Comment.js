@@ -1,9 +1,6 @@
-import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
-import { createComment, deleteComment, updateComment } from '../../features/bookSlice';
+import { deleteComment, updateComment } from '../../features/bookSlice';
 
 const Comment = ({ bookId, commentId }) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);

@@ -6,7 +6,6 @@ import {
 	updateBook,
 } from '../../features/bookSlice';
 import { fetchShelves } from '../../features/shelfSlice';
-import classes from './BookForm.module.css';
 import { isValidISBN } from '../../utils/validation';
 import axiosInstance from '../../axiosInstance';
 import { useLocation } from 'react-router-dom';
@@ -203,7 +202,7 @@ const BookForm = ({ method, bookId }) => {
 						)}
 
 						<div className='padding'>
-							<div class="field label prefix border">
+							<div className="field label prefix border">
 								<i>attach_file</i>
 								<input
 									id="imageUpload"
@@ -228,11 +227,11 @@ const BookForm = ({ method, bookId }) => {
 							)}
 						</ul>
 					)}
-					{isbnError && <p className={classes.error}>{isbnError}</p>}
+					{isbnError && <p className="error">{isbnError}</p>}
 
 
 					<article className='fill'>
-						<div class="field label border responsive">
+						<div className="field label border responsive">
 							<input
 								type="text"
 								id="title"
@@ -244,7 +243,7 @@ const BookForm = ({ method, bookId }) => {
 							<label>Title</label>
 						</div>
 
-						<div class="field label border responsive">
+						<div className="field label border responsive">
 							<input
 								type="text"
 								id="author"
@@ -256,7 +255,7 @@ const BookForm = ({ method, bookId }) => {
 							<label>Author</label>
 						</div>
 
-						<div class="field label border responsive">
+						<div className="field label border responsive">
 							<input
 								type="number"
 								id="release_year"
@@ -268,7 +267,7 @@ const BookForm = ({ method, bookId }) => {
 						</div>
 
 
-						<div class="field label border responsive">
+						<div className="field label border responsive">
 							<input
 								type="number"
 								id="totalPages"
@@ -279,7 +278,7 @@ const BookForm = ({ method, bookId }) => {
 							<label>Total Pages</label>
 						</div>
 
-						<div class="field label border responsive">
+						<div className="field label border responsive">
 							<input
 								type="text"
 								id="isbn"
@@ -316,7 +315,7 @@ const BookForm = ({ method, bookId }) => {
 					<article className='fill'>
 
 
-						<div class="field suffix border">
+						<div className="field suffix border">
 							<select
 
 								id="shelf"
@@ -333,7 +332,7 @@ const BookForm = ({ method, bookId }) => {
 								))}
 							</select>
 							<i>arrow_drop_down</i>
-							<span class="helper">Shelf</span>
+							<span className="helper">Shelf</span>
 						</div>
 
 

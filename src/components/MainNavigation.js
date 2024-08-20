@@ -48,7 +48,7 @@ function MainNavigation() {
 				end
 			>
 				<i>home</i>
-				<div>{user}'s Home</div>
+				<div>{user && `${user}'s `} Home</div>
 			</NavLink>
 			<NavLink
 				to="/shelves"

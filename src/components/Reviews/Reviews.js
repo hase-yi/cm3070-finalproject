@@ -1,8 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
 import { createReview, deleteReview, updateReview } from '../../features/bookSlice';
 
 const Reviews = () => {

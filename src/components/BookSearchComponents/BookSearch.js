@@ -78,20 +78,19 @@ const BookSearch = () => {
 
 	return (
 		<>
-			<div class="field large prefix round fill">
-				<i class="front">search</i>
+			<div className="field large prefix round fill">
+				<i className="front">search</i>
 				<input
 					type="text"
 					placeholder="Search by title"
 					value={searchTerm || ''}
 					onChange={handleSearch}
 				/>
-							
+
 
 			</div>
 
-			{loading && <progress></progress>
-							}
+			{loading && <progress></progress>}
 			{error && <p className='error'>{error}</p>}
 			<div className='grid'>
 				{searchResults.map((book, index) => (

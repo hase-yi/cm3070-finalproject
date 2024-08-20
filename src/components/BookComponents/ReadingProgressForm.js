@@ -4,8 +4,6 @@ import {
 	createReadingProgress,
 	updateReadingProgress,
 } from '../../features/bookSlice';
-import Input from '../Input';
-import FormButtons from '../FormButtons';
 
 const ReadingProgressForm = ({ bookId }) => {
 	const dispatch = useDispatch();

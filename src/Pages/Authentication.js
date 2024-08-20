@@ -4,13 +4,14 @@ import {
 	getUsername as fetchUsername,
 	loginUser,
 	logoutUser,
-} from '../features/authSlice'; // Ensure logoutUser is imported
+} from '../features/authSlice';
 import navigateEmitter from '../navigateEmitter';
 import { store } from '../store/index';
 import { fetchFollowedUsers, fetchFollowers } from '../features/followingSlice';
-import { fetchShelves
- } from '../features/shelfSlice';
- import { fetchBooks } from '../features/bookSlice';
+import {
+	fetchShelves
+} from '../features/shelfSlice';
+import { fetchBooks } from '../features/bookSlice';
 
 function AuthenticationPage() {
 	const [username, setUsername] = useState('');
@@ -55,21 +56,37 @@ function AuthenticationPage() {
 	};
 
 	return (
+		<article>
 		<form onSubmit={handleSubmit}>
-			<input
-				type="text"
-				placeholder="Username"
-				value={username}
-				onChange={(e) => setUsername(e.target.value)}
-			/>
-			<input
-				type="password"
-				placeholder="Password"
-				value={password}
-				onChange={(e) => setPassword(e.target.value)}
-			/>
-			<button type="submit">Login</button>
+			<div class="field label border">
+				<input
+					type="text"
+					value={username}
+					onChange={(e) => setUsername(e.target.value)}
+				/>
+				<label>Username</label>
+			</div>
+			<div class="field label border">
+				<input
+					type="password"
+					placeholder="Password"
+					value={password}
+					onChange={(e) => setPassword(e.target.value)}
+				/>
+				<label>Password</label>
+
+			</div>
+			<button
+				type="submit"
+				className='responsive'
+			>
+				<span>Login</span></button>
+
+			<div className='row center-align'>
+				<p className='italic'>No account yet? Register here!</p>
+			</div>
 		</form>
+		</article>
 	);
 }
 
