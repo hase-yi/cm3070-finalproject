@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createReview, deleteReview, updateReview } from '../../features/bookSlice';
+import { formatDate } from '../../utils/misc';
 
 const Reviews = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,7 +150,7 @@ const Reviews = () => {
 				<div className='row'>
 					<div className='max'>
 						<blockquote>
-							<p className="italic">{book.review.date}</p>
+							<p className="italic">{formatDate(book.review.date)}</p>
 							{formData.review.text}
 						</blockquote>
 					</div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteComment, updateComment } from '../../features/bookSlice';
+import { formatDate } from '../../utils/misc';
 
 const Comment = ({ bookId, commentId }) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -183,6 +184,7 @@ const Comment = ({ bookId, commentId }) => {
 		<article className="round">
 			<div className='row'>
 				<div className='max'>
+					<p>{formatDate(comment.date)} by <a href={`/profiles/${comment.user}`}>{comment.user}</a></p>
 					<p>{comment.text}</p>
 				</div>
 				{user === comment.user && (
