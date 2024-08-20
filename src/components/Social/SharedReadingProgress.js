@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosInstance';
-
+import { formatDate } from '../../utils/misc';
 
 function SharedReadingProgress({ username }) {
     const [readingProgresses, setReadingProgresses] = useState([]);
@@ -27,15 +27,18 @@ function SharedReadingProgress({ username }) {
     return (
         <article>
             <h5>Recent Reading Progress</h5>
-            {loadingReadingProgresses &&  <progress className="circle"></progress>}
+            {loadingReadingProgresses && <progress className="circle"></progress>}
             {errorReadingProgresses && <p className='error'>{errorReadingProgresses}</p>}
-            <ul>
-                {readingProgresses.map((progress) => (
-                    <li key={progress.id}>
-                        <a href={`/books/${progress.book.id}`}>{progress.book.title}</a>
-                    </li>
-                ))}
-            </ul>
+            {readingProgresses.map((progress) => (
+                <a className='row wave' key={progress.id} href={`/books/${progress.book.id}`}>
+                    <div className='max'>
+                        {progress.book.title}
+                    </div>
+                    <div>
+                        {formatDate(progress.timestamp)}
+                    </div>
+                </a>
+            ))}
         </article>
     )
 }

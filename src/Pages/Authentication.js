@@ -58,7 +58,7 @@ function AuthenticationPage() {
 	return (
 		<article>
 		<form onSubmit={handleSubmit}>
-			<div class="field label border">
+			<div className="field label border">
 				<input
 					type="text"
 					value={username}
@@ -66,7 +66,7 @@ function AuthenticationPage() {
 				/>
 				<label>Username</label>
 			</div>
-			<div class="field label border">
+			<div className="field label border">
 				<input
 					type="password"
 					placeholder="Password"

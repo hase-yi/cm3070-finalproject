@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosInstance';
 import { useSelector } from 'react-redux';
-
+import { formatDate } from '../../utils/misc';
 
 function Activity() {
     const [activities, setActivities] = useState([]);
@@ -27,18 +27,25 @@ function Activity() {
         }
     }, [followedUsers]);
 
+    if (activities.length == 0) {
+        return 
+    }
+
     return (
         <article>
             <h5>Recent Activity</h5>
-            {loadingActivities && <p>Loading...</p>}
-            {errorActivities && <p>{errorActivities}</p>}
-            <ul>
+            {loadingActivities && <progress className="circle"></progress>}
+            {errorActivities && <p className='error'>{errorActivities}</p>}
                 {activities.map((activity) => (
-                    <li key={activity.id}>
-                        <a href={`${activity.backlink}`}>{activity.text}</a>
-                    </li>
+                    <a className='row wave' key={activity.id} href={`/books/${activity.book}`}>
+                    <div className='max'>
+                        {activity.text}
+                    </div>
+                    <div>
+                        {formatDate(activity.timestamp)}
+                    </div>
+                    </a>
                 ))}
-            </ul>
         </article>
     )
 }

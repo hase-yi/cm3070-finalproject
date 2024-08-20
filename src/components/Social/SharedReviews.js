@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosInstance';
-
+import { formatDate } from '../../utils/misc';
 
 function SharedReviews({ username }) {
     const [reviews, setReviews] = useState([]);
@@ -29,14 +29,16 @@ function SharedReviews({ username }) {
             <h5>Recent Reviews</h5>
             {loadingReviews && <progress className="circle"></progress>}
             {errorReviews && <p className='error'>{errorReviews}</p>}
-            <ul>
-                {reviews.map((review) => (
-                    <li key={review.id}>
-                        <a href={`/books/${review.book.id}`}>{review.book.title}</a>
-                    </li>
-                ))}
-            </ul>
-            {/* TODO: Load more button */}
+            {reviews.map((review) => (
+                <a className='row wave' key={review.id} href={`/books/${review.book.id}`}>
+                    <div className='max'>
+                        {review.book.title}
+                    </div>
+                    <div>
+                        {formatDate(review.date)}
+                    </div>
+                </a>
+            ))}
         </article>
     )
 }

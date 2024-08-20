@@ -1,6 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosInstance';
+import { Link } from 'react-router-dom';
+import FollowUnfollowButton from './FollowUnfollowButton';
+import { useSelector } from 'react-redux';
 
 function PeopleSearch() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -17,7 +20,8 @@ function PeopleSearch() {
 
             axiosInstance.get(`/users/`, { params: { search: search } })
                 .then((response) => {
-                    setSearchResults(response.data);
+                    const users = response.data.filter((u) => u.username !== user)
+                    setSearchResults(users);
                     setLoading(false);
                 })
                 .catch((err) => {
@@ -32,24 +36,44 @@ function PeopleSearch() {
         setSearchParams({ search: newQuery });
     };
 
+    const user = useSelector((state) => state.auth.user);
+
     return (
-        <div style={{color: "red"}}>
-            <input
-                type="text"
-                placeholder="Search..."
-                value={search || ''}
-                onChange={handleSearch}
-            />
-            {loading && <p>Loading...</p>}
-            {error && <p>{error}</p>}
-            <ul>
+        <>
+            <div className="field large prefix round fill">
+                <i className="front">search</i>
+                <input
+                    type="text"
+                    placeholder="Search users"
+                    value={search || ''}
+                    onChange={handleSearch}
+                />
+            </div>
+            {loading && <progress></progress>}
+            {error && <p className='error'>{error}</p>}
+            <div className='grid'>
+
                 {searchResults.map((result) => (
-                    <li key={result.username}>
-                        <a href={`/profiles/${result.username}`}>{result.username}</a>
-                    </li>
+                    <div key={result.username} className='s12 m6 l4' >
+                        <article>
+                            <h4>{result.username}</h4>
+                            <div className='grid'>
+                                <div className='s6 m6 l6'>
+                                    <Link to={`/profiles/${result.username}`} className='responsive'>
+                                        <button className='responsive'>
+                                            <span>Go To Profile</span>
+                                        </button>
+                                    </Link>
+                                </div>
+                                <div className='s6 m6 l6'>
+                                    {result.username !== user && <FollowUnfollowButton username={result.username} />}
+                                </div>
+                            </div>
+                        </article>
+                    </div>
                 ))}
-            </ul>
-        </div>
+            </div>
+        </>
     );
 }
 
