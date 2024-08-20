@@ -1,20 +1,12 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchShelves } from '../../features/shelfSlice';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 import ShelfList from '../../components/ShelfComponents/ShelfList';
 
 function ShelvesPage() {
-	const dispatch = useDispatch();
 	const shelves = useSelector((state) => state.shelves.shelves);
 	const status = useSelector((state) => state.shelves.status);
 	const error = useSelector((state) => state.shelves.error);
-
-	useEffect(() => {
-		if (status === 'idle') {
-			dispatch(fetchShelves());
-		}
-	}, [dispatch, status]);
 
 	if (status === 'loading')
 		return <p style={{ textAlign: 'center' }}>Loading...</p>;

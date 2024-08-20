@@ -5,7 +5,6 @@ import {
 	createBook,
 	updateBook,
 } from '../../features/bookSlice';
-import { fetchShelves } from '../../features/shelfSlice';
 import { isValidISBN } from '../../utils/validation';
 import axiosInstance from '../../axiosInstance';
 import { useLocation } from 'react-router-dom';
@@ -47,13 +46,6 @@ const BookForm = ({ method, bookId }) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
 	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image || null);
-
-	// Fetch shelves on mount
-	useEffect(() => {
-		dispatch(fetchShelves()).then((response) => {
-			console.log('Shelves fetched:', response);
-		});
-	}, [dispatch]);
 
 	// Update form fields if the book changes
 	useEffect(() => {
