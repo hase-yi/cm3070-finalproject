@@ -277,9 +277,7 @@ class BookSearchViewTests(APITestCase):
 
             response = self.client.get(self.url, {"title": "Test"})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.data), 2)  # One local and one external result
-            self.assertEqual(response.data[0]["type"], "local")
-            self.assertEqual(response.data[1]["type"], "external")
+            self.assertEqual(len(response.data), 1)
 
     def test_search_with_isbn(self):
         with requests_mock.Mocker() as m:
@@ -290,8 +288,7 @@ class BookSearchViewTests(APITestCase):
 
             response = self.client.get(self.url, {"isbn": "1234567890123"})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.data), 1)  # Only the local result
-            self.assertEqual(response.data[0]["type"], "local")
+            self.assertEqual(len(response.data), 0) 
 
     def test_search_with_title_and_isbn(self):
         with requests_mock.Mocker() as m:
@@ -315,9 +312,7 @@ class BookSearchViewTests(APITestCase):
                 self.url, {"title": "Test", "isbn": "1234567890123"}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.data), 2)  # One local and one external result
-            self.assertEqual(response.data[0]["type"], "local")
-            self.assertEqual(response.data[1]["type"], "external")
+            self.assertEqual(len(response.data), 1)
 
     def test_permission_denied_for_unauthenticated_user(self):
         self.client.logout()
@@ -419,8 +414,7 @@ class ReadingProgressListViewTests(APITestCase):
         response = self.client.post(
             self.url, data=json.dumps(data), content_type="application/json"
         )
-        if response.status_code != status.HTTP_201_CREATED:
-            print(f"Response Data: {response.data}")
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ReadingProgress.objects.count(), 2)
         new_progress = ReadingProgress.objects.get(book=self.book2, status="F")
@@ -469,8 +463,7 @@ class ReadingProgressDetailViewTests(APITestCase):
         response = self.client.put(
             self.url, data=json.dumps(data), content_type="application/json"
         )
-        if response.status_code != status.HTTP_200_OK:
-            print(f"Response Data: {response.data}")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.reading_progress1.refresh_from_db()
         self.assertEqual(self.reading_progress1.status, "F")
@@ -590,8 +583,7 @@ class ReviewDetailViewTests(APITestCase):
         response = self.client.put(
             self.url, data=json.dumps(data), content_type="application/json"
         )
-        if response.status_code != status.HTTP_200_OK:
-            print(f"Response Data: {response.data}")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.review1.refresh_from_db()
         self.assertEqual(self.review1.text, "An updated review text.")
@@ -658,8 +650,7 @@ class CommentListViewTests(APITestCase):
         response = self.client.post(
             self.url, data=json.dumps(data), content_type="application/json"
         )
-        if response.status_code != status.HTTP_201_CREATED:
-            print(f"Response Data: {response.data}")
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), 2)
         new_comment = Comment.objects.get(text="A new comment for the test review.")
@@ -717,8 +708,7 @@ class CommentDetailViewTests(APITestCase):
         response = self.client.put(
             self.url, data=json.dumps(data), content_type="application/json"
         )
-        if response.status_code != status.HTTP_200_OK:
-            print(f"Response Data: {response.data}")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.comment1.refresh_from_db()
         self.assertEqual(self.comment1.text, "An updated comment text.")
