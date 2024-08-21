@@ -195,10 +195,8 @@ class Activity(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Object is being created
             self.timestamp = timezone.now()
         else:
-            # Object is being updated
             self.timestamp = timezone.now()
         super().save(*args, **kwargs)
 

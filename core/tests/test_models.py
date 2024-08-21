@@ -1,8 +1,8 @@
 from django.forms import ValidationError
 from django.test import TestCase
 from django.contrib.auth.models import User
-from core.models import Book, Following, ImageAsset, ReadingProgress, Shelf
-from django.db.models import QuerySet
+from core.models import Activity, Book, Comment, Following, ImageAsset, ReadingProgress, Review, Shelf
+from django.utils import timezone
 
 
 class BaseUserAccessManagerAndShelfModelTest(TestCase):
@@ -215,3 +215,111 @@ class ImageAssetModelTest(TestCase):
         image = ImageAsset.objects.create(file="path/to/book_image.jpg", book=self.book)
         self.assertEqual(image.book, self.book)
         self.assertIsNone(image.shelf)
+
+
+class ActivityModelTest(TestCase):
+    
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            "user1", "user1@example.com", "user1password"
+        )
+
+        self.shelf1 = Shelf.objects.create(
+            user=self.user1, title="User1 Shelf1", description="Description1"
+        )
+
+        self.book1 = Book.objects.create(
+            user=self.user1,
+            isbn="1234567890123",
+            title="Test Book 1",
+            author="Author 1",
+            total_pages=300,
+            release_year=2020,
+            shelf=self.shelf1,
+        )
+
+        self.review = Review.objects.create(book=self.book1, text="Great book!")
+        self.comment = Comment.objects.create(user=self.user1, text="Nice review!", review=self.review)
+        self.reading_progress = ReadingProgress.objects.create( book=self.book1, current_page=50)
+
+    def test_activity_creation(self):
+        # Test creating an Activity instance
+        activity = Activity.objects.create(
+            user=self.user1,
+            book=self.book1,
+            review=self.review,
+            comment=self.comment,
+            reading_progress=self.reading_progress,
+            text='This is a test activity.',
+            backlink='http://example.com'
+        )
+        
+        self.assertIsNotNone(activity.id)  # Check if the activity object was saved and has an ID
+        self.assertEqual(activity.text, 'This is a test activity.')
+        self.assertEqual(activity.backlink, 'http://example.com')
+        self.assertIsNotNone(activity.timestamp)  # Ensure timestamp is set
+        self.assertAlmostEqual(activity.timestamp, timezone.now(), delta=timezone.timedelta(seconds=1))
+
+    def test_activity_update_timestamp(self):
+        # Test that saving the Activity updates the timestamp
+        activity = Activity.objects.create(
+            user=self.user1,
+            book=self.book1,
+            review=self.review,
+            comment=self.comment,
+            reading_progress=self.reading_progress,
+            text='This is a test activity.',
+            backlink='http://example.com'
+        )
+        
+        initial_timestamp = activity.timestamp
+        
+        # Update the activity text and save
+        activity.text = "Updated activity text."
+        activity.save()
+        
+        # Ensure timestamp is updated on save
+        self.assertNotEqual(activity.timestamp, initial_timestamp)
+        self.assertAlmostEqual(activity.timestamp, timezone.now(), delta=timezone.timedelta(seconds=1))
+
+
+class CommentUserAccessManagerTest(TestCase):
+    
+    def setUp(self):
+        # Create users
+        self.user1 = User.objects.create_user(username='user1', password='12345')
+        self.user2 = User.objects.create_user(username='user2', password='12345')
+        self.user3 = User.objects.create_user(username='user3', password='12345')
+
+        # Create books
+        self.book1 = Book.objects.create(title='Book 1', author='Author 1', user=self.user1)
+        self.book2 = Book.objects.create(title='Book 2', author='Author 2', user=self.user2)
+        self.book3 = Book.objects.create(title='Book 3', author='Author 3', user=self.user3)
+
+        # Create reviews
+        self.review1 = Review.objects.create(book=self.book1,  text='Review 1', shared=True)
+        self.review2 = Review.objects.create(book=self.book2,  text='Review 2', shared=False)
+        self.review3 = Review.objects.create(book=self.book3,  text='Review 3', shared=True)
+
+        # Create comments
+        self.comment1 = Comment.objects.create(user=self.user1, book=self.book1, review=self.review1, text='Comment 1')
+        self.comment2 = Comment.objects.create(user=self.user2, book=self.book2, review=self.review2, text='Comment 2')
+        self.comment3 = Comment.objects.create(user=self.user3, book=self.book3, review=self.review3, text='Comment 3')
+
+        # Create a following relationship
+        following = Following.objects.create(user=self.user1)
+        following.followed_users.add(self.user3)  # Correct way to add to many-to-many relationship
+
+    def test_for_user(self):
+        # Test that only the comments for user1's books are returned
+        user1_comments = Comment.objects.for_user(self.user1)
+        self.assertIn(self.comment1, user1_comments)
+        self.assertNotIn(self.comment2, user1_comments)
+        self.assertNotIn(self.comment3, user1_comments)
+
+    def test_for_user_and_followed(self):
+        # Test that the comments for user1's books and the books of followed users with shared reviews are returned
+        comments = Comment.objects.for_user_and_followed(self.user1)
+        self.assertIn(self.comment1, comments)  # user1's own comment
+        self.assertNotIn(self.comment2, comments)  # user2's comment (not followed by user1)
+        self.assertIn(self.comment3, comments)  # user3's comment (followed by user1 and shared review)
