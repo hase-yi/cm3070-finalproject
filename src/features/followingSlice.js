@@ -13,12 +13,12 @@ export const fetchFollowers = createAsyncThunk('following/fetchFollowers', async
   return response.data;
 });
 
-// Thunk to create a new shelf
+// Thunk to follow a user
 export const followUser = createAsyncThunk('following/followUser', async (username, { rejectWithValue }) => {
   try {
     console.log(username)
 
-    const response = await axiosInstance.post(`users/follow/${username}/`, username);
+    await axiosInstance.post(`users/follow/${username}/`, username);
     return username;
   } catch (error) {
     if (!error.response) {
@@ -29,7 +29,7 @@ export const followUser = createAsyncThunk('following/followUser', async (userna
 });
 
 
-// Thunk to delete a shelf
+// Thunk to unfollow a user
 export const unfollowUser = createAsyncThunk('following/unfollowUser', async (username, { rejectWithValue }) => {
   try {
 

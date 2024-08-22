@@ -1,73 +1,77 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Quagga from 'quagga';
-import { useNavigate, useLocation } from 'react-router-dom';
+import Quagga from 'quagga';  // Import Quagga for barcode scanning
+import { useNavigate, useLocation } from 'react-router-dom';  // Hooks for navigation and listening to route changes
 
-const BookScanner = ({ onDetected, cooldown = 500 }) => { // cooldown is in milliseconds
-  const scannerRef = useRef(null);
-  const [lastDetected, setLastDetected] = useState(0); // Track the time of last detection
-  const navigate = useNavigate();
-  const location = useLocation(); // Use this to listen to route changes
+const BookScanner = ({ onDetected, cooldown = 500 }) => {  // cooldown sets the time limit between detections
+  const scannerRef = useRef(null);  // Create a ref to attach the scanner to a DOM element
+  const [lastDetected, setLastDetected] = useState(0);  // State to track the last time a barcode was detected
+  const navigate = useNavigate();  // Hook to programmatically navigate between routes
+  const location = useLocation();  // Hook to listen to route changes
 
+  // Initialize the barcode scanner using Quagga
   useEffect(() => {
       Quagga.init({
         inputStream: {
-          type: 'LiveStream',
-          target: scannerRef.current, // Use the scannerRef to target the DOM element
+          type: 'LiveStream',  // Use the live camera stream
+          target: scannerRef.current,  // Target the DOM element where the camera stream should display
           constraints: {
-            facingMode: 'environment' // Use the rear camera
+            facingMode: 'environment'  // Use the rear camera on mobile devices
           }
         },
         decoder: {
-          readers: ['ean_reader'] // Specify the types of barcodes you want to decode
+          readers: ['ean_reader']  // Specify the barcode type (EAN) to be decoded
         }
       }, (err) => {
         if (err) {
-          console.error(err);
+          console.error(err);  // Log any initialization errors
           return;
         }
-        Quagga.start();
+        Quagga.start();  // Start the barcode scanner
       });
 
+      // Register the detection handler
       Quagga.onDetected(handleDetected);
-    
 
+    // Cleanup the scanner on component unmount
     return () => {
-      Quagga.stop();
-      Quagga.offDetected(handleDetected);
+      Quagga.stop();  // Stop the scanner
+      Quagga.offDetected(handleDetected);  // Remove the detection handler
     };
   }, []);
 
+  // Handle barcode detection events
   const handleDetected = (result) => {
     const now = Date.now();
     if (now - lastDetected < cooldown) {
-      // If within cooldown period, ignore detection
+      // Ignore detection if it's within the cooldown period
       return;
     }
-    setLastDetected(now); // Update the time of last detection
+    setLastDetected(now);  // Update the last detection timestamp
 
-    // Call the onDetected prop function and pass the result
+    // Call the onDetected callback function passed as a prop
     if (onDetected) {
-      onDetected(result);
+      onDetected(result);  // Pass the detection result to the parent component
     }
   };
 
+  // Cleanup the scanner on component unmount
   useEffect(() => {
     return () => {
-      Quagga.stop(); // Stop the scanner when component unmounts
+      Quagga.stop();  // Stop the scanner when the component unmounts
     };
   }, []);
 
-  // React to route changes using location
+  // React to route changes and stop the scanner when navigating away
   useEffect(() => {
-    Quagga.stop(); // Stop the camera on route change
-  }, [location]);
-
+    Quagga.stop();  // Stop the scanner on route change
+  }, [location]);  // Re-run this effect when the location changes
 
   return (
     <div>
+      {/* The scanner will display inside this div */}
       <div ref={scannerRef} />
     </div>
   );
 };
 
-export default BookScanner;
+export default BookScanner;  // Export the BookScanner component as the default export

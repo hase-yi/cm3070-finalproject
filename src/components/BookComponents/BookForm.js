@@ -1,39 +1,37 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import {
-	createBook,
-	updateBook,
-} from '../../features/bookSlice';
-import { isValidISBN } from '../../utils/validation';
-import axiosInstance from '../../axiosInstance';
-import { useLocation } from 'react-router-dom';
-
+import { useDispatch, useSelector } from 'react-redux';  // Hooks to interact with Redux store
+import { useNavigate } from 'react-router-dom';  // Hook for navigation
+import { createBook, updateBook } from '../../features/bookSlice';  // Redux actions to create and update a book
+import { isValidISBN } from '../../utils/validation';  // Utility function to validate ISBN
+import axiosInstance from '../../axiosInstance';  // Axios instance for making HTTP requests
+import { useLocation } from 'react-router-dom';  // Hook to access current location state
 
 const BookForm = ({ method, bookId }) => {
-	const location = useLocation();
-	const bookPrototype = location.state?.bookPrototype;
+	const location = useLocation();  // Access the current location and state passed from navigation
+	const bookPrototype = location.state?.bookPrototype;  // Retrieve prefilled data from navigation state
 
+	// If bookPrototype exists, we are creating a new book
 	if (bookPrototype) {
-		method = "POST"
+		method = "POST";  // Set method to POST for creating a new book
 	}
 
+	const numericBookId = Number(bookId);  // Convert bookId from string to number
 
-	const numericBookId = Number(bookId);
-
+	// Get book, status, and other necessary data from Redux store
 	const book = useSelector((state) =>
 		state.books.books.find((book) => book.id === numericBookId)
 	);
 	const status = useSelector((state) => state.books.status);
 	const error = useSelector((state) => state.books.error);
 	const validationErrors = useSelector((state) => state.books.validationErrors);
-	const shelves = useSelector((state) => state.shelves.shelves);
+	const shelves = useSelector((state) => state.shelves.shelves);  // Get list of shelves from Redux store
 
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
+	const dispatch = useDispatch();  // Hook to dispatch actions
+	const navigate = useNavigate();  // Hook to programmatically navigate between routes
 
+	// Initialize state for form data and other variables
 	const [formData, setFormData] = useState({
-		title: book?.title || bookPrototype?.title || '',
+		title: book?.title || bookPrototype?.title || '',  // Prefill form with existing or prototype data
 		author: book?.author || bookPrototype?.author || '',
 		isbn: book?.isbn || bookPrototype?.isbn || '',
 		totalPages: book?.total_pages || bookPrototype?.total_pages || '',
@@ -42,12 +40,12 @@ const BookForm = ({ method, bookId }) => {
 		image: book?.image || bookPrototype?.image || '',
 	});
 
-	const [isbnError, setISBNError] = useState('');
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [imageFile, setImageFile] = useState(null);
-	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image || null);
+	const [isbnError, setISBNError] = useState('');  // State to store ISBN validation errors
+	const [isSubmitting, setIsSubmitting] = useState(false);  // Track form submission state
+	const [imageFile, setImageFile] = useState(null);  // State to hold selected image file
+	const [previewImage, setPreviewImage] = useState(book?.image || bookPrototype?.image || null);  // Image preview state
 
-	// Update form fields if the book changes
+	// Effect to update form fields if the book data changes
 	useEffect(() => {
 		if (book) {
 			setFormData({
@@ -59,18 +57,20 @@ const BookForm = ({ method, bookId }) => {
 				shelf: book.shelf || '',
 				image: book.image || '',
 			});
-			setPreviewImage(book.image || null);
+			setPreviewImage(book.image || null);  // Set preview image if available
 		}
 	}, [book]);
 
+	// Handle form input changes
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
 		setFormData((prevData) => ({
 			...prevData,
-			[name]: value,
+			[name]: value,  // Update form data based on input field name and value
 		}));
 	};
 
+	// Handle status change in reading progress (if applicable)
 	const handleStatusChange = (event) => {
 		const status = event.target.value;
 		setFormData((prevData) => ({
@@ -82,19 +82,21 @@ const BookForm = ({ method, bookId }) => {
 		}));
 	};
 
+	// Handle image file selection
 	const handleFileChange = (file) => {
-		setImageFile(file); // Set the selected image file
-		setPreviewImage(URL.createObjectURL(file)); // Set the preview image URL
+		setImageFile(file);  // Set the selected image file
+		setPreviewImage(URL.createObjectURL(file));  // Create a URL for the preview image
 	};
 
+	// Validate form inputs, especially ISBN and release year
 	const validateForm = () => {
 		let isValid = true;
 
 		if (!isValidISBN(formData.isbn)) {
-			setISBNError('Invalid ISBN. Please check and try again.');
+			setISBNError('Invalid ISBN. Please check and try again.');  // Set ISBN error if invalid
 			isValid = false;
 		} else {
-			setISBNError('');
+			setISBNError('');  // Clear ISBN error if valid
 		}
 
 		if (isNaN(parseInt(formData.releaseYear, 10))) {
@@ -102,15 +104,17 @@ const BookForm = ({ method, bookId }) => {
 			isValid = false;
 		}
 
-		return isValid;
+		return isValid;  // Return true if the form is valid
 	};
 
+	// Handle form submission
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		if (!validateForm()) return;
+		if (!validateForm()) return;  // If validation fails, exit early
 
-		setIsSubmitting(true);
+		setIsSubmitting(true);  // Set submitting state to true
 
+		// Prepare book data for submission
 		const bookData = {
 			id: book?.id,
 			title: formData.title,
@@ -119,39 +123,39 @@ const BookForm = ({ method, bookId }) => {
 			image: formData.image,
 			total_pages: parseInt(formData.totalPages, 10) || null,
 			release_year: parseInt(formData.releaseYear, 10),
-			isbn: formData.isbn.replace(/[-\s]/g, ''),
+			isbn: formData.isbn.replace(/[-\s]/g, ''),  // Remove any hyphens or spaces from the ISBN
 		};
 
 		try {
 			let response;
 			if (method === 'POST') {
-				response = await dispatch(createBook(bookData)).unwrap();
+				response = await dispatch(createBook(bookData)).unwrap();  // Dispatch createBook action for POST method
 			} else if (method === 'PUT' && book) {
-				response = await dispatch(updateBook(bookData)).unwrap();
+				response = await dispatch(updateBook(bookData)).unwrap();  // Dispatch updateBook action for PUT method
 			}
 
-			const bookId = response.id || book.id;
-			console.log(bookId);
+			const bookId = response.id || book.id;  // Get the ID of the newly created or updated book
 
+			// If an image file is selected, upload it
 			if (imageFile && bookId) {
-				// Ensure bookId is defined before attempting image upload
-				const imageUrl = await uploadImage(bookId); // Upload image after form submission
+				const imageUrl = await uploadImage(bookId);  // Upload image and get the URL
 				const updatedBookData = {
 					...bookData,
 					id: bookId,
 					image: imageUrl,
 				};
-				await updateBookWithImage(updatedBookData); // Update book with the image URL
+				await updateBookWithImage(updatedBookData);  // Update the book with the new image URL
 			}
 
-			navigate(`/books/${bookId}`);
+			navigate(`/books/${bookId}`);  // Navigate to the book's detail page after submission
 		} catch (err) {
-			console.error('Failed to save book:', err);
+			console.error('Failed to save book:', err);  // Log any errors during submission
 		} finally {
-			setIsSubmitting(false);
+			setIsSubmitting(false);  // Reset submitting state
 		}
 	};
 
+	// Handle image upload to the server
 	const uploadImage = async (bookId) => {
 		const formData = new FormData();
 		formData.append('file', imageFile);
@@ -163,33 +167,33 @@ const BookForm = ({ method, bookId }) => {
 					'Content-Type': 'multipart/form-data',
 				},
 			});
-			return response.data.file; // Assuming the image URL is returned in the `file` field
+			return response.data.file;  // Return the image URL after successful upload
 		} catch (err) {
-			console.error('Failed to upload image:', err);
+			console.error('Failed to upload image:', err);  // Log any errors during image upload
 			throw err;
 		}
 	};
 
+	// Update the book with the new image URL after the image is uploaded
 	const updateBookWithImage = async (updatedBookData) => {
 		try {
 			await dispatch(
-				updateBook(
-					updatedBookData // Spread the full book data with the new image URL
-				)
+				updateBook(updatedBookData)  // Dispatch the updateBook action with the updated book data
 			).unwrap();
 		} catch (err) {
-			console.error('Failed to update book with image URL:', err);
+			console.error('Failed to update book with image URL:', err);  // Log any errors during the update
 		}
 	};
 
+	// Render the form
 	return (
 		<form onSubmit={handleSubmit}>
 			<div className='grid'>
 				<div className='s12 m6 l5'>
 					<article className='no-padding'>
 						{previewImage && (
-							<div >
-								<img src={previewImage} alt="Image Preview" className='responsive' />
+							<div>
+								<img src={previewImage} alt="Image Preview" className='responsive' />  {/* Show image preview */}
 							</div>
 						)}
 
@@ -200,7 +204,7 @@ const BookForm = ({ method, bookId }) => {
 									id="imageUpload"
 									type="file"
 									accept="image/*"
-									onChange={(e) => handleFileChange(e.target.files[0])}
+									onChange={(e) => handleFileChange(e.target.files[0])}  // Handle image selection
 								/>
 								<input type="text" />
 								<label>Upload Image</label>
@@ -208,10 +212,12 @@ const BookForm = ({ method, bookId }) => {
 						</div>
 					</article>
 				</div>
+
 				<div className='s12 m6 l7'>
-					{error && <p className="error">{error}</p>}
+					{error && <p className="error">{error}</p>}  {/* Display error message if available */}
 					{validationErrors && (
 						<ul>
+							{/* Display validation errors */}
 							{Object.entries(validationErrors).map(([field, errors]) =>
 								errors.map((error, index) => (
 									<li key={`${field}-${index}`}>{`${field}: ${error}`}</li>
@@ -219,10 +225,10 @@ const BookForm = ({ method, bookId }) => {
 							)}
 						</ul>
 					)}
-					{isbnError && <p className="error">{isbnError}</p>}
-
+					{isbnError && <p className="error">{isbnError}</p>}  {/* Display ISBN validation error */}
 
 					<article className='fill'>
+						{/* Form fields for book details */}
 						<div className="field label border responsive">
 							<input
 								type="text"
@@ -258,7 +264,6 @@ const BookForm = ({ method, bookId }) => {
 							<label>Release Year</label>
 						</div>
 
-
 						<div className="field label border responsive">
 							<input
 								type="number"
@@ -282,13 +287,13 @@ const BookForm = ({ method, bookId }) => {
 							<label>ISBN</label>
 						</div>
 
-
+						{/* Buttons for submitting or canceling the form */}
 						<div className='row'>
 							<div className='max'></div>
 
 							<button
 								type="button"
-								onClick={() => navigate('..')}
+								onClick={() => navigate('..')}  // Navigate back on cancel
 								disabled={isSubmitting}
 							>
 								<i>undo</i>
@@ -297,19 +302,18 @@ const BookForm = ({ method, bookId }) => {
 
 							<button
 								type="submit"
-								disabled={isSubmitting}
+								disabled={isSubmitting}  // Disable button while submitting
 							>
 								<i>save</i>
 								<span>{isSubmitting ? 'Submitting' : 'Save'}</span>
 							</button>
 						</div>
 					</article>
+
 					<article className='fill'>
-
-
+						{/* Shelf selection */}
 						<div className="field suffix border">
 							<select
-
 								id="shelf"
 								name="shelf"
 								required
@@ -326,9 +330,6 @@ const BookForm = ({ method, bookId }) => {
 							<i>arrow_drop_down</i>
 							<span className="helper">Shelf</span>
 						</div>
-
-
-
 					</article>
 				</div>
 			</div>
@@ -336,4 +337,4 @@ const BookForm = ({ method, bookId }) => {
 	);
 };
 
-export default BookForm;
+export default BookForm;  // Export the BookForm component as the default export

@@ -1,34 +1,34 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchBooks } from '../../features/bookSlice';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
+import { useSelector } from 'react-redux';  // Hook to access the Redux store
+import { useLocation } from 'react-router-dom';  // Hook to access the current URL location
 
-import BookList from '../../components/BookComponents/BookList';
+import BookList from '../../components/BookComponents/BookList';  // Component to display a list of books
 
 const BooksPage = () => {
-  const dispatch = useDispatch();
 
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const readingListStatus = queryParams.get('list');
+  const location = useLocation();  // Get the current location object from React Router
+  const queryParams = new URLSearchParams(location.search);  // Parse the query parameters from the URL
+  const readingListStatus = queryParams.get('list');  // Get the 'list' parameter from the query string
 
-  const status = useSelector((state) => state.books.status);
-  const error = useSelector((state) => state.books.error);
+  const status = useSelector((state) => state.books.status);  // Get the loading status of books from the Redux store
+  const error = useSelector((state) => state.books.error);  // Get any error related to fetching books
 
+  // If the books are still loading, display a loading message
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
+  // If fetching the books failed, display the error message
   if (status === 'failed') {
     return <p>{error}</p>;
   }
 
   return (
     <div>
-      {/* <h1>Books in</h1> */}
+      {/* Render the BookList component, passing the readingListStatus from the query string */}
       <BookList readingListStatus={readingListStatus} />
     </div>
   );
 };
 
-export default BooksPage;
+export default BooksPage;  // Export the BooksPage component as the default export

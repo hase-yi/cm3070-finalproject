@@ -10,7 +10,6 @@ import { useLocation } from 'react-router-dom';
 function NavigationLinks() {
 	const user = useSelector((state) => state.auth.user);
 	const status = useSelector((state) => state.auth.status);
-	const error = useSelector((state) => state.auth.error);
 	const { search } = useLocation()
 
 	const dispatch = useDispatch();

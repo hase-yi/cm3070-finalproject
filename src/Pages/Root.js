@@ -7,8 +7,8 @@ function RootLayout() {
 		<>
 			<MainNavigation />
 			<main className='responsive'>
-				<div className="large-space l m"></div>
-				<div className="medium-space s"></div>
+				<div className="large-space l m"></div> {/* Larger deadzone for l and m devices */}
+				<div className="medium-space s"></div> {/* Smaller deadzone for s devices */}
 				<Outlet />
 			</main>
 		</>
