@@ -1,5 +1,4 @@
 import logging
-
 import requests
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -25,12 +24,13 @@ logger = logging.getLogger(__name__)
 OPEN_LIBRARY_SEARCH_URL = "http://openlibrary.org/search.json"
 
 
+# View for listing and creating shelves for the authenticated user.
 class ShelfListView(ListAPIView, CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ShelfSerializer
 
     def get_queryset(self):
-        return Shelf.objects.for_user(user=self.request.user)
+        return Shelf.objects.for_user(user=self.request.user)  # Fetch shelves for the authenticated user.
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -38,6 +38,7 @@ class ShelfListView(ListAPIView, CreateAPIView):
         return context
 
 
+# View for retrieving, updating, and deleting a specific shelf for the authenticated user.
 class ShelfDetailView(
     RetrieveAPIView,
     UpdateAPIView,
@@ -47,7 +48,7 @@ class ShelfDetailView(
     serializer_class = ShelfSerializer
 
     def get_queryset(self):
-        return Shelf.objects.for_user(user=self.request.user)
+        return Shelf.objects.for_user(user=self.request.user)  # Fetch the shelf for the authenticated user.
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -55,20 +56,21 @@ class ShelfDetailView(
         return context
 
 
+# View for listing and creating books for the authenticated user, with search and filter options.
 class BookListView(ListAPIView, CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        books = Book.objects.for_user(user=self.request.user)
+        books = Book.objects.for_user(user=self.request.user)  # Fetch books for the authenticated user.
 
         search_str = self.request.query_params.get("search", None)
         if search_str:
-            books = books.search_local(search_str)
+            books = books.search_local(search_str)  # Search for books by ISBN, title, or author.
 
         shelf = self.request.query_params.get("shelf", None)
         if shelf:
-            books = books.get_books_by_shelf(shelf)
+            books = books.get_books_by_shelf(shelf)  # Filter books by shelf.
 
         return books
 
@@ -78,9 +80,10 @@ class BookListView(ListAPIView, CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user)  # Save the book with the current user as the owner.
 
 
+# View for retrieving, updating, and deleting a specific book, including filtering by shared status.
 class BookDetailView(
     RetrieveAPIView,
     UpdateAPIView,
@@ -90,6 +93,7 @@ class BookDetailView(
     serializer_class = BookSerializer
 
     def get_queryset(self):
+        # Fetch books either owned by the user or shared by others (review or reading progress).
         return Book.objects.filter(
             Q(user=self.request.user)
             | Q(review__shared=True)
@@ -102,6 +106,7 @@ class BookDetailView(
         return context
 
 
+# API view for searching books either by title or ISBN using the Open Library API.
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def book_search(request):
@@ -113,10 +118,10 @@ def book_search(request):
     if not title_str and not isbn_str:
         return Response(search_results, status=status.HTTP_200_OK)
 
-    # Remote search
+    # Remote search using the Open Library API.
     remote_params = {"isbn": isbn_str} if isbn_str else {"title": title_str}
-
     response = requests.get(OPEN_LIBRARY_SEARCH_URL, params=remote_params)
+
     if response.status_code == 200:
         data = response.json()
         for doc in data.get("docs", []):
@@ -133,12 +138,12 @@ def book_search(request):
                     else None
                 ),
             }
-
             search_results.append(book_data)
 
     return Response(search_results, status=status.HTTP_200_OK)
 
 
+# View to get a list of users based on different relationships (followers, followed).
 class UserListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -146,14 +151,12 @@ class UserListView(APIView):
         search_str = self.request.query_params.get("search", None)
         relationship = self.request.query_params.get("relationship", None)
 
+        # Filter users based on the relationship type (followers, followed, or all).
         if relationship == "followers":
-            # Get the User objects from the Following instances
             users = User.objects.filter(following__in=self.request.user.followers.all())
         elif relationship == "followed":
             try:
-                users = Following.objects.get(
-                    user=self.request.user
-                ).followed_users.all()
+                users = Following.objects.get(user=self.request.user).followed_users.all()
             except Following.DoesNotExist:
                 users = User.objects.none()
         elif relationship is None:
@@ -162,27 +165,29 @@ class UserListView(APIView):
             return Response({"error": "Invalid relationship value."}, status=400)
 
         if search_str:
-            users = users.filter(username__icontains=search_str)
+            users = users.filter(username__icontains=search_str)  # Filter users by username.
 
         serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
 
 
+# View to list activities for the user's followed users, ordered by timestamp.
 class ActivityListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ActivitySerializer
 
     def get_queryset(self):
+        # Get the users followed by the current user.
         try:
             users = Following.objects.get(user=self.request.user).followed_users.all()
         except Following.DoesNotExist:
             users = User.objects.none()
 
         limit = self.request.query_params.get("limit", 5)
-
         return Activity.objects.filter(user__in=users).order_by("-timestamp")[:limit]
 
 
+# API view for following and unfollowing users.
 @api_view(["POST", "DELETE"])
 @permission_classes([IsAuthenticated])
 def follow_user(request, username):
@@ -192,38 +197,30 @@ def follow_user(request, username):
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.user == target_user:
-        return Response(
-            {"error": "Both users are identical"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({"error": "Both users are identical"}, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == "POST":
-        # Get or create a Following instance for the authenticated user
+        # Add the target user to the current user's followed list.
         following, _ = Following.objects.get_or_create(user=request.user)
-
         following.followed_users.add(target_user)
         following.save()
 
-        return Response(
-            {"message": "User followed successfully"}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "User followed successfully"}, status=status.HTTP_200_OK)
 
     else:
-        # Get the Following instance for the authenticated user
+        # Remove the target user from the current user's followed list.
         try:
             following = Following.objects.get(user=request.user)
         except Following.DoesNotExist:
-            return Response(
-                {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
-            )
+            return Response({"message": "User unfollowed successfully"}, status=status.HTTP_200_OK)
 
         following.followed_users.remove(target_user)
         following.save()
 
-        return Response(
-            {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "User unfollowed successfully"}, status=status.HTTP_200_OK)
 
 
+# View for listing and creating reading progress entries.
 class ReadingProgressListView(ListAPIView, CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReadingProgressSerializer
@@ -234,28 +231,21 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
         username_filter = self.request.query_params.get("username", None)
         limit = self.request.query_params.get("limit", 5)
 
+        # Filter reading progress by status, book, and username.
         if username_filter:
-            reading_progress = ReadingProgress.objects.filter(
-                book__user=User.objects.get(username=username_filter)
-            )
+            reading_progress = ReadingProgress.objects.filter(book__user=User.objects.get(username=username_filter))
             if username_filter != self.request.user.username:
                 reading_progress = reading_progress.filter(shared=True)
-
         else:
             if status:
-                reading_progress = ReadingProgress.objects.for_user(
-                    self.request.user
-                ).filter(status=status)
+                reading_progress = ReadingProgress.objects.for_user(self.request.user).filter(status=status)
             else:
-                reading_progress = ReadingProgress.objects.for_user_and_followed(
-                    user=self.request.user
-                )
+                reading_progress = ReadingProgress.objects.for_user_and_followed(user=self.request.user)
 
         if book:
-            reading_progress.filter(book=book)
+            reading_progress = reading_progress.filter(book=book)
 
-        limited = reading_progress.order_by("timestamp")[:limit]
-        return limited
+        return reading_progress.order_by("timestamp")[:limit]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -265,15 +255,17 @@ class ReadingProgressListView(ListAPIView, CreateAPIView):
     def perform_create(self, serializer):
         progress = serializer.save()
 
+        # Create a new activity for tracking reading progress.
         Activity.objects.create(
             user=self.request.user,
             book=progress.book,
             reading_progress=progress,
-            text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
+            text=f"{self.request.user} started tracking their reading status for {progress.book.title}",
             backlink=f"/books/{progress.book.id}",
         )
 
 
+# View for retrieving, updating, and deleting a specific reading progress entry.
 class ReadingProgressDetailView(
     RetrieveAPIView,
     UpdateAPIView,
@@ -293,15 +285,17 @@ class ReadingProgressDetailView(
     def perform_update(self, serializer):
         progress = serializer.save()
 
+        # Create a new activity for updating reading progress.
         Activity.objects.create(
             user=self.request.user,
             book=progress.book,
             reading_progress=progress,
-            text=f"{self.request.user} tarted tracking their reading status for {progress.book.title}",
+            text=f"{self.request.user} updated their reading status for {progress.book.title}",
             backlink=f"/books/{progress.book.id}",
         )
 
 
+# View for listing and creating reviews.
 class ReviewListView(ListAPIView, CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReviewSerializer
@@ -310,10 +304,9 @@ class ReviewListView(ListAPIView, CreateAPIView):
         username_filter = self.request.query_params.get("username", None)
         limit = self.request.query_params.get("limit", 5)
 
+        # Filter reviews by username or get reviews for the current user's followed users.
         if username_filter:
-            reviews = Review.objects.filter(
-                book__user=User.objects.get(username=username_filter)
-            )
+            reviews = Review.objects.filter(book__user=User.objects.get(username=username_filter))
             if username_filter != self.request.user.username:
                 reviews = reviews.filter(shared=True)
         else:
@@ -329,6 +322,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
     def perform_create(self, serializer):
         review = serializer.save()
 
+        # Create a new activity for writing a review.
         Activity.objects.create(
             user=self.request.user,
             book=review.book,
@@ -338,6 +332,7 @@ class ReviewListView(ListAPIView, CreateAPIView):
         )
 
 
+# View for retrieving, updating, and deleting a specific review.
 class ReviewDetailView(
     RetrieveAPIView,
     UpdateAPIView,
@@ -355,26 +350,26 @@ class ReviewDetailView(
         return context
 
 
+# View for listing and creating comments for a specific review.
 class CommentListView(ListAPIView, CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
 
     def get_queryset(self):
         review_id = self.kwargs["review_pk"]
-        return Comment.objects.for_user_and_followed(user=self.request.user).filter(
-            review_id=review_id
-        )
+        return Comment.objects.for_user_and_followed(user=self.request.user).filter(review_id=review_id)
 
     def perform_create(self, serializer):
         review_id = self.kwargs["review_pk"]
         comment = serializer.save(review_id=review_id, user=self.request.user)
 
+        # Create a new activity for posting a comment.
         Activity.objects.create(
             user=self.request.user,
             book=comment.book,
             review=comment.review,
             comment=comment,
-            text=f"{self.request.user} replied to the review of {comment.book.user.username}'s review of {comment.book.title}",
+            text=f"{self.request.user} replied to {comment.book.user.username}'s review of {comment.book.title}",
             backlink=f"/books/{comment.book.id}",
         )
 
@@ -384,6 +379,7 @@ class CommentListView(ListAPIView, CreateAPIView):
         return context
 
 
+# View for retrieving, updating, and deleting a specific comment.
 class CommentDetailView(
     RetrieveAPIView,
     UpdateAPIView,
@@ -393,9 +389,7 @@ class CommentDetailView(
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return Comment.objects.for_user_and_followed(
-            user=self.request.user
-        )  # pragma: no cover
+        return Comment.objects.for_user_and_followed(user=self.request.user)
 
     def get_object(self):
         review_id = self.kwargs["review_pk"]
@@ -408,23 +402,23 @@ class CommentDetailView(
         return context
 
 
+# Custom view for handling JWT tokens and storing them in cookies.
 class CookieTokenObtainPairView(TokenObtainPairView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get("access"):
-            # Set the access token in a cookie
+            # Set access token in an HTTP-only cookie.
             response.set_cookie(
                 "access_token",
                 response.data["access"],
-                httponly=True,  # HTTP-only flag
-                samesite="None",  # SameSite attribute can be 'Lax' or 'Strict'
-                secure=True,  # Only send cookie over HTTPS
+                httponly=True,
+                samesite="None",
+                secure=True,
                 path="/",
             )
-            # Remove the access token from the response body
             del response.data["access"]
 
         if response.data.get("refresh"):
-            # Set the refresh token in a cookie
+            # Set refresh token in an HTTP-only cookie.
             response.set_cookie(
                 "refresh_token",
                 response.data["refresh"],
@@ -433,13 +427,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 secure=True,
                 path="/",
             )
-            # Remove the refresh token from the response body
             del response.data["refresh"]
 
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-# User Registration View
+# User registration view for creating a new user account.
 @api_view(["POST"])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
@@ -449,43 +442,33 @@ def register_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# API view to get the username of the authenticated user.
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_username(request):
     return JsonResponse({"username": request.user.username})
 
 
-
-
+# View for listing and creating image assets (associated with books or shelves).
 class ImageAssetListCreateView(generics.ListCreateAPIView):
     queryset = ImageAsset.objects.all()
     serializer_class = ImageAssetSerializer
 
     def perform_create(self, serializer):
-        # Retrieve book and shelf from the validated data
+        # Validate that an image is associated with either a book or a shelf.
         book = serializer.validated_data.get("book")
         shelf = serializer.validated_data.get("shelf")
 
-        # Ensure only one of book or shelf is set
         if book and shelf:
-            raise ValidationError(
-                "An image can be associated with either a book or a shelf, not both."
-            )
+            raise ValidationError("An image can be associated with either a book or a shelf, not both.")
         if not book and not shelf:
-            raise ValidationError(
-                "An image must be associated with either a book or a shelf."
-            )
+            raise ValidationError("An image must be associated with either a book or a shelf.")
 
-        # Delete the existing image if a new image is being uploaded
-        if book:
-            existing_image = ImageAsset.objects.filter(book=book).first()
-        elif shelf:
-            existing_image = ImageAsset.objects.filter(shelf=shelf).first()
-
+        # Delete the existing image if a new one is being uploaded.
+        existing_image = ImageAsset.objects.filter(book=book).first() if book else ImageAsset.objects.filter(shelf=shelf).first()
         if existing_image:
             existing_image.delete()
 
-        # Save the new image
         serializer.save()
 
     def create(self, request, *args, **kwargs):
@@ -493,6 +476,4 @@ class ImageAssetListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
