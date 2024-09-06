@@ -1,0 +1,6 @@
+Django~=4.2
+django-rest-framework
+coverage
+djangorestframework-simplejwt
+django-cors-headers
+requests
