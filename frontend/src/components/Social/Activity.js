@@ -43,7 +43,7 @@ function Activity() {
             {errorActivities && <p className='error'>{errorActivities}</p>}
             {/* Display the fetched activities */}
             {activities.map((activity) => (
-                <a className='row wave' key={activity.id} href={`/books/${activity.book}`}>  {/* Link to the book's detail page */}
+                <a className='row wave' key={activity.id} href={`/books/${activity.book.id}`}>  {/* Link to the book's detail page */}
                     <div className='max'>
                         {activity.text}  {/* Display the activity text */}
                     </div>

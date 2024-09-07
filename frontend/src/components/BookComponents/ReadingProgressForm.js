@@ -88,9 +88,13 @@ const ReadingProgressForm = ({ bookId }) => {
 			<>
 				<h6>{book.user}'s Reading Progress</h6>  {/* Show the user's reading progress */}
 				<p>{readingStatusToString(readingProgress.status)}</p>  {/* Show the readable reading status */}
-				<progress value={`${book.reading_progress.current_page}`} max={`${book.total_pages}`}></progress>  {/* Show progress bar */}
-				<p>Page {book.reading_progress.current_page} of {book.total_pages}</p>  {/* Show the current page and total pages */}
-			</>
+				{book?.reading_progress && isReading && (
+					<>
+					<progress value={`${book.reading_progress.current_page}`} max={`${book.total_pages}`}></progress>  {/* Show progress bar */}
+					<p>Page {book.reading_progress.current_page} of {book.total_pages}</p>  {/* Show the current page and total pages */}
+				</>
+				)}
+				</>
 		);
 	}
 
@@ -129,7 +133,7 @@ const ReadingProgressForm = ({ bookId }) => {
 			</div>
 
 			{/* Progress bar showing the current page out of total pages */}
-			{book?.reading_progress && (
+			{book?.reading_progress && isReading && (
 				<progress value={`${book.reading_progress.current_page}`} max={`${book.total_pages}`}></progress>
 			)}
 
