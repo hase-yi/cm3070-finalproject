@@ -433,8 +433,8 @@ const bookSlice = createSlice({
 				state.status = 'loading';
 			})
 			.addCase(deleteBook.fulfilled, (state, action) => {
-				state.status = 'succeeded';
 				state.books = state.books.filter((book) => book.id !== action.payload);
+				state.status = 'succeeded';
 			})
 			.addCase(deleteBook.rejected, (state, action) => {
 				state.status = 'failed';
@@ -525,7 +525,6 @@ const bookSlice = createSlice({
 					(book) => book.id === action.payload.book
 				);
 
-				console.log('state.books[bookIndex] is: ', state.books[bookIndex]);
 				const comments = [...state.books[bookIndex].review.comments];
 				comments.push(action.payload);
 
@@ -545,12 +544,9 @@ const bookSlice = createSlice({
 					(book) => book.id === action.payload.book
 				);
 
-				console.log('bookIndex is:', bookIndex);
-
 				const commentIndex = state.books[bookIndex].review.comments.findIndex(
 					(comment) => comment.id === action.payload.id
 				);
-				console.log('commentIndex is:', commentIndex);
 				const comments = [...state.books[bookIndex].review.comments];
 				comments[commentIndex] = action.payload;
 
@@ -567,9 +563,7 @@ const bookSlice = createSlice({
 			.addCase(deleteComment.fulfilled, (state, action) => {
 				const bookID = action.payload.review.comment.book;
 				const commentId = action.payload.review.comment.id;
-
 				const bookIndex = state.books.findIndex((book) => book.id === bookID);
-
 				const comments = [...state.books[bookIndex].review.comments];
 
 				if (bookIndex !== -1) {
