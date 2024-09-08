@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';  // Hooks to dispatch actions and access the Redux store
 import { useNavigate, useParams, Link } from 'react-router-dom';  // Hooks for navigation and managing URL parameters
-import { fetchShelf } from '../../features/shelfSlice';  // Redux action to fetch shelf data
 import { deleteBook } from '../../features/bookSlice';  // Redux action to delete a book
 import ImageWithLoading from '../ImageWithLoading';  // Component to display an image with a loading state
 
@@ -22,13 +21,6 @@ function BookItem() {
 
 	const status = useSelector((state) => state.books.status);  // Get the loading status of books
 	const error = useSelector((state) => state.books.error);  // Get any errors related to fetching books
-
-	// Fetch the shelf data for the book if not already loaded
-	useEffect(() => {
-		if (status === 'idle' || !book) {
-			dispatch(fetchShelf(numericBookId));  // Fetch the shelf to which the book belongs
-		}
-	}, [status, dispatch, numericBookId, book]);
 
 	// Handle the deletion of a book
 	const startDeleteHandler = () => {

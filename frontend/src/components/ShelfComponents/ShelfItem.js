@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';  // Hooks for navigation and retrieving URL parameters
-import { fetchShelf, deleteShelf } from '../../features/shelfSlice';  // Actions to fetch and delete a shelf
+import { deleteShelf } from '../../features/shelfSlice';  // Action to delete a shelf
 
 function ShelfItem() {
   const { shelfId } = useParams();  // Retrieve the shelfId from the URL parameters
@@ -16,13 +16,6 @@ function ShelfItem() {
   );
   const status = useSelector((state) => state.shelves.status);  // Get the loading status of shelves
   const error = useSelector((state) => state.shelves.error);  // Get any errors related to fetching shelves
-
-  // Fetch the shelf if it is not already loaded or if the status is idle
-  useEffect(() => {
-    if (status === 'idle' || !shelf) {
-      dispatch(fetchShelf(numericShelfId));  // Dispatch the action to fetch the shelf
-    }
-  }, [status, dispatch, numericShelfId, shelf]);  // Re-run the effect when status, dispatch, numericShelfId, or shelf changes
 
   // Handle the deletion of the shelf
   const startDeleteHandler = () => {
