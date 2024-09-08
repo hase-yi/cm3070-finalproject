@@ -91,6 +91,13 @@ function NavigationLinks() {
 				<i>person_search</i>
 				<div>Search People</div>
 			</NavLink>
+			<NavLink
+				to="/auth"
+				end
+			>
+				<i>logout</i>
+				<div>Logout</div>
+			</NavLink>
 			<hr className='m l'></hr>
 			<label className='m l'>Reading Lists</label>
 			<NavLink
